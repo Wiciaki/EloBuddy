@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SparkTech.SDK</RootNamespace>
-    <AssemblyName>SparkTech.SDK</AssemblyName>
+    <RootNamespace>AllyPingSpammer</RootNamespace>
+    <AssemblyName>AllyPingSpammer</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -39,49 +42,18 @@
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SharpDX.Direct3D9">
-      <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.Direct3D9.dll</HintPath>
+    <Reference Include="SparkTech.SDK">
+      <HintPath>C:\Users\wicia\AppData\Roaming\EloBuddy\Addons\Libraries\SparkTech.SDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Speech" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache\EnumCache.cs" />
-    <Compile Include="Cache\MiscallenousCache.cs" />
-    <Compile Include="Cache\ObjectCache.cs" />
-    <Compile Include="Enumerations\AIMinionType.cs" />
-    <Compile Include="Enumerations\HumanizerMode.cs" />
-    <Compile Include="Enumerations\Language.cs" />
-    <Compile Include="Enumerations\MinionType.cs" />
-    <Compile Include="Enumerations\Mode.cs" />
-    <Compile Include="Enumerations\ObjectTeam.cs" />
-    <Compile Include="Enumerations\Orbwalker.cs" />
-    <Compile Include="Enumerations\UnitType.cs" />
-    <Compile Include="Executors\Executable.cs" />
-    <Compile Include="Executors\TriggerAttribute.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Utils\Converters.cs" />
-    <Compile Include="Utils\Extensions.cs" />
-    <Compile Include="Utils\Minion.cs" />
-    <Compile Include="Utils\ObjectTracker.cs" />
-    <Compile Include="Utils\Randomizer.cs" />
-    <Compile Include="Utils\TickOperation.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
