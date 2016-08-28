@@ -60,6 +60,7 @@
     <Compile Include="Enumerations\ObjectTeam.cs" />
     <Compile Include="Enumerations\Orbwalker.cs" />
     <Compile Include="Enumerations\UnitType.cs" />
+    <Compile Include="Executors\Bootstrap.cs" />
     <Compile Include="Executors\Executable.cs" />
     <Compile Include="Executors\TriggerAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

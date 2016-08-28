@@ -10,6 +10,8 @@
     using EloBuddy.SDK.Menu.Values;
 
     using SparkTech.SDK.Cache;
+    using SparkTech.SDK.Enumerations;
+    using SparkTech.SDK.Executors;
     using SparkTech.SDK.Utils;
 
     internal static class Program
@@ -20,11 +22,13 @@
         /// <param name="args">The empty string array</param>
         private static void Main(string[] args)
         {
-            Array.ForEach(args, Console.WriteLine);
+            args.Handle();
 
             Loading.OnLoadingComplete += delegate
             {
-                var allies = ObjectManager.Get<AIHeroClient>().Where(champ => champ.IsAlly && !champ.IsMe).ToList();
+                // var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(champ => !champ.IsMe); 
+                // fucking sandbox doesn't let me use own sdk :D
+                var allies = ObjectManager.Get<AIHeroClient>().Where(ally => ally.IsAlly && !ally.IsMe).ToList();
 
                 if (allies.Count == 0)
                 {
@@ -52,6 +56,9 @@
                 var randomizer2 = pingSettings.Add(Header + "_randomize2", new CheckBox("^ Randomize PingCategory"));
                 pingSettings.AddSeparator();
                 var difference = pingSettings.Add(Header + "_difference", new Slider("Maximal click point randomization", 200, 20, 800));
+                pingSettings.AddSeparator();
+                pingSettings.AddLabel("Prevent \"You have to wait before issuing more pings\" from displaying in your chat");
+                var hider = pingSettings.Add(Header + "_hide", new CheckBox("Activate blocker", false));
 
                 var operation = new TickOperation(
                     delay.CurrentValue,
@@ -96,6 +103,23 @@
 
                     shouldAssign = false;
                     operation.TickDelay = delay.CurrentValue;
+                };
+
+                var name = Player.Instance.Name;
+
+                Chat.OnClientSideMessage += arg =>
+                {
+                    if (!hider.CurrentValue)
+                    {
+                        return;
+                    }
+
+                    var message = arg.Message;
+
+                    if (message.Contains(name) || message.Contains("ping"))
+                    {
+                        arg.Process = false;
+                    }
                 };
             };
         }
