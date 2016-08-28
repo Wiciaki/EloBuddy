@@ -57,8 +57,8 @@
                 pingSettings.AddSeparator();
                 var difference = pingSettings.Add(Header + "_difference", new Slider("Maximal click point randomization", 200, 20, 800));
                 pingSettings.AddSeparator();
-                pingSettings.AddLabel("Prevent \"You have to wait before issuing more pings\" from displaying in your chat");
-                var hider = pingSettings.Add(Header + "_hide", new CheckBox("Activate blocker", false));
+                var hider = pingSettings.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
+                pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings\" from displaying in your chat");
 
                 var operation = new TickOperation(
                     delay.CurrentValue,
