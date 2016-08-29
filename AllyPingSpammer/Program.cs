@@ -27,7 +27,7 @@
             Loading.OnLoadingComplete += delegate
             {
                 // var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(champ => !champ.IsMe); 
-                // fucking sandbox doesn't let me use own sdk :D
+                // TODO: fucking sandbox doesn't let me use functions from my very own SDK :D
                 var allies = ObjectManager.Get<AIHeroClient>().Where(ally => ally.IsAlly && !ally.IsMe).ToList();
 
                 if (allies.Count == 0)
@@ -58,7 +58,7 @@
                 var difference = pingSettings.Add(Header + "_difference", new Slider("Maximal click point randomization", 200, 20, 800));
                 pingSettings.AddSeparator();
                 var hider = pingSettings.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
-                pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings\" from displaying in your chat");
+                pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings.\" from displaying in your chat");
 
                 var operation = new TickOperation(
                     delay.CurrentValue,
@@ -105,18 +105,9 @@
                     operation.TickDelay = delay.CurrentValue;
                 };
 
-                var name = Player.Instance.Name;
-
                 Chat.OnClientSideMessage += arg =>
                 {
-                    if (!hider.CurrentValue)
-                    {
-                        return;
-                    }
-
-                    var message = arg.Message;
-
-                    if (message.Contains(name) || message.Contains("ping"))
+                    if (hider.CurrentValue && arg.Message == "You must wait before issuing more pings.")
                     {
                         arg.Process = false;
                     }
