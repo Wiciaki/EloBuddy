@@ -36,6 +36,10 @@
     <Reference Include="EloBuddy.SDK">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\EloBuddy.SDK.dll</HintPath>
     </Reference>
+    <Reference Include="MoreLinq, Version=2.0.19309.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <HintPath>..\packages\morelinq.2.0.0-beta04\lib\net35\MoreLinq.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.dll</HintPath>
     </Reference>
@@ -69,12 +73,19 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SparkWalking\HealthWrapper.cs" />
+    <Compile Include="SparkWalking\MinionData.cs" />
+    <Compile Include="SparkWalking\PetWalker.cs" />
+    <Compile Include="SparkWalking\Soldiers.cs" />
+    <Compile Include="SparkWalking\SparkWalker.cs" />
+    <Compile Include="SparkWalking\TargetData.cs" />
     <Compile Include="Utils\Converters.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\Minion.cs" />
     <Compile Include="Utils\ObjectTracker.cs" />
     <Compile Include="Utils\Randomizer.cs" />
     <Compile Include="Utils\TickOperation.cs" />
+    <Compile Include="Version.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -82,7 +93,9 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

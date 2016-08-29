@@ -79,6 +79,16 @@
         /// <returns></returns>
         public static string Description(TEnum item) => Descriptions[item];
 
+        /// <summary>
+        /// Gets the equivalent <see cref="TEnum"/> value
+        /// </summary>
+        /// <param name="value">The string to be parsed</param>
+        /// <returns></returns>
+        public static TEnum Parse(string value)
+        {
+            return (TEnum)Enum.Parse(typeof(TEnum), value);
+        }
+
         #endregion
     }
 }

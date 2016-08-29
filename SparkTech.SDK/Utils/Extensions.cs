@@ -61,13 +61,23 @@
         }
 
         /// <summary>
+        /// Gets the unique name
+        /// </summary>
+        /// <param name="hero">The <see cref="AIHeroClient"/> instance</param>
+        /// <returns></returns>
+        public static string UniqueName(this AIHeroClient hero)
+        {
+            return $"{hero.ChampionName()} ({hero.Name})";
+        }
+
+        /// <summary>
         /// Gets the real champion name
         /// </summary>
-        /// <param name="champ"><see cref="AIHeroClient"/> instance</param>
+        /// <param name="hero">The <see cref="AIHeroClient"/> instance</param>
         /// <returns></returns>
-        public static string ChampionName(this AIHeroClient champ)
+        public static string ChampionName(this AIHeroClient hero)
         {
-            var name = champ.ChampionName;
+            var name = hero.ChampionName;
 
             switch (name.ToLower())
             {

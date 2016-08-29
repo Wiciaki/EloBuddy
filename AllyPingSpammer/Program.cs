@@ -42,7 +42,7 @@
                 var shouldRandomize2 = false;
                 var shouldAssign = false;
                 var root = MainMenu.AddMenu("AllyPingSpammer", Header);
-                var hero = root.Add(Header + "_hero", new ComboBox("Ally to be spammed", allies.ConvertAll(ally => ally.ChampionName())));
+                var hero = root.Add(Header + "_hero", new ComboBox("Ally to be spammed", allies.ConvertAll(ally => ally.UniqueName())));
                 root.AddSeparator(30);
                 var active = root.Add(Header + "_active", new CheckBox("TILT THE SHIT OUT OF MOTHERFUCKER"));
                 root.AddSeparator(30);
@@ -59,6 +59,8 @@
                 pingSettings.AddSeparator();
                 var hider = pingSettings.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
                 pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings.\" from displaying in your chat");
+                Func<AIHeroClient> assign = () => allies.Find(champ => champ.UniqueName() == hero.SelectedText);
+                var selectedHero = assign();
 
                 var operation = new TickOperation(
                     delay.CurrentValue,
@@ -73,15 +75,17 @@
                         if (randomizer2.CurrentValue)
                             shouldRandomize2 = true;
 
-                        var pingType = (PingCategory)Enum.Parse(typeof(PingCategory), ping.SelectedText);
-                        var position = Randomizer.Randomize(allies.Find(champ => champ.ChampionName() == hero.SelectedText).ServerPosition.To2D(), difference.CurrentValue);
-
-                        TacticalMap.SendPing(pingType, position);
+                        TacticalMap.SendPing(EnumCache<PingCategory>.Parse(ping.SelectedText), Randomizer.Randomize(selectedHero.Position.To2D(), difference.CurrentValue));
                     });
 
                 delay.OnValueChange += delegate
                 {
                     shouldAssign = true;
+                };
+
+                hero.OnValueChange += delegate
+                {
+                    selectedHero = assign();
                 };
 
                 Game.OnUpdate += delegate
