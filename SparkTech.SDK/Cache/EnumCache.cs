@@ -10,16 +10,16 @@
     /// <summary>
     ///     Exposes the enumeration for fast access
     /// </summary>
-    /// <typeparam name="TEnum">The enumeration to be cached</typeparam>
+    /// <typeparam name="TEnum">The enumeration type to be cached</typeparam>
     [SuppressMessage("ReSharper", "StaticMemberInGenericType", Justification = "The members differ for every generic type provided, therefore the supression is fine.")]
     public static class EnumCache<TEnum> where TEnum : struct, IConvertible
     {
         #region Static Fields
 
         /// <summary>
-        ///     The amount of all the values in an enumeration
+        ///     The enumeration values represented by a list
         /// </summary>
-        public static readonly int Count;
+        public static readonly List<TEnum> Values;
 
         /// <summary>
         ///     The names of the constants in the enumeration
@@ -27,9 +27,9 @@
         public static readonly List<string> Names;
 
         /// <summary>
-        ///     The enumeration values represented by a list
+        ///     The amount of all the values in an enumeration
         /// </summary>
-        public static readonly List<TEnum> Values;
+        public static readonly int Count;
 
         /// <summary>
         ///     Contains the descriptions of the enum members
@@ -52,7 +52,7 @@
                 throw new InvalidOperationException("TEnum must be of an enumerable type!");
             }
 
-            Values = ((TEnum[])Enum.GetValues(typeof(TEnum))).OrderByDescending(item => item).ToList();
+            Values = ((TEnum[])Enum.GetValues(typeof(TEnum))).ToList();
 
             Names = Values.ConvertAll(@enum => @enum.ToString(CultureInfo.InvariantCulture));
 
@@ -61,10 +61,11 @@
             Descriptions = Values.ToDictionary(
                 @enum => @enum,
                 @enum =>
-                (typeof(TEnum).GetMember(@enum.ToString(CultureInfo.InvariantCulture))
+                ((DescriptionAttribute)
+                 typeof(TEnum).GetMember(@enum.ToString(CultureInfo.InvariantCulture))
                      .Single()
                      .GetCustomAttributes(typeof(DescriptionAttribute), false)
-                     .SingleOrDefault() as DescriptionAttribute)?.Description);
+                     .SingleOrDefault())?.Description);
         }
 
         #endregion
@@ -84,9 +85,10 @@
         /// </summary>
         /// <param name="value">The string to be parsed</param>
         /// <returns></returns>
+        /// <exception cref="IndexOutOfRangeException">The value couldn't be parsed</exception>
         public static TEnum Parse(string value)
         {
-            return (TEnum)Enum.Parse(typeof(TEnum), value);
+            return Values[Names.IndexOf(value)];
         }
 
         #endregion

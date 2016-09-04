@@ -33,5 +33,5 @@ using SparkTech.SDK;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion(Version.AllyPingSpammer)]
-[assembly: AssemblyFileVersion(Version.AllyPingSpammer)]
+[assembly: AssemblyVersion(Variables.VersionAllyPingSpammer)]
+[assembly: AssemblyFileVersion(Variables.VersionAllyPingSpammer)]

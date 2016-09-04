@@ -11,6 +11,16 @@
         /// <returns></returns>
         public static int Round(this float value)
         {
+            return Round((double)value);
+        }
+
+        /// <summary>
+        /// Rounds the double to the nearest <see cref="int"/> value
+        /// </summary>
+        /// <param name="value">The floating point-number</param>
+        /// <returns></returns>
+        public static int Round(this double value)
+        {
             return (int)Math.Round(value, MidpointRounding.ToEven);
         }
 
@@ -19,14 +29,14 @@
         /// </summary>
         /// <param name="value">The value</param>
         /// <returns></returns>
-        public static float Pow(this float @value)
+        public static float Pow(this float value)
         {
-            return @value * @value;
+            return value * value;
         }
 
-        public static double Root(this double @value, double level = 2d)
+        public static double Root(this double value, double level = 2d)
         {
-            return Math.Pow(@value, 1d / level);
+            return Math.Pow(value, 1d / level);
         }
 
         public static int ToTicks(this float seconds)

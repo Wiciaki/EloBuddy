@@ -5,7 +5,6 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Reflection;
-    using System.Security.Permissions;
 
     using EloBuddy;
     using EloBuddy.SDK;
@@ -216,7 +215,6 @@
         /// <param name="team">The specified object team</param>
         /// <param name="inrange">The function determining whether this instance is in range</param>
         /// <returns></returns>
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Predicate<TGameObject> inrange = null) where TGameObject : GameObject
         {
             FieldInfo field;
@@ -247,7 +245,6 @@
         /// </summary>
         /// <typeparam name="TGameObject">The requested <see cref="GameObject" /> type</typeparam>
         /// <returns></returns>
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         public static List<TGameObject> GetNative<TGameObject>() where TGameObject : GameObject
         {
             FieldInfo field;
@@ -380,7 +377,6 @@
         /// </summary>
         /// <param name="fieldName">The name of the searched field</param>
         /// <returns></returns>
-        [PermissionSet(SecurityAction.Assert, Unrestricted = true)]
         private static FieldInfo GetField(string fieldName)
         {
             return typeof(ObjectCache).GetField(fieldName, BindingFlags.Default | BindingFlags.Static | BindingFlags.NonPublic);

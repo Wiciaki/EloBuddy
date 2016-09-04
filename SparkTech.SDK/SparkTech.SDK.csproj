@@ -85,7 +85,7 @@
     <Compile Include="Utils\ObjectTracker.cs" />
     <Compile Include="Utils\Randomizer.cs" />
     <Compile Include="Utils\TickOperation.cs" />
-    <Compile Include="Version.cs" />
+    <Compile Include="Variables.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

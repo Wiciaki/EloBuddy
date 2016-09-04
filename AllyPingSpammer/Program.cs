@@ -1,7 +1,6 @@
 ﻿namespace AllyPingSpammer
 {
     using System;
-    using System.Linq;
 
     using EloBuddy;
     using EloBuddy.SDK;
@@ -26,9 +25,7 @@
 
             Loading.OnLoadingComplete += delegate
             {
-                // var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(champ => !champ.IsMe); 
-                // TODO: fucking sandbox doesn't let me use functions from my very own SDK :D
-                var allies = ObjectManager.Get<AIHeroClient>().Where(ally => ally.IsAlly && !ally.IsMe).ToList();
+                var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(champ => !champ.IsMe);
 
                 if (allies.Count == 0)
                 {
