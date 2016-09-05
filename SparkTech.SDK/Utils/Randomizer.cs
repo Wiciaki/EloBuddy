@@ -4,9 +4,12 @@
 
     using SharpDX;
 
+    using SparkTech.SDK.Executors;
+
     /// <summary>
     /// The randomization class
     /// </summary>
+    [Trigger]
     public static class Randomizer
     {
         /// <summary>

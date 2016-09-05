@@ -44,7 +44,6 @@
         ///     Initializes static members of the <see cref="EnumCache{TEnum}" /> class
         /// </summary>
         /// <exception cref="InvalidOperationException">TEnum is not an enum</exception>
-        /// <exception cref="InvalidEnumArgumentException">The count is wrong</exception>
         static EnumCache()
         {
             if (!typeof(TEnum).IsEnum)

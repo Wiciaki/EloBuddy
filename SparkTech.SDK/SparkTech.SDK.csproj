@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>SparkTech.SDK.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -56,6 +57,7 @@
     <Compile Include="Cache\EnumCache.cs" />
     <Compile Include="Cache\MiscallenousCache.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
+    <Compile Include="Database.cs" />
     <Compile Include="Enumerations\AIMinionType.cs" />
     <Compile Include="Enumerations\HumanizerMode.cs" />
     <Compile Include="Enumerations\Language.cs" />

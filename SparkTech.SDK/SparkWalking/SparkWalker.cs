@@ -10,14 +10,14 @@
 //    using EloBuddy.SDK.Menu.Values;
 
 //    using SharpDX;
-    
+
 //    using SparkTech.SDK.Cache;
 //    using SparkTech.SDK.Enumerations;
 //    using SparkTech.SDK.EventData;
 //    using SparkTech.SDK.Executors;
 //    using SparkTech.SDK.Utils;
 //    using SparkTech.SDK.Web;
-    
+
 //    using DrawingClass = EloBuddy.Drawing;
 //    using Prediction = EloBuddy.SDK.Prediction.Position;
 
@@ -79,69 +79,69 @@
 //        private static readonly Dictionary<string, ObjectInfo> AttackDictionary = new Dictionary<string, ObjectInfo>(StringComparer.OrdinalIgnoreCase)
 //                                                                                      {
 //                                                                                          {
-//                                                                                              "zyrathornplant", 
+//                                                                                              "zyrathornplant",
 //                                                                                              new ObjectInfo("Zyra's thorn plant")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
-//                                                                                              "zyragraspingplant", 
+//                                                                                              "zyragraspingplant",
 //                                                                                              new ObjectInfo("Zyra's grasping plant")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "illaoitentacle", // TODO verify
 //                                                                                              new ObjectInfo("Illaoi's tentacle")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "shacobox",
 //                                                                                              new ObjectInfo("Shaco's box")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "yorickdecayedghoul",
 //                                                                                              new ObjectInfo("Yorick's decayed ghoul")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "yorickravenousghoul",
 //                                                                                              new ObjectInfo("Yorick's ravenous ghoul")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "yorickspectralghoul",
 //                                                                                              new ObjectInfo("Yorick's spectral ghoul")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "heimertyellow",
 //                                                                                              new ObjectInfo("Heimer's yellow turret")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "heimertblue",
 //                                                                                              new ObjectInfo("Heimer's blue turret")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "malzaharvoidling",
 //                                                                                              new ObjectInfo("Malzahar's voidling")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "teemomushroom",
 //                                                                                              new ObjectInfo("Teemo's mushroom")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "elisespiderling",
 //                                                                                              new ObjectInfo("Elise's spiderling")
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "annietibbers",
 //                                                                                              new ObjectInfo("Annie's tibbers", false)
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "gangplankbarrel",
 //                                                                                              new ObjectInfo("Gangplank's barrel", false)
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "leblanc",
 //                                                                                              new ObjectInfo("LeBlanc's clone", false)
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "shaco",
 //                                                                                              new ObjectInfo("Shaco's clone", false)
-//                                                                                          }, 
+//                                                                                          },
 //                                                                                          {
 //                                                                                              "monkeyking",
 //                                                                                              new ObjectInfo("Wukong's clone", false)
@@ -188,43 +188,43 @@
 //        private static readonly Dictionary<Mode, ModeConfig> ModeConfiguration = new Dictionary<Mode, ModeConfig>
 //                                                                                     {
 //                                                                                         {
-//                                                                                             Mode.Combo, 
+//                                                                                             Mode.Combo,
 //                                                                                             new ModeConfig(
-//                                                                                             Key.Space, 
+//                                                                                             Key.Space,
 //                                                                                             UnitType.Champion)
-//                                                                                         }, 
+//                                                                                         },
 //                                                                                         {
-//                                                                                             Mode.LaneClear, 
+//                                                                                             Mode.LaneClear,
 //                                                                                             new ModeConfig(
-//                                                                                             Key.V, 
+//                                                                                             Key.V,
 //                                                                                             UnitType.LaneMinion,
 //                                                                                             UnitType.Structure,
 //                                                                                             UnitType.Object,
 //                                                                                             UnitType.Champion,
 //                                                                                             UnitType.LaneClearMinion,
 //                                                                                             UnitType.JungleMinion)
-//                                                                                         }, 
+//                                                                                         },
 //                                                                                         {
-//                                                                                             Mode.Harass, 
+//                                                                                             Mode.Harass,
 //                                                                                             new ModeConfig(
-//                                                                                             Key.C, 
-//                                                                                             UnitType.LaneMinion, 
+//                                                                                             Key.C,
+//                                                                                             UnitType.LaneMinion,
 //                                                                                             UnitType.Champion)
-//                                                                                         }, 
+//                                                                                         },
 //                                                                                         {
-//                                                                                             Mode.Freeze, 
+//                                                                                             Mode.Freeze,
 //                                                                                             new ModeConfig(
-//                                                                                             Key.A, 
+//                                                                                             Key.A,
 //                                                                                             UnitType.LaneMinion)
-//                                                                                         }, 
+//                                                                                         },
 //                                                                                         {
-//                                                                                             Mode.LastHit, 
+//                                                                                             Mode.LastHit,
 //                                                                                             new ModeConfig(
-//                                                                                             Key.X, 
+//                                                                                             Key.X,
 //                                                                                             UnitType.LaneMinion)
-//                                                                                         }, 
+//                                                                                         },
 //                                                                                         {
-//                                                                                             Mode.Flee, 
+//                                                                                             Mode.Flee,
 //                                                                                             new ModeConfig(Key.Z)
 //                                                                                         }
 //                                                                                     };
@@ -310,7 +310,7 @@
 //        /// The <see cref="ObjectText"/> entry
 //        /// </summary>
 //        private ObjectTextEntry objectTextEntry;
-        
+
 //        /// <summary>
 //        /// The last reset tick
 //        /// </summary>
@@ -355,7 +355,7 @@
 //        #endregion
 
 //        #region Public Events
-        
+
 //        /// <summary>
 //        /// Fired before the orbwalker - generated attack, useful for cancelling it
 //        /// </summary>
@@ -453,7 +453,7 @@
 //        /// <summary>
 //        /// Gets the current latency
 //        /// </summary>
-//        protected virtual float Latency => Game.Ping / 2f + Menu["misc"]["server_latency"]; 
+//        protected virtual float Latency => Game.Ping / 2f + Menu["misc"]["server_latency"];
 
 //        /// <summary>
 //        /// Determines whether this spell name is an auto-attack reset
@@ -650,10 +650,10 @@
 //            Game.OnUpdate += this.OnUpdate;
 
 //            ObjectText.Entries.Add(this.objectTextEntry =
-//                new ObjectTextEntry(x => this.Unit.Compare(x), 
-//                    o => Color.Gold, 
-//                    () => this.CustomMode, 
-//                    o => $"Custom mode: {this.customMode?.ToString() ?? "InvalidOperation"}", 
+//                new ObjectTextEntry(x => this.Unit.Compare(x),
+//                    o => Color.Gold,
+//                    () => this.CustomMode,
+//                    o => $"Custom mode: {this.customMode?.ToString() ?? "InvalidOperation"}",
 //                    "Custom Mode"));
 
 //            this.Enabled = true;
@@ -849,12 +849,18 @@
 //                            var attack = Unit.BasicAttack;
 
 //                            var input = new EloBuddy.SDK.Prediction.Manager.PredictionInput
-//                                        {
-//                                            Collision = false, Delay = attack.SpellCastTime, UseBoundingRadius = true, 
-//                                            From = ServerPosition3D, Unit = hero, Speed = attack.MissileSpeed, AoE = false, 
-//                                            RangeCheckFrom = ServerPosition3D, Radius = 0f, 
-//                                            Range = Unit.AttackRange + Unit.BoundingRadius
-//                                        };
+//                            {
+//                                Collision = false,
+//                                Delay = attack.SpellCastTime,
+//                                UseBoundingRadius = true,
+//                                From = ServerPosition3D,
+//                                Unit = hero,
+//                                Speed = attack.MissileSpeed,
+//                                AoE = false,
+//                                RangeCheckFrom = ServerPosition3D,
+//                                Radius = 0f,
+//                                Range = Unit.AttackRange + Unit.BoundingRadius
+//                            };
 
 //                            destination3D = Prediction.GetPrediction(input).UnitPosition;
 //                        }
@@ -1229,7 +1235,7 @@
 //            {
 //                delay *= 1f + extraMovement / 1000f;
 //            }
-            
+
 //            var time = this.LastAttackStartingT + delay;
 
 //            if (this.LastResetTick > this.LastAttackStartingT)
@@ -1577,11 +1583,11 @@
 //            }
 
 //            return new TargetData(from minion in ObjectCache.GetMinions(ObjectTeam.Enemy, MinionType.Minion, this.InAttackRange)
-//                               let pred = HealthWrapper.GetPrediction(minion, (this.AttackTime() * 2f + this.ProjectileTime(minion)).Round(), FarmDelay)
-//                               let damage = this.AttackDamage(minion)
-//                               where pred >= 2f * damage || Math.Abs(pred - minion.Health) < 1f
-//                               orderby minion.MaxHealth descending, this.Unit.DistanceSquared(minion)
-//                               select minion);
+//                                  let pred = HealthWrapper.GetPrediction(minion, (this.AttackTime() * 2f + this.ProjectileTime(minion)).Round(), FarmDelay)
+//                                  let damage = this.AttackDamage(minion)
+//                                  where pred >= 2f * damage || Math.Abs(pred - minion.Health) < 1f
+//                                  orderby minion.MaxHealth descending, this.Unit.DistanceSquared(minion)
+//                                  select minion);
 //        }
 
 //        /// <summary>

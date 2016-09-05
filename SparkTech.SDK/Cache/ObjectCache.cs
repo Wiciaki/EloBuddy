@@ -275,7 +275,7 @@
         /// <param name="team">The requested team</param>
         /// <param name="inrange">The function determining whether this instance is in range</param>
         /// <returns></returns>
-        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Enemy, MinionType type = MinionType.Minion, Predicate<Obj_AI_Minion> inrange = null)
+        public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion, Predicate<Obj_AI_Minion> inrange = null)
         {
             var container = new List<Obj_AI_Minion>(Obj_AI_MinionList.Count);
 
@@ -335,6 +335,16 @@
             return TeamDictionary.Single(pair => pair.Value == team).Key;
         }
 
+        /// <summary>
+        ///     Determines whether a <see cref="GameObject"/> is valid
+        /// </summary>
+        /// <param name="object">The <see cref="GameObject" /> to be inspected</param>
+        /// <returns></returns>
+        public static bool IsValid(this GameObject @object)
+        {
+            return @object != null && @object.IsValid;
+        }
+
         #endregion
 
         #region Methods
@@ -362,7 +372,7 @@
 
                 while (true)
                 {
-                    var index = list.FindIndex(item => searched.HasValue ? item != null && item.NetworkId == searched.Value : item == null);
+                    var index = list.FindIndex(item => searched.HasValue ? item?.NetworkId == searched : item == null);
 
                     if (index < 0)
                         break;
@@ -427,11 +437,11 @@
                 GetExecutor(minion, @new)(
                     type.IsMinion()
                         ? Minions
-                        : type.IsWard()
+                        : type == AIMinionType.Ward
                         ? Wards
                         : type.IsJungle()
                         ? JungleMinions
-                        : type.IsPet()
+                        : type == AIMinionType.Pet
                         ? Pets
                         : OtherMinions);
             }
@@ -475,14 +485,7 @@
 
                     var attackable = o as AttackableUnit;
 
-                    if (attackable == null)
-                        return true;
-
-                    if (attackable.IsInvulnerable || attackable.IsZombie || (team != AlliedTeam && !attackable.IsTargetable))
-                        return false;
-
-                    var @base = attackable as Obj_AI_Base;
-                    return @base == null || @base.HealthPercent > 10f || @base.Buffs.All(buff => buff.Type != BuffType.Invulnerability && !buff.Name.Equals("kindredrnodeathbuff", StringComparison.OrdinalIgnoreCase));
+                    return attackable == null || !attackable.IsInvulnerable && !attackable.IsZombie && (team == AlliedTeam || attackable.IsTargetable);
                 });
         }
 
