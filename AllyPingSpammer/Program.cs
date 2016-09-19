@@ -25,7 +25,7 @@
 
             Loading.OnLoadingComplete += delegate
             {
-                var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(champ => !champ.IsMe);
+                var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally, champ => !champ.IsMe);
 
                 if (allies.Count == 0)
                 {
@@ -56,8 +56,8 @@
                 pingSettings.AddSeparator();
                 var hider = pingSettings.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
                 pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings.\" from displaying in your chat");
-                Func<AIHeroClient> assign = () => allies.Find(champ => champ.UniqueName() == hero.SelectedText);
-                var selectedHero = assign();
+                Func<AIHeroClient> getSelectedHero = () => allies.Find(champ => champ.UniqueName() == hero.SelectedText);
+                var selectedHero = getSelectedHero();
 
                 var operation = new TickOperation(
                     delay.CurrentValue,
@@ -72,7 +72,7 @@
                         if (randomizer2.CurrentValue)
                             shouldRandomize2 = true;
 
-                        TacticalMap.SendPing(EnumCache<PingCategory>.Parse(ping.SelectedText), Randomizer.Randomize(selectedHero.Position.To2D(), difference.CurrentValue));
+                        TacticalMap.SendPing(ping.GetValue<PingCategory>(), Randomizer.Randomize(selectedHero.Position.To2D(), difference.CurrentValue));
                     });
 
                 delay.OnValueChange += delegate
@@ -82,7 +82,7 @@
 
                 hero.OnValueChange += delegate
                 {
-                    selectedHero = assign();
+                    selectedHero = getSelectedHero();
                 };
 
                 Game.OnUpdate += delegate

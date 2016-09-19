@@ -17,8 +17,8 @@
 
         JungleSmall,
 
-        JungleLarge,
+        JungleMedium,
 
-        JungleLegendary
+        JungleLarge
     }
 }

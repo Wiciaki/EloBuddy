@@ -158,7 +158,7 @@
                         };
 
             Minions = Obj_AI_MinionList.FindAll(minion => minion.IsMinion());
-            Pets = Obj_AI_MinionList.FindAll(minion => minion.IsPet());
+            Pets = Obj_AI_MinionList.FindAll(minion => minion.DetermineType() == AIMinionType.Pet);
             Wards = Obj_AI_MinionList.FindAll(minion => minion.IsWard());
             JungleMinions = Obj_AI_MinionList.FindAll(minion => minion.IsJungle());
             OtherMinions = Obj_AI_MinionList.FindAll(o => o.DetermineType() == AIMinionType.Unknown);
@@ -183,7 +183,7 @@
             {
                 int index;
 
-                while ((index = GameObjectList.FindIndex(o => o == null || !o.IsValid)) >= 0)
+                while ((index = GameObjectList.FindIndex(o => !o.IsValid())) >= 0)
                 {
                     Process(GameObjectList[index], false);
                 }
@@ -252,7 +252,7 @@
 
             if (FieldData.TryGetValue(name, out field))
             {
-                return Selector((List<TGameObject>)field.GetValue(null), AllTeams, true, true, null);
+                return Selector((List<TGameObject>)field.GetValue(null), AllTeams, false, true, null);
             }
 
             var container = GameObjectList.OfType<GameObject, TGameObject>(o => o.IsValid);
@@ -265,7 +265,7 @@
                 FieldData.Add(name, field);
             }
 
-            return Selector(container, AllTeams, true, false, null);
+            return Selector(container, AllTeams, false, false, null);
         }
 
         /// <summary>
@@ -331,7 +331,11 @@
         /// <returns></returns>
         public static ObjectTeam Team(this GameObject @object)
         {
-            var team = @object.Team;
+            return @object.Team.Convert();
+        }
+
+        public static ObjectTeam Convert(this GameObjectTeam team)
+        {
             return TeamDictionary.Single(pair => pair.Value == team).Key;
         }
 
@@ -389,7 +393,7 @@
         /// <returns></returns>
         private static FieldInfo GetField(string fieldName)
         {
-            return typeof(ObjectCache).GetField(fieldName, BindingFlags.Default | BindingFlags.Static | BindingFlags.NonPublic);
+            return typeof(ObjectCache).GetField(fieldName, BindingFlags.Static | BindingFlags.NonPublic);
         }
 
         /// <summary>
@@ -401,24 +405,22 @@
         {
             GetExecutor(@object, @new)(GameObjectList);
 
-            var emitter = @object as Obj_GeneralParticleEmitter;
-            if (emitter != null)
+            var attackable = @object as AttackableUnit;
+            if (attackable == null)
             {
-                GetExecutor(emitter, @new)(Obj_GeneralParticleEmitterList);
+                GetExecutor(@object as Obj_GeneralParticleEmitter, @new)(Obj_GeneralParticleEmitterList);
                 return;
             }
 
-            var attackable = @object as AttackableUnit;
-            if (attackable == null)
-                return;
-
             GetExecutor(attackable, @new)(AttackableUnitList);
-            GetExecutor(attackable as Obj_HQ, @new)(Obj_HQList);
-            GetExecutor(attackable as Obj_BarracksDampener, @new)(Obj_BarracksDampenerList);
 
             var @base = attackable as Obj_AI_Base;
             if (@base == null)
+            {
+                GetExecutor(attackable as Obj_HQ, @new)(Obj_HQList);
+                GetExecutor(attackable as Obj_BarracksDampener, @new)(Obj_BarracksDampenerList);
                 return;
+            }
 
             GetExecutor(@base, @new)(Obj_AI_BaseList);
             GetExecutor(@base as AIHeroClient, @new)(AIHeroClientList);
@@ -469,12 +471,12 @@
         {
             return container.FindAll(o =>
                 {
-                    if (validityCheck && (o == null || !o.IsValid))
+                    if (validityCheck && !o.IsValid())
                         return false;
 
                     var team = o.Team;
 
-                    if (!flags.HasFlag(TeamDictionary.Single(pair => pair.Value == team).Key) || inrange != null && !inrange(o))
+                    if (!flags.HasFlag(team.Convert()) || inrange != null && !inrange(o))
                         return false;
 
                     if (!moreChecks)

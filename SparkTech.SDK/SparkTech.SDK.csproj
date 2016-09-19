@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>SparkTech.SDK.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="EloBuddy">
@@ -36,6 +37,10 @@
     </Reference>
     <Reference Include="EloBuddy.SDK">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\EloBuddy.SDK.dll</HintPath>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=10.1.5.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.10.1.5\lib\net\JetBrains.Annotations.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MoreLinq, Version=2.0.19309.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
       <HintPath>..\packages\morelinq.2.0.0-beta04\lib\net35\MoreLinq.dll</HintPath>
@@ -57,7 +62,6 @@
     <Compile Include="Cache\EnumCache.cs" />
     <Compile Include="Cache\MiscallenousCache.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
-    <Compile Include="Database.cs" />
     <Compile Include="Enumerations\AIMinionType.cs" />
     <Compile Include="Enumerations\HumanizerMode.cs" />
     <Compile Include="Enumerations\Language.cs" />
@@ -78,7 +82,7 @@
     <Compile Include="SparkWalking\HealthWrapper.cs" />
     <Compile Include="SparkWalking\MinionData.cs" />
     <Compile Include="SparkWalking\PetWalker.cs" />
-    <Compile Include="SparkWalking\Soldiers.cs" />
+    <Compile Include="SparkWalking\SoldierManager.cs" />
     <Compile Include="SparkWalking\SparkWalker.cs" />
     <Compile Include="SparkWalking\TargetData.cs" />
     <Compile Include="Utils\Converters.cs" />
@@ -88,6 +92,10 @@
     <Compile Include="Utils\Randomizer.cs" />
     <Compile Include="Utils\TickOperation.cs" />
     <Compile Include="Variables.cs" />
+    <Compile Include="Web\AssemblyInfoUpdater.cs" />
+    <Compile Include="Web\SparkTechUpdater.cs" />
+    <Compile Include="Web\Updater.cs" />
+    <Compile Include="Web\Utility.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -97,6 +105,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="SparkTech.SDK.ruleset" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

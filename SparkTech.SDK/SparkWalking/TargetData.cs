@@ -13,7 +13,7 @@
         /// <summary>
         /// The default <see cref="TargetData"/> instance
         /// </summary>
-        public static TargetData Empty;
+        public static readonly TargetData Empty;
 
         /// <summary>
         /// The <see cref="AttackableUnit"/> instance
@@ -31,8 +31,6 @@
         /// <param name="shouldWait">Determines whether this instance should wait</param>
         public TargetData(bool shouldWait)
         {
-            this.Target = null;
-
             this.ShouldWait = shouldWait;
         }
 
@@ -43,23 +41,13 @@
         public TargetData(AttackableUnit target)
         {
             this.Target = target;
-
-            this.ShouldWait = false;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TargetData"/> class
         /// </summary>
         /// <param name="orderedEnumerable">The sorted targets</param>
-        public TargetData(IEnumerable<AttackableUnit> orderedEnumerable) : this(orderedEnumerable.FirstOrDefault())
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TargetData"/> class
-        /// </summary>
-        private TargetData()
+        public TargetData(IEnumerable<AttackableUnit> orderedEnumerable) : this(orderedEnumerable?.FirstOrDefault())
         {
             
         }
@@ -69,7 +57,7 @@
         /// </summary>
         static TargetData()
         {
-            Empty = new TargetData();
+            Empty = new TargetData(false);
         }
     }
 }

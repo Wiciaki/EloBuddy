@@ -21,15 +21,14 @@
         private readonly StringComparison comparison;
 
         private readonly int trackedId;
-
-        // ReSharper disable once SuggestBaseTypeForParameter
-        public ObjectTracker(string itemName, string spellName, AIHeroClient hero = null, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        
+        public ObjectTracker(string itemName, string spellName, int? sourceNetworkId = null, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
         {
             this.Items = new List<T>();
             this.itemName = itemName;
             this.spellName = spellName;
             this.comparison = comparison;
-            this.trackedId = hero?.NetworkId ?? ObjectCache.Player.NetworkId;
+            this.trackedId = sourceNetworkId ?? ObjectCache.Player.NetworkId;
 
             GameObject.OnCreate += this.OnCreate;
             Obj_AI_Base.OnPlayAnimation += this.OnPlayAnimation;

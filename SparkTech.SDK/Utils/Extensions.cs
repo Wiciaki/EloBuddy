@@ -6,6 +6,9 @@
     using System.Text.RegularExpressions;
 
     using EloBuddy;
+    using EloBuddy.SDK.Menu.Values;
+
+    using SparkTech.SDK.Cache;
 
     public static class Extensions
     {
@@ -58,6 +61,11 @@
             }
 
             return container;
+        }
+
+        public static TEnum GetValue<TEnum>(this ComboBox item) where TEnum : struct, IConvertible
+        {
+            return EnumCache<TEnum>.Parse(item.SelectedText);
         }
 
         /// <summary>
