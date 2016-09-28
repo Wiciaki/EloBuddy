@@ -269,9 +269,9 @@ namespace SparkTech.SDK.SparkWalking
         protected static readonly Random Random = new Random();
 
         /// <summary>
-        /// The orbwalkEloBuddy.SDK.Menu.Menure.UI.IMenu.Menu"/> instance
+        /// The orbwalkEloBuddy.SDK.Menu.Menure.UI.IMenu.SDKMenu"/> instance
         /// </summary>
-        protected static readonly Menu Menu = new Menu("st_orb", "SparkWalker [EARLY]");
+        protected static readonly Menu SDKMenu = new SDKMenu("st_orb", "SparkWalker [EARLY]");
 
         /// <summary>
         /// The names of the priorities
@@ -676,7 +676,7 @@ namespace SparkTech.SDK.SparkWalking
                 Priorities.Add($"priority_{i}");
             }
 
-            var modesMenu = Menu.Add(new Menu("st_orb_modes", "Modes"));
+            var modesMenu = Menu.Add(new SDKMenu("st_orb_modes", "Modes"));
             {
                 foreach (var config in ModeConfiguration)
                 {
@@ -757,7 +757,7 @@ namespace SparkTech.SDK.SparkWalking
                 modesMenu.Add(new MenuKeyBind("st_orb_key_movblock", "Movement block", Key.P, KeyBindType.Press));
             }
 
-            var drawMenu = Menu.Add(new Menu("st_orb_draw", "Drawings"));
+            var drawMenu = Menu.Add(new SDKMenu("st_orb_draw", "Drawings"));
             {
                 var rangeMenu = drawMenu.Add(new Menu("st_orb_draw_ranges", "Attack ranges"));
                 {
@@ -795,7 +795,7 @@ namespace SparkTech.SDK.SparkWalking
                 }
             }
 
-            var problemMenu = Menu.Add(new Menu("st_orb_problems", "Problems"));
+            var problemMenu = Menu.Add(new SDKMenu("st_orb_problems", "Problems"));
             {
                 problemMenu.Add(new MenuBool("problem_stutter", "I'm stuttering"));
                 problemMenu.Add(new MenuBool("problem_missingcs", "The lasthits are badly timed"));
@@ -806,7 +806,7 @@ namespace SparkTech.SDK.SparkWalking
             Menu.Add(new MenuBool("movement_disable", "Disable movement"));
             Menu.Add(new MenuList<HumanizerMode>("humanizer_mode", "Humanizer mode", EnumCache<HumanizerMode>.Values) { SelectedValue = HumanizerMode.Normal });
 
-            Core.Menu.Add(Menu);
+            Core.Menu.Add(SDKMenu);
 
             Game.OnUpdate += delegate
                 {

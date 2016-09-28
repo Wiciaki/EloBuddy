@@ -1,22 +1,16 @@
-﻿/*
-
-namespace SparkTech.SDK.Web
+﻿namespace SparkTech.SDK.Web
 {
     using System;
-    using System.Text.RegularExpressions;
-
-    using SparkTech.EventData;
+    
+    using SparkTech.SDK.EventData;
+    using SparkTech.SDK.Executors;
+    using SparkTech.SDK.Utils;
 
     /// <summary>
     /// The base class for the future updater engines
     /// </summary>
-    public abstract class Updater
+    public abstract class Updater : Executable
     {
-        /// <summary>
-        /// The regular expression used to match the downloaded data
-        /// </summary>
-        protected readonly Regex Regex;
-
         /// <summary>
         /// The <see cref="Uri"/> representation of the user provided link
         /// </summary>
@@ -30,8 +24,12 @@ namespace SparkTech.SDK.Web
         /// <summary>
         /// The <see cref="E:CheckPerformed"/> invokator
         /// </summary>
-        /// <param name="args">The provided data to be processed</param>
-        protected void RaiseEvent(CheckPerformedEventArgs args) => this.CheckPerformed?.Invoke(args);
+        protected void RaiseEvent(Version gitVersion, Version localVersion, string assemblyName)
+        {
+            this.CheckPerformed?.Invoke(new CheckPerformedEventArgs(gitVersion, localVersion, assemblyName));
+
+            this.Dispose(true);
+        }
 
         /// <summary>
         /// Fired when the check has finished. Doesn't fire if there was no correct data provided.
@@ -42,17 +40,21 @@ namespace SparkTech.SDK.Web
         /// Initializes a new instance of the <see cref="Updater"/> base class
         /// </summary>
         /// <param name="link">The <see cref="string"/> representation of an user-provided link</param>
-        /// <param name="pattern">The regex pattern</param>
-        protected Updater(string link, string pattern)
+        protected Updater(string link)
         {
             if (!(this.IsLinkValid = Utility.IsLinkValid(link, out this.Link)))
             {
                 new ArgumentException("[ST] Updater - The provided link was invalid!").Catch();
             }
+        }
 
-            this.Regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.CultureInvariant);
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        /// <param name="managed">Determines whether managed sources should be cleaned</param>
+        protected override void Dispose(bool managed)
+        {
+            this.CheckPerformed = null;
         }
     }
 }
-
-*/

@@ -39,11 +39,6 @@
         public static readonly AIHeroClient Player;
 
         /// <summary>
-        ///     The allied team to the <see cref="E:Player" />
-        /// </summary>
-        private static readonly GameObjectTeam AlliedTeam;
-
-        /// <summary>
         ///     Contains the <see cref="FieldInfo" /> instances
         /// </summary>
         private static readonly Dictionary<string, FieldInfo> FieldData;
@@ -157,22 +152,48 @@
                             { "Obj_AI_MinionList", GetField("Obj_AI_MinionList") }
                         };
 
-            Minions = Obj_AI_MinionList.FindAll(minion => minion.IsMinion());
-            Pets = Obj_AI_MinionList.FindAll(minion => minion.DetermineType() == AIMinionType.Pet);
-            Wards = Obj_AI_MinionList.FindAll(minion => minion.IsWard());
-            JungleMinions = Obj_AI_MinionList.FindAll(minion => minion.IsJungle());
-            OtherMinions = Obj_AI_MinionList.FindAll(o => o.DetermineType() == AIMinionType.Unknown);
+            Minions = new List<Obj_AI_Minion>();
+            Pets = new List<Obj_AI_Minion>();
+            Wards = new List<Obj_AI_Minion>();
+            JungleMinions = new List<Obj_AI_Minion>();
+            OtherMinions = new List<Obj_AI_Minion>();
+
+            foreach (var minion in Obj_AI_MinionList)
+            {
+                switch (minion.DetermineType())
+                {
+                    case AIMinionType.Normal:
+                    case AIMinionType.Siege:
+                    case AIMinionType.Super:
+                        Minions.Add(minion);
+                        break;
+                    case AIMinionType.JungleSmall:
+                    case AIMinionType.JungleMedium:
+                    case AIMinionType.JungleLarge:
+                        JungleMinions.Add(minion);
+                        break;
+                    case AIMinionType.Ward:
+                        Wards.Add(minion);
+                        break;
+                    case AIMinionType.Pet:
+                        Pets.Add(minion);
+                        break;
+                    default:
+                        OtherMinions.Add(minion);
+                        break;
+                }
+            }
 
             Player = (AIHeroClient)GameObjectList.Single(o => o.IsMe);
 
-            AlliedTeam = Player.Team;
+            var alliedTeam = Player.Team;
 
-            TeamDictionary = new Dictionary<ObjectTeam, GameObjectTeam>(4)
+            TeamDictionary = new Dictionary<ObjectTeam, GameObjectTeam>
                              {
-                                 { ObjectTeam.Ally, AlliedTeam },
+                                 { ObjectTeam.Ally, alliedTeam },
                                  {
                                      ObjectTeam.Enemy,
-                                     AlliedTeam == GameObjectTeam.Order ? GameObjectTeam.Chaos : GameObjectTeam.Order
+                                     alliedTeam == GameObjectTeam.Order ? GameObjectTeam.Chaos : GameObjectTeam.Order
                                  },
                                  { ObjectTeam.Neutral, GameObjectTeam.Neutral },
                                  { ObjectTeam.Unknown, GameObjectTeam.Unknown }
@@ -226,7 +247,7 @@
                 return Selector((List<TGameObject>)field.GetValue(null), team, true, true, inrange);
             }
 
-            var container = GameObjectList.OfType<GameObject, TGameObject>(o => o.IsValid);
+            var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
             field = GetField(name);
 
             // ReSharper disable once InvertIf
@@ -255,7 +276,7 @@
                 return Selector((List<TGameObject>)field.GetValue(null), AllTeams, false, true, null);
             }
 
-            var container = GameObjectList.OfType<GameObject, TGameObject>(o => o.IsValid);
+            var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
             field = GetField(name);
 
             // ReSharper disable once InvertIf
@@ -336,7 +357,7 @@
 
         public static ObjectTeam Convert(this GameObjectTeam team)
         {
-            return TeamDictionary.Single(pair => pair.Value == team).Key;
+            return TeamDictionary.First(pair => pair.Value == team).Key;
         }
 
         /// <summary>
@@ -474,9 +495,9 @@
                     if (validityCheck && !o.IsValid())
                         return false;
 
-                    var team = o.Team;
+                    var team = o.Team.Convert();
 
-                    if (!flags.HasFlag(team.Convert()) || inrange != null && !inrange(o))
+                    if (!flags.HasFlag(team) || inrange != null && !inrange(o))
                         return false;
 
                     if (!moreChecks)
@@ -487,7 +508,7 @@
 
                     var attackable = o as AttackableUnit;
 
-                    return attackable == null || !attackable.IsInvulnerable && !attackable.IsZombie && (team == AlliedTeam || attackable.IsTargetable);
+                    return attackable == null || !attackable.IsInvulnerable && !attackable.IsZombie && (team == ObjectTeam.Ally || attackable.IsTargetable || team == ObjectTeam.Unknown);
                 });
         }
 
