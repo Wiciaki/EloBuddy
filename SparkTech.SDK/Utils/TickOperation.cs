@@ -1,69 +1,111 @@
 ﻿namespace SparkTech.SDK.Utils
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using EloBuddy;
-    using EloBuddy.SDK.Enumerations;
-    using EloBuddy.SDK.Utils;
+
+    using NLog;
 
     using SparkTech.SDK.Executors;
 
     /// <summary>
-    ///     Executes an operation each set amount of ticks.
+    /// The tick utility
     /// </summary>
+    [Trigger]
     public class TickOperation : Executable
     {
-        #region Fields
+        /// <summary>
+        /// The logger for the current class
+        /// </summary>
+        private new static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
         /// <summary>
-        ///     Contains the next tick value that Action should be executed.
+        /// The list containing the operations
         /// </summary>
-        private int nextTick;
-
-        #endregion
-
-        #region Constructors and Destructors
+        private static readonly List<TickOperation> Operations = new List<TickOperation>();
 
         /// <summary>
-        ///     Constructor for a new Tick Operation instance, auto-starts by default.
+        /// The current time
         /// </summary>
-        /// <param name="tickDelay">
-        ///     A set delay between ticks the action should be executed.
-        /// </param>
-        /// <param name="action">
-        ///     The executed action.
-        /// </param>
-        public TickOperation(int tickDelay, Action action)
+        private static int currentTime;
+
+        /// <summary>
+        /// Initializes static members of the <see cref="TickOperation"/> class
+        /// </summary>
+        static TickOperation()
         {
-            this.action = action;
-            this.TickDelay = tickDelay;
+            Game.OnUpdate += delegate
+                {
+                    currentTime = Game.Time.ToTicks();
 
-            this.IsRunning = true;
-            Game.OnUpdate += this.OnTick;
+                    foreach (var operation in Operations.Where(o => o.Active && o.lastTick + o.TickDelay > currentTime))
+                    {
+                        operation.lastTick = currentTime;
+
+                        operation.Execute();
+                    }
+                };
         }
 
-        #endregion
+        /// <summary>
+        /// Executes an action on next tick
+        /// </summary>
+        /// <param name="action">The action to be executed</param>
+        public static void ExecuteOnNextTick(Action action)
+        {
+            GameUpdate @delegate = null;
 
-        #region Public Properties
+            @delegate = delegate
+                {
+                    Game.OnUpdate -= @delegate;
+
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex);
+                    }
+                };
+
+            Game.OnUpdate += @delegate;
+        }
 
         /// <summary>
-        ///     The Executed Action.
+        /// The action to be executed
         /// </summary>
         private readonly Action action;
 
         /// <summary>
-        ///     Gets or sets a value indicating whether is the Tick Operation is currently running
+        /// Determines whether the <see cref="TickOperation"/> will be executing
         /// </summary>
-        public bool IsRunning { get; private set; }
+        public bool Active = true;
 
         /// <summary>
-        ///     Gets or sets a delay between ticks that action should be executed.
+        /// The tick delay
         /// </summary>
         public int TickDelay;
 
-        #endregion
+        /// <summary>
+        /// The last tick time
+        /// </summary>
+        private int lastTick;
 
-        #region Public Methods and Operators
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TickOperation"/> class
+        /// </summary>
+        /// <param name="action"></param>
+        public TickOperation(Action action)
+        {
+            this.action = action;
+
+            this.lastTick = currentTime;
+
+            Operations.Add(this);
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -71,89 +113,29 @@
         /// <param name="managed">Determines whether managed sources should be cleaned</param>
         protected override void Dispose(bool managed)
         {
-            if (this.IsRunning)
+            if (managed)
             {
-                Game.OnUpdate -= this.OnTick;
+                this.Active = false;
+                this.TickDelay = 0;
+                this.lastTick = 0;
             }
 
-            if (!managed)
-            {
-                return;
-            }
-
-            this.TickDelay = 0;
-            this.nextTick = 0;
-            this.IsRunning = false;
+            Operations.Remove(this);
         }
 
         /// <summary>
-        ///     Starts the tick operation.
+        /// Handles an action
         /// </summary>
-        /// <returns>Tick Operation instance.</returns>
-        public void Start()
+        private void Execute()
         {
-            if (!this.IsRunning)
+            try
             {
-                Game.OnUpdate += this.OnTick;
+                this.action();
+            }
+            catch (Exception ex)
+            {
+                this.Log(ex, LogLevel.Error, "Couldn't execute an action in TickOperation!");
             }
         }
-
-        /// <summary>
-        ///     Stops the tick operation.
-        /// </summary>
-        /// <returns>Tick Operation instance.</returns>
-        public void Stop()
-        {
-            if (this.IsRunning)
-            {
-                Game.OnUpdate -= this.OnTick;
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        ///     Notified function per game tick by Game.OnGameUpdate event.
-        ///     Executes the action if met tick requirements.
-        /// </summary>
-        /// <param name="args"><see cref="System.EventArgs" /> event data</param>
-        private void OnTick(EventArgs args)
-        {
-            var time = Game.Time.ToTicks();
-
-            if (this.nextTick > time)
-            {
-                return;
-            }
-
-            this.action();
-
-            this.nextTick = time + this.TickDelay;
-        }
-
-        public static void ExecuteOnNextTick(Action action)
-        {
-            GameUpdate @delegate = null;
-
-            @delegate = delegate
-            {
-                Game.OnUpdate -= @delegate;
-
-                try
-                {
-                    action();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Exception(LogLevel.Error, "ExecuteOnNextTick:", ex);
-                }
-            };
-
-            Game.OnUpdate += @delegate;
-        }
-
-        #endregion
     }
 }

@@ -23,7 +23,7 @@
             this.notified = true;
 
             // ex. "You are using the latest version of [NAME]"
-            // Comms.Print(Translations.GetTranslation(("updater_" + (this.Success ? this.IsUpdated ? "updated" : "available" : "error")).Replace("[NAME]", this.aName), this.MessageLanguage));
+            // Comms.Print(Translations.GetTranslation(("updater_" + (this.Success ? this.IsUpdated ? "updated" : "available" : "error")).Replace("[NAME]", this.assemblyName), this.MessageLanguage));
         }
 
         /// <summary>
@@ -54,7 +54,7 @@
         /// <summary>
         /// The locally saved assembly name
         /// </summary>
-        private readonly string aName;
+        private readonly string assemblyName;
 
         /// <summary>
         /// Inidicates whether the check has already been printed
@@ -71,9 +71,9 @@
         {
             this.LocalVersion = localVersion;
 
-            this.aName = assemblyName;
-
             this.GitVersion = gitVersion;
+
+            this.assemblyName = assemblyName;
         }
     }
 }

@@ -37,6 +37,14 @@
             }
             #endregion
 
+            #region Version
+            
+            #endregion
+
+            #region License
+
+            #endregion
+
             #region Info
             {
                 var info = SDKMenu.AddSubMenu("About", "st.sdk.info");
@@ -61,7 +69,7 @@
                 {
                     var assemblyName = Assembly.GetName();
 
-                    new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args => version.DisplayName = args.Success ? args.IsUpdated ? "Your copy of SDK is up to date." : "A new update is available!" : "Download failure";
+                    new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args => version.DisplayName = args.Success ? args.IsUpdated ? "Your copy of SparkTech.SDK is up to date" : "A new update is available!" : "Download failure";
                 }
             }
             #endregion

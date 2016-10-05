@@ -38,19 +38,19 @@
                     var root = MainMenu.AddMenu("AllyPingSpammer", Header);
                     var hero = root.Add(Header + "_hero", new ComboBox("Ally to be spammed", allies.ConvertAll(ally => ally.UniqueName())));
                     root.AddSeparator(30);
-                    var active = root.Add(Header + "_active", new CheckBox("TILT THE SHIT OUT OF MOTHERFUCKER"));
+                    var active = root.Add(Header + "_active", new CheckBox("TILT THE SHIT OUT OF MOTHERFUCKER", false));
                     TickOperation.ExecuteOnNextTick(() => active.CurrentValue = false);
-                    var pingSettings = root.AddSubMenu("Advanced");
-                    var delay = pingSettings.Add(Header + "_delay", new Slider("Delay between attempts", 3000, 200, 10000));
-                    var delayRandomizer = pingSettings.Add(Header + "_randomize1", new CheckBox("^ Randomize delay"));
-                    pingSettings.AddSeparator();
-                    var ping = pingSettings.Add(Header + "_pingtype", new ComboBox("PingCategory", EnumCache<PingCategory>.Names));
-                    var categoryRandomizer = pingSettings.Add(Header + "_randomize2", new CheckBox("^ Randomize PingCategory"));
-                    pingSettings.AddSeparator();
-                    var difference = pingSettings.Add(Header + "_difference", new Slider("Maximal click point randomization", 200, 20, 800));
-                    pingSettings.AddSeparator();
-                    var hider = pingSettings.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
-                    pingSettings.AddLabel("Prevents \"You have to wait before issuing more pings.\" from displaying in your chat");
+                    var advanced = root.AddSubMenu("Advanced");
+                    var delay = advanced.Add(Header + "_delay", new Slider("Delay between attempts", 3000, 200, 10000));
+                    var delayRandomizer = advanced.Add(Header + "_randomize1", new CheckBox("^ Randomize delay"));
+                    advanced.AddSeparator();
+                    var ping = advanced.Add(Header + "_pingtype", new ComboBox("PingCategory", EnumCache<PingCategory>.Names));
+                    var categoryRandomizer = advanced.Add(Header + "_randomize2", new CheckBox("^ Randomize PingCategory"));
+                    advanced.AddSeparator();
+                    var difference = advanced.Add(Header + "_difference", new Slider("Maximal click point randomization", 200, 20, 800));
+                    advanced.AddSeparator();
+                    var hider = advanced.Add(Header + "_hide", new CheckBox("Chat blocker active", false));
+                    advanced.AddLabel("Prevents \"You have to wait before issuing more pings.\" from displaying in your chat");
 
                     var selectedHero = allies.Find(champ => champ.UniqueName() == hero.SelectedText);
                     var r = new Random();
@@ -78,7 +78,7 @@
 
                             if (delayRandomizer.CurrentValue)
                             {
-                                delay.CurrentValue = r.Next(3000, 10000);
+                                delay.CurrentValue = r.Next(200, 10000);
                             }
 
                             if (categoryRandomizer.CurrentValue)

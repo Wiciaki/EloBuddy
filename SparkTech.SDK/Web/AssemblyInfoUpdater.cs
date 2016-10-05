@@ -5,8 +5,7 @@
     using System.Text.RegularExpressions;
 
     /// <summary>
-    /// <para>A child of the <see cref="Updater"/> class, uses a method which makes it change a thread, unfortunately (leading to possible bugsplats on drawings drawn in event method etc.)</para>
-    /// All of the invokable methods exposed by me are knows to be thread-safe and here I mean mostly "args.Notify()"
+    /// <para>A child of the <see cref="Updater"/> class allowing to check for an update based on the AssemblyInfo file</para>
     /// </summary>
     public class AssemblyInfoUpdater : Updater
     {
@@ -23,24 +22,30 @@
         /// <param name="assemblyName">The name of the assembly</param>
         public AssemblyInfoUpdater(string fullRawAssemblyInfoLink, Version localVersion, string assemblyName) : base(fullRawAssemblyInfoLink)
         {
-            var low = this.Link.AbsoluteUri.ToLower();
-
-            if (!low.Contains("assemblyinfo.cs") || !low.Contains("raw.githubusercontent.com"))
+            if (this.IsLinkValid && Utility.AssemblyInfoValidation(this.Path))
             {
-                return;
+                this.UpdateCheck(localVersion, assemblyName);
+            }
+        }
+
+        /// <summary>
+        /// Performs an update check
+        /// </summary>
+        /// <param name="localVersion">The local version of the assembly</param>
+        /// <param name="assemblyName">The assembly name</param>
+        private async void UpdateCheck(Version localVersion, string assemblyName)
+        {
+            string data;
+
+            using (var client = new WebClient())
+            {
+                data = await client.DownloadStringTaskAsync(this.Link).ConfigureAwait(false);
             }
 
-            new Action(async () =>
-                {
-                    Match match;
+            var match = Regex.Match(data);
+            var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
 
-                    using (var client = new WebClient())
-                    {
-                        match = Regex.Match(await client.DownloadStringTaskAsync(this.Link).ConfigureAwait(false));
-                    }
-
-                    this.RaiseEvent(match.Success ? new Version(match.Groups[0].Value) : null, localVersion, assemblyName);
-                })();
+            this.RaiseEvent(gitVersion, localVersion, assemblyName);
         }
     }
 }

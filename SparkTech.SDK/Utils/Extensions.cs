@@ -8,8 +8,17 @@
 
     using SparkTech.SDK.Cache;
 
+    /// <summary>
+    /// Provides static methods and extensions of various sort
+    /// </summary>
     public static class Extensions
     {
+        /// <summary>
+        /// Quickly retrieves the selected enum value
+        /// </summary>
+        /// <typeparam name="TEnum">The enum type</typeparam>
+        /// <param name="item">The menu item</param>
+        /// <returns></returns>
         public static TEnum GetValue<TEnum>(this ComboBox item) where TEnum : struct, IConvertible
         {
             return EnumCache<TEnum>.Parse(item.SelectedText);
@@ -68,14 +77,15 @@
                        : Regex.Replace(input, "(?<!^)([A-Z])", " $1");
         }
 
+        /// <summary>
+        /// Removes a part of the string
+        /// </summary>
+        /// <param name="string">The original instance</param>
+        /// <param name="text">The desired text to be removed</param>
+        /// <returns></returns>
         public static string Remove(this string @string, string text)
         {
             return @string.Replace(text, "");
-        }
-
-        public static void Catch(this Exception ex)
-        {
-            
         }
     }
 }

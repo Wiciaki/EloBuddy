@@ -2,6 +2,8 @@
 {
     using System;
 
+    using NLog;
+
     /// <summary>
     /// Represents a disposable class
     /// </summary>
@@ -13,11 +15,18 @@
         private bool toBeDisposed;
 
         /// <summary>
+        /// the logger for the current instance
+        /// </summary>
+        protected readonly Logger Logger;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="Executable"/> class
         /// </summary>
         protected Executable()
         {
             this.toBeDisposed = true;
+
+            this.Logger = LogManager.GetLogger(this.GetType().FullName);
         }
 
         /// <summary>
@@ -53,5 +62,16 @@
         /// </summary>
         /// <param name="managed">Determines whether managed sources should be cleaned</param>
         protected abstract void Dispose(bool managed);
+
+        /// <summary>
+        /// Logs the exception
+        /// </summary>
+        /// <param name="ex">The exception</param>
+        /// <param name="level">The log level</param>
+        /// <param name="message">The message</param>
+        protected void Log(Exception ex, LogLevel level, string message)
+        {
+            this.Logger.Log(level, ex, message);
+        }
     }
 }
