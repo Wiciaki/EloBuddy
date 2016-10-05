@@ -149,6 +149,8 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\NLog.dll" />
+    <None Include="Resources\MoreLinq.dll" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
