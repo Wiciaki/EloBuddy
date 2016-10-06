@@ -75,7 +75,6 @@
       <HintPath>C:\Users\wicia\AppData\Roaming\EloBuddy\Addons\Libraries\SparkTech.SDK.dll</HintPath>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Drawing" />
   </ItemGroup>

@@ -66,9 +66,13 @@
     <Reference Include="EloBuddy.SDK">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\EloBuddy.SDK.dll</HintPath>
     </Reference>
+    <Reference Include="MoreLinq, Version=2.0.19309.0, Culture=neutral, PublicKeyToken=384d532d7e88985d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>References\MoreLinq.dll</HintPath>
+    </Reference>
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\EloBuddy\Dependencies\NLog.dll</HintPath>
+      <HintPath>References\NLog.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.dll</HintPath>
@@ -134,10 +138,13 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="References\MoreLinq.dll" />
+    <Content Include="References\NLog.dll" />
     <None Include="SparkTech.pfx" />
     <None Include="SparkTech.SDK.ruleset" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Resources\" />
     <Folder Include="Targeting\Weights\" />
   </ItemGroup>
   <ItemGroup>
