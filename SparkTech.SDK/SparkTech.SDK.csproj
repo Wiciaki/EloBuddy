@@ -94,7 +94,6 @@
     <Compile Include="Cache\EnumCache.cs" />
     <Compile Include="Cache\MiscallenousCache.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
-    <Compile Include="Delegates.cs" />
     <Compile Include="Enumerations\AIMinionType.cs" />
     <Compile Include="Enumerations\HumanizerMode.cs" />
     <Compile Include="Enumerations\Language.cs" />
@@ -143,9 +142,6 @@
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="References\JetBrains.Annotations.dll" />
-    <None Include="References\NLog.dll" />
-    <None Include="References\MoreLinq.dll" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
