@@ -140,17 +140,12 @@
     <Compile Include="Web\Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="Resources\NLog.dll" />
-    <None Include="Resources\MoreLinq.dll" />
+    <None Include="References\JetBrains.Annotations.dll" />
+    <None Include="References\NLog.dll" />
+    <None Include="References\MoreLinq.dll" />
     <None Include="NLog.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -160,6 +155,12 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Targeting\Weights\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

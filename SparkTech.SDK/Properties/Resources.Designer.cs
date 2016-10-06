@@ -59,25 +59,5 @@ namespace SparkTech.SDK.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] MoreLinq {
-            get {
-                object obj = ResourceManager.GetObject("MoreLinq", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] NLog {
-            get {
-                object obj = ResourceManager.GetObject("NLog", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
     }
 }

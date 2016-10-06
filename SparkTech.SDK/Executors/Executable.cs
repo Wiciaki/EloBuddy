@@ -15,7 +15,7 @@
         private bool toBeDisposed;
 
         /// <summary>
-        /// the logger for the current instance
+        /// The logger for the current instance
         /// </summary>
         protected readonly Logger Logger;
 
@@ -72,6 +72,16 @@
         protected void Log(Exception ex, LogLevel level, string message)
         {
             this.Logger.Log(level, ex, message);
+        }
+
+        /// <summary>
+        /// Logs an exception
+        /// </summary>
+        /// <typeparam name="TException">The exception type</typeparam>
+        /// <param name="ex">The exception object</param>
+        protected void Log<TException>(TException ex) where TException : Exception
+        {
+            this.Logger.Error(ex);
         }
     }
 }

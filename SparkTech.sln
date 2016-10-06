@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.
 		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0} = {0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTech.Addon", "SparkTech.Addon\SparkTech.Addon.csproj", "{89EE39CA-2498-4F38-B2E8-A5FA0D70108D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{9CB90809-C63B-4636-BBB1-8F7631204B06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9CB90809-C63B-4636-BBB1-8F7631204B06}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CB90809-C63B-4636-BBB1-8F7631204B06}.Release|Any CPU.ActiveCfg = Release|x86
+		{89EE39CA-2498-4F38-B2E8-A5FA0D70108D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{89EE39CA-2498-4F38-B2E8-A5FA0D70108D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{89EE39CA-2498-4F38-B2E8-A5FA0D70108D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{89EE39CA-2498-4F38-B2E8-A5FA0D70108D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

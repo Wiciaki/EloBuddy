@@ -21,7 +21,7 @@
         /// <param name="args">The empty string array</param>
         private static void Main(string[] args)
         {
-            args.Handle();
+            args.Handle(typeof(Program));
 
             Loading.OnLoadingComplete += delegate
                 {
