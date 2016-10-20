@@ -54,11 +54,19 @@
                     var selectedHero = allies.Find(champ => champ.UniqueName() == hero.SelectedText);
                     var r = new Random();
                     var lastPing = 0;
+                    var firstTick = true;
                     
                     hero.OnValueChange += (s, arg) => selectedHero = allies.Find(champ => champ.UniqueName() == hero[arg.NewValue]);
 
-                    GameTick onTick = delegate
+                    Game.OnTick += delegate
                         {
+                            if (firstTick)
+                            {
+                                firstTick = false;
+
+                                active.CurrentValue = false;
+                            }
+
                             if (!active.CurrentValue)
                             {
                                 return;
@@ -75,7 +83,7 @@
 
                             TacticalMap.SendPing(ping.GetValue<PingCategory>(), Randomizer.Randomize(selectedHero.Position.To2D(), difference.CurrentValue));
 
-                            if (delayRandomizer.CurrentValue)
+                            if (delayRandomizer.CurrentValue) 
                             {
                                 delay.CurrentValue = r.Next(200, 10000);
                             }
@@ -93,13 +101,6 @@
                             arg.Process = false;
                         }
                     };
-
-                    TickOperation.ExecuteOnNextTick(delegate
-                            {
-                                active.CurrentValue = false;
-
-                                Game.OnTick += onTick;
-                            });
                 };
         }
     }
