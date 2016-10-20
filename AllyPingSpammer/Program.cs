@@ -39,7 +39,6 @@
                     var hero = root.Add(Header + "_hero", new ComboBox("Ally to be spammed", allies.ConvertAll(ally => ally.UniqueName())));
                     root.AddSeparator(30);
                     var active = root.Add(Header + "_active", new CheckBox("TILT THE SHIT OUT OF MOTHERFUCKER", false));
-                    TickOperation.ExecuteOnNextTick(() => active.CurrentValue = false);
                     var advanced = root.AddSubMenu("Advanced");
                     var delay = advanced.Add(Header + "_delay", new Slider("Delay between attempts", 3000, 200, 10000));
                     var delayRandomizer = advanced.Add(Header + "_randomize1", new CheckBox("^ Randomize delay"));
@@ -58,7 +57,7 @@
                     
                     hero.OnValueChange += (s, arg) => selectedHero = allies.Find(champ => champ.UniqueName() == hero[arg.NewValue]);
 
-                    Game.OnTick += delegate
+                    GameTick onTick = delegate
                         {
                             if (!active.CurrentValue)
                             {
@@ -94,6 +93,13 @@
                             arg.Process = false;
                         }
                     };
+
+                    TickOperation.ExecuteOnNextTick(delegate
+                            {
+                                active.CurrentValue = false;
+
+                                Game.OnTick += onTick;
+                            });
                 };
         }
     }
