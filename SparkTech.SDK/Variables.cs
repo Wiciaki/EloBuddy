@@ -42,7 +42,7 @@
         /// <summary>
         /// The path to web version of the current class
         /// </summary>
-        public const string RawVariablesPath = "https://raw.githubusercontent.com/Wiciaki/Dependencies/master/SparkTech.SDK/Variables.cs";
+        public const string RawVariablesPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/Variables.cs";
 
         /// <summary>
         /// Determines whether this run is a first one in the specified environment
