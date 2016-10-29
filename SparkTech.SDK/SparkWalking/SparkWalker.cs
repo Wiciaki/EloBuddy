@@ -29,7 +29,7 @@
     /// <summary>
     /// An alternative to the <see cref="EloBuddy.SDK.Orbwalker"/> class.
     /// </summary>
-    [Trigger]
+ // [Trigger]
     public class SparkWalker : Executable
     {
         #region Menus
