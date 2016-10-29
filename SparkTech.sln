@@ -5,22 +5,32 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllyPingSpammer", "AllyPingSpammer\AllyPingSpammer.csproj", "{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTech.SDK", "ClassLibrary1\SparkTech.SDK.csproj", "{74E56F31-8540-44A0-A920-BD38BB86E674}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTech.SDK", "SparkTech.SDK\SparkTech.SDK.csproj", "{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
+		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Debug|x86.ActiveCfg = Debug|x86
+		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Debug|x86.Build.0 = Debug|x86
 		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Release|Any CPU.ActiveCfg = Release|x86
 		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Release|Any CPU.Build.0 = Release|x86
-		{74E56F31-8540-44A0-A920-BD38BB86E674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74E56F31-8540-44A0-A920-BD38BB86E674}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74E56F31-8540-44A0-A920-BD38BB86E674}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74E56F31-8540-44A0-A920-BD38BB86E674}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Release|x86.ActiveCfg = Release|x86
+		{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}.Release|x86.Build.0 = Release|x86
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Debug|x86.ActiveCfg = Debug|x86
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Debug|x86.Build.0 = Debug|x86
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Release|x86.ActiveCfg = Release|x86
+		{0C2738A8-8265-4C5B-BBE9-554A7A42F4D0}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

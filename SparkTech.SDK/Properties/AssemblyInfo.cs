@@ -1,15 +1,18 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
+﻿using System.Resources;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
+
+using SparkTech.SDK;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ClassLibrary1")]
+[assembly: AssemblyTitle("SparkTech.SDK")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ClassLibrary1")]
+[assembly: AssemblyProduct("SparkTech.SDK")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +23,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("74e56f31-8540-44a0-a920-bd38bb86e674")]
+[assembly: Guid("0c2738a8-8265-4c5b-bbe9-554a7a42f4d0")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +35,6 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion(Variables.VersionSDK)]
+[assembly: AssemblyFileVersion(Variables.VersionSDK)]
+[assembly: SecurityRules(SecurityRuleSet.Level2)]

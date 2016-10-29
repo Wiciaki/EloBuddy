@@ -65,9 +65,6 @@
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.dll</HintPath>
     </Reference>
-    <Reference Include="SparkTech.SDK">
-      <HintPath>C:\Users\wicia\AppData\Roaming\EloBuddy\Addons\Libraries\SparkTech.SDK.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
