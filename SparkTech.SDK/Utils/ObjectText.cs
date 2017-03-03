@@ -4,16 +4,15 @@
     using System.Linq;
 
     using EloBuddy;
-    using EloBuddy.SDK.Menu;
-    using EloBuddy.SDK.Menu.Values;
 
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Executors;
+    using SparkTech.SDK.MenuWrapper;
 
     /// <summary>
     /// This class offers you to draw text under the objects in an easy way
     /// </summary>
-    [Trigger]
+   // [Trigger]
     public class ObjectText
     {
         /// <summary>
@@ -36,19 +35,19 @@
         /// </summary>
         static ObjectText()
         {
-            Menu = Variables.SDKMenu.AddSubMenu("Text below units", "st_core_drawings_text");
-            Menu.Add("text_enable", new CheckBox("Enable"));
+            Menu = Creator.MainMenu.AddSubMenu("Text below units", "st_core_drawings_text");
+            Menu.Add("text_enable", new MenuItem("Enable", false));
 
             Entries = new List<ObjectTextEntry>();
 
             Drawing.OnDraw += delegate
             {
-                if (!Menu["text_enable"].Bool())
+                if (!Menu["text_enable"])
                 {
                     return;
                 }
 
-                var enabledEntries = Entries.Where(item => Menu[$"text_{item.Id}"].Bool() && item.Condition())
+                var enabledEntries = Entries.Where(item => Menu[$"text_{item.Id}"] && item.Condition())
                         .OrderBy(item => item.Id)
                         .ToList();
 
@@ -88,7 +87,7 @@
         /// <param name="item">The <see cref="ObjectText"/>'s component to be added</param>
         public static void AddItem(ObjectTextEntry item)
         {
-            Menu.Add($"text_{item.Id}", new CheckBox($"Enable \"{item.MenuText}\"", item.OnByDefault));
+            Menu.Add($"text_{item.Id}", new MenuItem($"Enable \"{item.MenuText}\"", item.OnByDefault));
 
             Entries.Add(item);
         }
@@ -99,7 +98,7 @@
         /// <param name="item">The <see cref="ObjectText"/>'s component to be removed</param>
         public static void RemoveItem(ObjectTextEntry item)
         {
-            Menu.Remove($"text_{item.Id}");
+           // Menu.Remove($"text_{item.Id}"); TODO
 
             Entries.RemoveAt(Entries.FindIndex(i => i.Id == item.Id));
         }

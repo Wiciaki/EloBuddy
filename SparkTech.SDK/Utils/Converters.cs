@@ -4,6 +4,16 @@
 
     public static class Converters
     {
+        public static int ToTicks(this float seconds)
+        {
+            return (int)(seconds * 1000f);
+        }
+
+        public static float ToSeconds(this int ticks)
+        {
+            return ticks / 1000f;
+        }
+
         /// <summary>
         /// Rounds the float to the nearest <see cref="int"/> value
         /// </summary>
@@ -27,16 +37,6 @@
         public static double Root(this double value, double level = 2d)
         {
             return Math.Pow(value, 1d / level);
-        }
-
-        public static int ToTicks(this float seconds)
-        {
-            return (seconds * 1000f).Round();
-        }
-
-        public static float ToSeconds(this int ticks)
-        {
-            return ticks / 1000f;
         }
     }
 }

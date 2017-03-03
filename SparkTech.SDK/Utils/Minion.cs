@@ -4,7 +4,6 @@
     using System.Text.RegularExpressions;
 
     using EloBuddy;
-    using EloBuddy.SDK;
 
     using SparkTech.SDK.Enumerations;
 
@@ -13,6 +12,7 @@
         public static bool IsJungleBuff(this Obj_AI_Minion minion)
         {
             var @base = minion.CharData.BaseSkinName;
+
             return @base == "SRU_Blue" || @base == "SRU_Red";
         }
 
@@ -23,12 +23,15 @@
 
         public static bool IsMinion(this AIMinionType type)
         {
-            return type == AIMinionType.Normal || type == AIMinionType.Siege || type == AIMinionType.Super;
-        }
-
-        public static bool IsWard(this Obj_AI_Minion minion)
-        {
-            return minion.DetermineType() == AIMinionType.Ward;
+            switch (type)
+            {
+                case AIMinionType.Normal:
+                case AIMinionType.Siege:
+                case AIMinionType.Super:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static bool IsJungle(this Obj_AI_Minion minion)
@@ -38,17 +41,12 @@
 
         public static bool IsJungle(this AIMinionType type)
         {
-            return type == AIMinionType.JungleSmall || type == AIMinionType.JungleMedium || type == AIMinionType.JungleLarge;
-        }
-
-        public static bool IsPet(this Obj_AI_Minion minion)
-        {
-            return minion.DetermineType() == AIMinionType.Pet;
+            return type == AIMinionType.Jungle || type == AIMinionType.JungleBoss;
         }
 
         public static AIMinionType DetermineType(this Obj_AI_Minion minion)
         {
-            if (minion.IsValid())
+            if (minion != null && minion.IsValid)
             {
                 var @base = minion.CharData.BaseSkinName;
 
@@ -67,6 +65,11 @@
                     return AIMinionType.Super;
                 }
 
+                if (@base.StartsWith("SRU_Plant"))
+                {
+                    return AIMinionType.Plant;
+                }
+
                 @base = @base.ToLower();
 
                 if (@base.Contains("ward") || @base.Contains("trinket"))
@@ -81,27 +84,20 @@
 
                 var name = minion.Name;
 
-                if (SmallNameRegex.Exists(regex => Regex.IsMatch(name, regex)))
+                if (JungleNameRegexList.Exists(regex => Regex.IsMatch(name, regex)))
                 {
-                    return AIMinionType.JungleSmall;
+                    return AIMinionType.Jungle;
                 }
 
-                if (LargeNameRegex.Exists(regex => Regex.IsMatch(name, regex)))
+                if (JungleBossNameRegexList.Exists(regex => Regex.IsMatch(name, regex)))
                 {
-                    return AIMinionType.JungleMedium;
-                }
-
-                if (LegendaryNameRegex.Exists(regex => Regex.IsMatch(name, regex)))
-                {
-                    return AIMinionType.JungleLarge;
+                    return AIMinionType.JungleBoss;
                 }
             }
 
             return AIMinionType.Unknown;
         }
 
-        #region Database
-        
         private static readonly List<string> NormalMinionList = new List<string>
                                                                     {
                                                                         "SRU_ChaosMinionMelee", "SRU_ChaosMinionRanged",
@@ -132,17 +128,13 @@
                                                                        "HA_ChaosMinionSuper", "HA_OrderMinionSuper"
                                                                    };
 
-        private static readonly List<string> SmallNameRegex = new List<string> { "SRU_[a-zA-Z](.*?)Mini", "Sru_Crab" };
+        private static readonly List<string> JungleNameRegexList = new List<string> { "SRU_[a-zA-Z](.*?)Mini", "Sru_Crab" };
 
-        private static readonly List<string> LargeNameRegex = new List<string>
+        private static readonly List<string> JungleBossNameRegexList = new List<string>
             {
                 "SRU_Murkwolf[0-9.]{1,}", "SRU_Gromp", "SRU_Blue[0-9.]{1,}",
                 "SRU_Razorbeak[0-9.]{1,}", "SRU_Red[0-9.]{1,}",
-                "SRU_Krug[0-9]{1,}"
+                "SRU_Krug[0-9]{1,}", "SRU_RiftHerald", "SRU_Dragon", "SRU_Baron"
             };
-
-        private static readonly List<string> LegendaryNameRegex = new List<string> { "SRU_Dragon", "SRU_Baron", "SRU_RiftHerald" };
-
-        #endregion
     }
 }

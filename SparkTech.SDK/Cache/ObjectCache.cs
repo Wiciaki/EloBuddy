@@ -18,8 +18,8 @@
     /// <summary>
     ///     An alternative to the <see cref="ObjectManager" /> class
     /// </summary>
-    [Trigger]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "These fields won't work with any other naming")]
+    [Trigger]
     public static class ObjectCache
     {
         #region Constants
@@ -54,7 +54,12 @@
         private static readonly List<Obj_AI_Minion> JungleMinions;
 
         /// <summary>
-        ///     Gets the clean list cointaining just the minions (no ghost wards, clones or any other crap just lane minions)
+        ///     Gets the list containing the plants
+        /// </summary>
+        private static readonly List<Obj_AI_Minion> Plants;
+
+        /// <summary>
+        ///     Gets the clean list containing just the minions (no ghost wards, clones or any other crap just lane minions)
         /// </summary>
         private static readonly List<Obj_AI_Minion> Minions;
 
@@ -69,20 +74,21 @@
         private static readonly List<Obj_AI_Minion> OtherMinions;
 
         /// <summary>
-        ///     Gets the list containing the attackable objects (e.g. shaco's boxes)
+        ///     Gets the list containing the attackable objects (e.g. Shaco's boxes)
         /// </summary>
         private static readonly List<Obj_AI_Minion> Pets;
 
         /// <summary>
         ///     The team relation dictionary
         /// </summary>
-        private static readonly Dictionary<ObjectTeam, GameObjectTeam> TeamDictionary;
+        private static readonly Dictionary<GameObjectTeam, ObjectTeam> TeamDictionary;
 
         /// <summary>
         ///     Gets the list containing just the wards
         /// </summary>
         private static readonly List<Obj_AI_Minion> Wards;
 
+        // The compiler can't know we're going to use reflection!
 #pragma warning disable 649
 #pragma warning disable 169
 
@@ -141,6 +147,7 @@
         /// <summary>
         ///     Initializes static members of the <see cref="ObjectCache" /> class
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         static ObjectCache()
         {
             GameObjectList = ObjectManager.Get<GameObject>().ToList();
@@ -148,14 +155,15 @@
 
             FieldData = new Dictionary<string, FieldInfo>(10)
                         {
-                            { "GameObjectList", GetField("GameObjectList") },
-                            { "Obj_AI_MinionList", GetField("Obj_AI_MinionList") }
-                        };
+                            ["GameObjectList"] = GetField("GameObjectList"),
+                            ["Obj_AI_MinionList"] = GetField("Obj_AI_MinionList")
+            };
 
             Minions = new List<Obj_AI_Minion>();
             Pets = new List<Obj_AI_Minion>();
             Wards = new List<Obj_AI_Minion>();
             JungleMinions = new List<Obj_AI_Minion>();
+            Plants = new List<Obj_AI_Minion>();
             OtherMinions = new List<Obj_AI_Minion>();
 
             foreach (var minion in Obj_AI_MinionList)
@@ -167,10 +175,12 @@
                     case AIMinionType.Super:
                         Minions.Add(minion);
                         break;
-                    case AIMinionType.JungleSmall:
-                    case AIMinionType.JungleMedium:
-                    case AIMinionType.JungleLarge:
+                    case AIMinionType.Jungle:
+                    case AIMinionType.JungleBoss:
                         JungleMinions.Add(minion);
+                        break;
+                    case AIMinionType.Plant:
+                        Plants.Add(minion);
                         break;
                     case AIMinionType.Ward:
                         Wards.Add(minion);
@@ -178,9 +188,11 @@
                     case AIMinionType.Pet:
                         Pets.Add(minion);
                         break;
-                    default:
+                    case AIMinionType.Unknown:
                         OtherMinions.Add(minion);
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(AIMinionType));
                 }
             }
 
@@ -188,17 +200,21 @@
 
             var alliedTeam = Player.Team;
 
-            TeamDictionary = new Dictionary<ObjectTeam, GameObjectTeam>
-                             {
-                                 { ObjectTeam.Ally, alliedTeam },
+            TeamDictionary = new Dictionary<GameObjectTeam, ObjectTeam>
                                  {
-                                     ObjectTeam.Enemy,
-                                     alliedTeam == GameObjectTeam.Order ? GameObjectTeam.Chaos : GameObjectTeam.Order
-                                 },
-                                 { ObjectTeam.Neutral, GameObjectTeam.Neutral },
-                                 { ObjectTeam.Unknown, GameObjectTeam.Unknown }
-                             };
+                                     [alliedTeam] = ObjectTeam.Ally,
+                                     [alliedTeam == GameObjectTeam.Order ? GameObjectTeam.Chaos : GameObjectTeam.Order] = ObjectTeam.Enemy,
+                                     [GameObjectTeam.Neutral] = ObjectTeam.Neutral,
+                                     [GameObjectTeam.Unknown] = ObjectTeam.Unknown
+                                 };
 
+            /*
+             * 
+             * UPDATE
+             * Now, hopefully this subscription is obsolete.
+             * Still needs to pass some extra tests, though...
+             * 
+             * 
             // I don't find OnDelete too reliable when it comes to keeping the lists tidy so I'll additionally go for OnUpdate
             Game.OnUpdate += delegate
             {
@@ -209,6 +225,8 @@
                     Process(GameObjectList[index], false);
                 }
             };
+
+             */
 
             GameObject.OnCreate += (sender, args) => Process(sender, true);
             GameObject.OnDelete += (sender, args) => Process(sender, false);
@@ -250,7 +268,6 @@
             var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
             field = GetField(name);
 
-            // ReSharper disable once InvertIf
             // This type of GameObject is supported however cache is being just initialized
             if (field != null)
             {
@@ -279,7 +296,6 @@
             var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
             field = GetField(name);
 
-            // ReSharper disable once InvertIf
             if (field != null)
             {
                 field.SetValue(null, container);
@@ -300,22 +316,22 @@
         {
             var container = new List<Obj_AI_Minion>(Obj_AI_MinionList.Count);
 
-            if (type.HasFlag(MinionType.Minion))
+            if ((type & MinionType.Minion) != 0)
                 container.AddRange(Minions);
-            if (type.HasFlag(MinionType.Ward))
+            if ((type & MinionType.Ward) != 0)
                 container.AddRange(Wards);
-            if (type.HasFlag(MinionType.Pet))
+            if ((type & MinionType.Pet) != 0)
                 container.AddRange(Pets);
-            if (type.HasFlag(MinionType.Jungle))
+            if ((type & MinionType.Jungle) != 0)
                 container.AddRange(JungleMinions);
-            if (type.HasFlag(MinionType.Other))
+            if ((type & MinionType.Other) != 0)
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, true, inrange);
+            return Selector(container, team, true, false, inrange);
         }
 
         /// <summary>
-        ///     Gets minions in a similiar way to <see cref="E:MinionManager" />
+        ///     Gets minions in a similar way to <see cref="E:MinionManager" />
         /// </summary>
         /// <param name="from">The from</param>
         /// <param name="range">The range to take minions from</param>
@@ -326,23 +342,25 @@
         {
             var container = new List<Obj_AI_Base>(Obj_AI_MinionList.Count);
 
-            if (type.HasFlag(MinionType.Minion))
+            if ((type & MinionType.Minion) != 0)
                 container.AddRange(Minions);
-            if (type.HasFlag(MinionType.Ward))
+            if ((type & MinionType.Ward) != 0)
                 container.AddRange(Wards);
-            if (type.HasFlag(MinionType.Pet))
+            if ((type & MinionType.Pet) != 0)
                 container.AddRange(Pets);
-            if (type.HasFlag(MinionType.Jungle))
+            if ((type & MinionType.Jungle) != 0)
                 container.AddRange(JungleMinions);
-            if (type.HasFlag(MinionType.Other))
+            if ((type & MinionType.Other) != 0)
                 container.AddRange(OtherMinions);
+
+            range *= range;
 
             if (from.IsZero)
                 from = Player.ServerPosition.To2D();
 
-            var infinity = float.IsPositiveInfinity(range *= range);
+            var infinity = float.IsPositiveInfinity(range);
 
-            return Selector(container, team, true, true, @base => infinity || Vector2.DistanceSquared(@base.ServerPosition.To2D(), from) <= range);
+            return Selector(container, team, true, false, @base => infinity || Vector2.DistanceSquared(@base.ServerPosition.To2D(), from) <= range);
         }
 
         /// <summary>
@@ -352,12 +370,17 @@
         /// <returns></returns>
         public static ObjectTeam Team(this GameObject @object)
         {
-            return @object.Team.Convert();
+            return @object.Team.ToObjectTeam();
         }
 
-        public static ObjectTeam Convert(this GameObjectTeam team)
+        /// <summary>
+        ///     Gets the <see cref="ObjectTeam" /> representation of the current object
+        /// </summary>
+        /// <param name="team">The <see cref="GameObjectTeam" /> instance to be converted</param>
+        /// <returns></returns>
+        public static ObjectTeam ToObjectTeam(this GameObjectTeam team)
         {
-            return TeamDictionary.First(pair => pair.Value == team).Key;
+            return TeamDictionary[team];
         }
 
         /// <summary>
@@ -367,12 +390,12 @@
         /// <returns></returns>
         public static bool IsValid(this GameObject @object)
         {
-            return @object != null && @object.IsValid;
+            return @object?.IsValid == true;
         }
 
         #endregion
 
-        #region Methods
+        #region Private Methods
 
         /// <summary>
         ///     Gets the executor function
@@ -418,7 +441,7 @@
         }
 
         /// <summary>
-        ///     Adds or removes a <see cref="GameObject" /> from the appropiate lists
+        ///     Adds or removes a <see cref="GameObject" /> from the appropriate lists
         /// </summary>
         /// <param name="object">The <see cref="GameObject" /> to be processed</param>
         /// <param name="new">Determines whether to add or remove an item</param>
@@ -486,24 +509,24 @@
         /// <param name="flags">The provided team flags</param>
         /// <param name="moreChecks">Determines whether to perform additional checks</param>
         /// <param name="validityCheck">The additional predicate</param>
-        /// <param name="inrange">The function to check if the unit is in range</param>
+        /// <param name="predicate">The function to check if the unit meets the condition</param>
         /// <returns></returns>
-        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, bool moreChecks, bool validityCheck, Predicate<TGameObject> inrange) where TGameObject : GameObject
+        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, bool moreChecks, bool validityCheck, Predicate<TGameObject> predicate) where TGameObject : GameObject
         {
             return container.FindAll(o =>
                 {
                     if (validityCheck && !o.IsValid())
                         return false;
 
-                    var team = o.Team.Convert();
+                    var team = o.Team();
 
-                    if (!flags.HasFlag(team) || inrange != null && !inrange(o))
+                    if ((flags & team) == 0)
                         return false;
 
                     if (!moreChecks)
                         return true;
 
-                    if (!o.IsVisible || o.IsDead)
+                    if (predicate != null && !predicate(o) || !o.IsVisible || o.IsDead)
                         return false;
 
                     var attackable = o as AttackableUnit;

@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using EloBuddy;
 
@@ -12,7 +11,7 @@
     /// The tick utility
     /// </summary>
     [Trigger]
-    public class TickOperation : Executable
+    public class TickOperation
     {
         /// <summary>
         /// The list containing the operations
@@ -33,44 +32,26 @@
                 {
                     currentTime = Game.Time.ToTicks();
 
-                    foreach (var operation in Operations.Where(o => o.Active && o.lastTick + o.TickDelay > currentTime))
+                    foreach (var operation in Operations.FindAll(o => o.Active && o.lastTick + o.TickDelay > currentTime))
                     {
                         operation.lastTick = currentTime;
 
-                        operation.Execute();
+                        try
+                        {
+                            operation.action();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Exception(ex, "TickOperation action failed!");
+                        }
                     }
                 };
-        }
-
-        /// <summary>
-        /// Executes an action on next tick
-        /// </summary>
-        /// <param name="action">The action to be executed</param>
-        public static void ExecuteOnNextTick(Action action)
-        {
-            GameUpdate @delegate = null;
-
-            @delegate = delegate
-                {
-                    Game.OnUpdate -= @delegate;
-
-                    try
-                    {
-                        action();
-                    }
-                    catch (Exception ex)
-                    {
-                        Log(ex);
-                    }
-                };
-
-            Game.OnUpdate += @delegate;
         }
 
         /// <summary>
         /// The action to be executed
         /// </summary>
-        private readonly Action Action;
+        private readonly Action action;
 
         /// <summary>
         /// Determines whether the <see cref="TickOperation"/> will be executing
@@ -91,44 +72,19 @@
         /// Initializes a new instance of the <see cref="TickOperation"/> class
         /// </summary>
         /// <param name="action"></param>
+        /// <exception cref="ArgumentNullException"></exception>
         public TickOperation(Action action)
         {
-            this.Action = action;
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
+            this.action = action;
 
             this.lastTick = currentTime;
 
             Operations.Add(this);
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <param name="managed">Determines whether managed sources should be cleaned</param>
-        protected override void Dispose(bool managed)
-        {
-            if (managed)
-            {
-                this.Active = false;
-                this.TickDelay = 0;
-                this.lastTick = 0;
-            }
-
-            Operations.Remove(this);
-        }
-
-        /// <summary>
-        /// Handles an action
-        /// </summary>
-        private void Execute()
-        {
-            try
-            {
-                this.Action();
-            }
-            catch (Exception ex)
-            {
-                Log(ex);
-            }
         }
     }
 }

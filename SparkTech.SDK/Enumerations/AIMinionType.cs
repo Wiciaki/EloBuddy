@@ -1,6 +1,5 @@
 ﻿namespace SparkTech.SDK.Enumerations
 {
-    // ReSharper disable once InconsistentNaming
     public enum AIMinionType
     {
         Unknown,
@@ -13,12 +12,12 @@
 
         Ward,
 
+        Plant,
+
         Pet,
 
-        JungleSmall,
+        Jungle,
 
-        JungleMedium,
-
-        JungleLarge
+        JungleBoss
     }
 }

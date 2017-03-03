@@ -60,7 +60,7 @@
         {
             get
             {
-                if (Targeting["pet_always_combo"].Bool())
+                if (Targeting["pet_always_combo"])
                 {
                     return Mode.Combo;
                 }

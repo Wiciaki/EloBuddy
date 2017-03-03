@@ -48,7 +48,7 @@
         /// <summary>
         /// Gets the current status message
         /// </summary>
-        public string StatusMessage => this.Success ? this.IsUpdated ? $"Congratulations! {this.AssemblyName} is updated!" : $"A new update for {this.AssemblyName} is available" : $"Can't check update for {this.AssemblyName}";
+        public string StatusMessage => this.IsUpdated ? $"{this.AssemblyName} is up to date!" : $"A new update for {this.AssemblyName} is available";
 
         /// <summary>
         /// The message <see cref="Language"/>

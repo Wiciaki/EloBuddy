@@ -18,7 +18,6 @@
     /// <summary>
     /// The management class for Azirs' soldiers
     /// </summary>
-    [Trigger]
     public static class SoldierManager
     {
         /// <summary>

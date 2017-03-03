@@ -6,8 +6,6 @@
 
     using EloBuddy;
     using EloBuddy.SDK;
-    using EloBuddy.SDK.Menu;
-    using EloBuddy.SDK.Menu.Values;
 
     using SharpDX;
 
@@ -15,10 +13,9 @@
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.EventData;
     using SparkTech.SDK.Executors;
+    using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
     using SparkTech.SDK.Web;
-
-    using MoreLinq;
 
     using Color = System.Drawing.Color;
     using DrawingClass = EloBuddy.Drawing;
@@ -30,14 +27,14 @@
     /// An alternative to the <see cref="EloBuddy.SDK.Orbwalker"/> class.
     /// </summary>
  // [Trigger]
-    public class SparkWalker : Executable
+    public class SparkWalker
     {
         #region Menus
 
         /// <summary>
         /// The main menu instance of the orbwalker
         /// </summary>
-        protected static readonly Menu Menu = MainMenu.AddMenu("Orbwalker", "st_orb");
+        protected static readonly MainMenu Menu = new MainMenu("st_orb", "st_orb", null);
 
         /// <summary>
         /// The targeting submenu instance
@@ -99,7 +96,7 @@
 
                 displayName = displayName.ToMenuUse();
 
-                this.Attack = Targeting[displayName].Bool;
+                this.Attack = () => Targeting[displayName];
 
                 this.AddToMenu = true;
 
@@ -280,7 +277,7 @@
         /// <summary>
         /// Gets the stop order
         /// </summary>
-        protected virtual GameObjectOrder StopOrder => Misc["stop_order"].Cast<ComboBox>().GetValue<GameObjectOrder>();
+        protected virtual GameObjectOrder StopOrder => Misc["stop_order"].Enum<GameObjectOrder>();
 
         #endregion
 
@@ -309,7 +306,7 @@
         /// <summary>
         /// Gets the extra holdzone radius
         /// </summary>
-        public static int ExtraHoldZone => Misc["extra_holdzone"].Cast<Slider>().CurrentValue;
+        public static int ExtraHoldZone => Misc["extra_holdzone"];
 
         #endregion
 
@@ -360,17 +357,10 @@
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
         /// </summary>
         /// <param name="managed">Determines whether managed sources should be cleaned</param>
-        protected override void Dispose(bool managed)
-        {
-            ObjectText.RemoveItem(this.ObjectTextEntry);
-
-            if (!managed)
-            {
-                return;
-            }
-
-            this.Enabled = false;
-        }
+        //protected override void Dispose(bool managed)
+        //{
+        //    ObjectText.RemoveItem(this.ObjectTextEntry);
+        //}
 
         #endregion
 
@@ -460,7 +450,7 @@
         /// <summary>
         /// Gets the current latency
         /// </summary>
-        protected static float Latency => Game.Ping / 2f + Misc["server_latency"].Cast<Slider>().CurrentValue;
+        protected static float Latency => Game.Ping / 2f + Misc["server_latency"];
 
         /// <summary>
         /// Determines whether this spell is an auto-attack reset
@@ -618,7 +608,7 @@
         {
             get
             {
-                return this.customMode ?? EnumCache<Mode>.Values.Find(mode => Keybinds[mode.ToString().ToLower()].Cast<KeyBind>().CurrentValue);
+                return this.customMode ?? EnumCache<Mode>.Values.Find(mode => Keybinds[mode.ToString().ToLower()]); // TODO: Add keybinds!
             }
 
             set
@@ -1158,7 +1148,7 @@
                 return false;
             }
 
-            if (!this.Attacks || !Menu["attack_enabled"].Bool() || !ModeMenu[mode]["attack"].Bool())
+            if (!this.Attacks || !Menu["attack_enabled"] || !ModeMenu[mode]["attack"])
             {
                 return false;
             }
@@ -1262,7 +1252,7 @@
         {
             var pmode = mode ?? this.Mode;
 
-            return pmode == Mode.None ? float.MaxValue : this.TimeToAttack((ushort)ModeMenu[pmode]["extra_movement"].Slider());
+            return pmode == Mode.None ? float.MaxValue : this.TimeToAttack((ushort)ModeMenu[pmode]["extra_movement"]);
         }
 
         /// <summary>
@@ -1276,7 +1266,7 @@
                 return false;
             }
 
-            var speed = 1f + Misc["speed_percent"].Slider() / 100f;
+            var speed = 1f + Misc["speed_percent"] / 100f;
 
             return TickCount - this.LastAttackStartingT - this.Unit.AttackCastDelay * 1000f - this.Unit.AttackSpeedMod * 15f * speed > Game.Ping / 2f - 5f;
         }
@@ -1290,7 +1280,7 @@
         {
             var menu = ModeMenu[mode];
 
-            return Priorities.ConvertAll(priority => menu[priority].GetValue<UnitType>()).ToHashSet();
+            return new HashSet<UnitType>(Priorities.ConvertAll(priority => menu[priority].Enum<UnitType>())); // TODO MoreLinq
         }
 
         #endregion
@@ -1312,7 +1302,7 @@
             var processed = new HashSet<UnitType> { UnitType.None };
             var menu = ModeMenu[mode];
 
-            return Priorities.Select(priority => menu[priority].Cast<ComboBox>().GetValue<UnitType>())
+            return Priorities.Select(priority => menu[priority].Enum<UnitType>())
                     .Where(processed.Add)
                     .Select(unitType => this.GetTargetData(unitType, mode, () => processed.Add(UnitType.LaneMinion)))
                     .TakeWhile(data => !data.ShouldWait)
@@ -1344,7 +1334,7 @@
                 case UnitType.LaneClearMinion:
                     return this.GetBalanceMinion(checkNormal(), mode == Mode.Freeze);
                 case UnitType.JungleMinion:
-                    return this.GetJungleMinion(Targeting["jungle_smallfirst"].Cast<CheckBox>().CurrentValue);
+                    return this.GetJungleMinion(Targeting["jungle_smallfirst"]);
                 case UnitType.None:
                     return default(TargetData);
                 default:
@@ -1360,7 +1350,7 @@
         {
             var flags = MinionType.Pet;
 
-            if (Targeting["objects_wards"].Bool())
+            if (Targeting["objects_wards"])
             {
                 flags |= MinionType.Ward;
             }
@@ -1549,7 +1539,7 @@
             return new TargetData(
                 from minion in ObjectCache.GetMinions(ObjectTeam.Neutral, MinionType.Jungle, this.InAttackRange)
                 let type = minion.DetermineType()
-                orderby type == AIMinionType.JungleSmall == smallfirst descending, type descending, minion.Health, this.Unit.Distance(minion)
+                orderby type == AIMinionType.Jungle == smallfirst descending/*, type descending*/, minion.Health, this.Unit.Distance(minion)
                 select minion);
         }
 

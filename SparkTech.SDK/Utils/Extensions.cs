@@ -1,20 +1,14 @@
 ﻿namespace SparkTech.SDK.Utils
 {
-    using System;
     using System.Text.RegularExpressions;
 
     using EloBuddy;
-    using EloBuddy.SDK.Menu.Values;
-
-    using SparkTech.SDK.Cache;
 
     /// <summary>
     /// Provides static methods and extensions of various sort
     /// </summary>
     public static class Extensions
     {
-
-
         /// <summary>
         /// Gets the real champion name
         /// </summary>
@@ -64,7 +58,7 @@
         public static string Space(this string input, bool ignoreAcronyms = true)
         {
             return ignoreAcronyms
-                       ? Regex.Replace(input, "((?<=\\p{Ll})\\p{Lu})|((?!\\A)\\p{Lu}(?>\\p{Ll}))", " $0")
+                       ? Regex.Replace(input, @"((?<=\p{Ll})\p{Lu})|((?!\A)\p{Lu}(?>\p{Ll}))", " $0")
                        : Regex.Replace(input, "(?<!^)([A-Z])", " $1");
         }
 
@@ -76,7 +70,7 @@
         /// <returns></returns>
         public static string Remove(this string @string, string text)
         {
-            return @string.Replace(text, "");
+            return @string.Replace(text, string.Empty);
         }
 
         /// <summary>

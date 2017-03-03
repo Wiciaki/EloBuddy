@@ -1,64 +1,75 @@
 ﻿namespace SparkTech.SDK.Web
 {
     using System;
-    
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
+
     using SparkTech.SDK.EventData;
-    using SparkTech.SDK.Executors;
 
-    /// <summary>
-    /// The base class for the future updater engines
-    /// </summary>
-    public abstract class Updater : Executable
+    public static class Updater
     {
-        /// <summary>
-        /// The <see cref="Uri"/> representation of the user provided link
-        /// </summary>
-        protected readonly Uri Link;
-
-        /// <summary>
-        /// Determines whether the provided link was valid
-        /// </summary>
-        protected readonly bool IsLinkValid;
-
-        /// <summary>
-        /// Gets the current path
-        /// </summary>
-        protected string Path => this.Link.AbsoluteUri;
-
-        /// <summary>
-        /// Fired when the check has finished. Doesn't fire if there was no correct data provided.
-        /// </summary>
-        public event EventDataHandler<CheckPerformedEventArgs> CheckPerformed;
-
-        /// <summary>
-        /// The <see cref="E:CheckPerformed"/> invoker
-        /// </summary>
-        /// <exception cref="Exception">A delegate callback throws an exception.</exception>
-        protected void RaiseEvent(Version gitVersion, Version localVersion, string assemblyName)
+        public static void Check(string username, string repository, string folderName, Action<CheckPerformedEventArgs> action = null)
         {
-            this.CheckPerformed?.Invoke(new CheckPerformedEventArgs(gitVersion, localVersion, assemblyName));
+            Check($"https://raw.githubusercontent.com/{username}/{repository}/master/{folderName}/Properties/AssemblyInfo.cs", action, Assembly.GetCallingAssembly());
+        }
 
-            this.Dispose(true);
+        public static void Check(string link, Action<CheckPerformedEventArgs> action = null)
+        {
+            Check(link, action, Assembly.GetCallingAssembly());
         }
 
         /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// The regular expression
         /// </summary>
-        /// <param name="managed">Determines whether managed sources should be cleaned</param>
-        protected override void Dispose(bool managed)
-        {
-            this.CheckPerformed = null;
-        }
+        private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]");
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Updater"/> class
-        /// </summary>
-        /// <param name="link">The <see cref="string"/> representation of an user-provided link</param>
-        protected Updater(string link)
+        public static void Check(string link, Action<CheckPerformedEventArgs> action, Assembly callingAssembly)
         {
-            if (!(this.IsLinkValid = Utility.IsLinkValid(link, out this.Link)))
+            Uri uri;
+
+            if (link == null || !link.ToLower().Contains("raw.githubusercontent.com") || !link.EndsWith("properties/assemblyinfo.cs", StringComparison.CurrentCultureIgnoreCase) || !Uri.TryCreate(link, UriKind.Absolute, out uri) || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
             {
-                Log(new ArgumentException(@"[ST] Updater - The provided link was invalid!", nameof(link)));
+                throw new ArgumentException("Invalid link provided!");
+            }
+
+            var assemblyName = callingAssembly.GetName();
+
+            Action req  = async delegate
+                {
+                    var match = Regex.Match(await Connection.WebClient.DownloadStringTaskAsync(uri).ConfigureAwait(false));
+                    var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
+                    var args = new CheckPerformedEventArgs(gitVersion, assemblyName.Version, assemblyName.Name);
+
+                    if (action != null)
+                    {
+                        action(args);
+                    }
+                    else
+                    {
+                        args.Notify();
+                    }
+                };
+
+            if (Connection.IsAllowed)
+            {
+                new Task(req).Start();
+            }
+            else
+            {
+                // This case is supposed to delay the check until the menu item has been marked
+
+#pragma warning disable RCS1127
+                Connection.PermissionChange change = null;
+#pragma warning restore RCS1127
+
+                change = enabled =>
+                    {
+                        new Task(req).Start();
+                        Connection.PermissionChanged -= change;
+                    };
+
+                Connection.PermissionChanged += change;
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-using SparkTech.SDK;
+using SparkTech.SDK.Web;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -33,5 +33,5 @@ using SparkTech.SDK;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion(Variables.VersionAllyPingSpammer)]
-[assembly: AssemblyFileVersion(Variables.VersionAllyPingSpammer)]
+[assembly: AssemblyVersion(Versioning.VersionAllyPingSpammer)]
+[assembly: AssemblyFileVersion(Versioning.VersionAllyPingSpammer)]
