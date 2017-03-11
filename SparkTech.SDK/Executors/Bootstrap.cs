@@ -1,14 +1,19 @@
 ﻿namespace SparkTech.SDK.Executors
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Reflection;
     using System.Runtime.CompilerServices;
+    using System.Text.RegularExpressions;
+    using System.Threading.Tasks;
     using System.Timers;
-
+   
     using EloBuddy.SDK.Events;
 
+    using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
 
     /// <summary>
@@ -16,8 +21,29 @@
     /// </summary>
     public static class Bootstrap
     {
+        /// <summary>
+        /// The path to web version of the versioning class
+        /// </summary>
+        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/Web/Versioning.cs";
+
+        /// <summary>
+        /// Determines whether this instance is licensed
+        /// </summary>
+        public static readonly bool Licensed;
+
+        /// <summary>
+        /// The downloaded versioning data
+        /// </summary>
+        private static readonly string Data;
+
+        /// <summary>
+        /// The timer
+        /// </summary>
         private static readonly Timer Timer;
 
+        /// <summary>
+        /// The flip list
+        /// </summary>
         private static readonly List<string> Flips = new List<string>(4)
                                                        {
                                                            @"\", "|", "/", "-"
@@ -26,37 +52,54 @@
         /// <summary>
         /// The object representation of the currently executing assembly
         /// </summary>
-        public static readonly Assembly Assembly;
+        public static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
 
         /// <summary>
         /// Initializes static members of the <see cref="Bootstrap"/> class
         /// </summary>
+        [CodeFlow.Unsafe]
+       // [PermissionSet(SecurityAction.Assert, Name = "FullTrust", Unrestricted = true)]
         static Bootstrap()
         {
-            var i = 0;
+            AppDomain.CurrentDomain.DomainUnload += (sender, args) => Console.Title = "SparkTech reload...";
 
-            Timer = new Timer(250d) { Enabled = true };
+            Timer = new Timer(225d);
+
+            var index = 0;
 
             Timer.Elapsed += delegate
                 {
-                    if (++i == Flips.Count)
+                    if (++index == Flips.Count)
                     {
-                        i = 0;
+                        index = 0;
                     }
 
-                    Console.Title = "SparkTech init... " + Flips[i];
+                    Console.Title = "SparkTech load... " + Flips[index];
                 };
 
-            HandleTrigger(Assembly = Assembly.GetExecutingAssembly());
+            Timer.Start();
+
+            Licensed = License.Obtain();
+
+            using (var client = new WebClient())
+            {
+                Data = client.DownloadString(VersioningWebPath);
+            }
+
+            HandleTrigger(Assembly);
         }
 
-        internal static void Notify()
+        [CodeFlow.Unsafe]
+        internal static void Release()
         {
             Timer.Stop();
             Timer.Dispose();
             Flips.Clear();
             Flips.TrimExcess();
 
+            MainMenu.GetAllComponents().ForEach(comp => comp.UpdateText());
+
+            Console.WriteLine("Licensed: " + Licensed);
             Console.Title = "SparkTech.SDK";
         }
 
@@ -64,11 +107,14 @@
         /// Handles the application entry point arguments
         /// </summary>
         /// <param name="args">The empty, non-null string array</param>
+        [CodeFlow.Unsafe]
         public static void Init(this string[] args)
         {
             Array.ForEach(args, Console.WriteLine);
 
-            HandleTrigger(Assembly.GetCallingAssembly());
+            var assembly = Assembly.GetCallingAssembly();
+
+            HandleTrigger(assembly);
         }
 
         /// <summary>
@@ -79,7 +125,7 @@
         {
             Loading.OnLoadingComplete += delegate
                 {
-                    Versioning.Handle(assembly);
+                    //Versioning.Handle(assembly);
 
                     foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Length > 0).OrderBy(type => type.Name))
                     {
@@ -93,6 +139,83 @@
                         }
                     }
                 };
+        }
+
+        private static readonly ConcurrentQueue<Assembly> Assemblies = new ConcurrentQueue<Assembly>();
+
+        private static string data;
+
+        [CodeFlow.Unsafe]
+        internal static void Handle(Assembly assembly)
+        {
+            return;
+
+            Assemblies.Enqueue(assembly);
+
+            Match();
+        }
+
+        [CodeFlow.Unsafe]
+        private static async void Download()
+        {
+            data = await Connection.WebClient.DownloadStringTaskAsync(VersioningWebPath).ConfigureAwait(false);
+
+            CodeFlow.Secure(Match);
+        }
+
+        [CodeFlow.Unsafe]
+        private static void Match()
+        {
+            if (data == null)
+            {
+                if (Connection.IsAllowed)
+                {
+                    new Task(Download).Start();
+                }
+
+                return;
+            }
+
+            var menu = Creator.MainMenu.GetMenu("sdk.versioning");
+            const string SDKItemName = "sdk.version";
+
+            if (Assemblies.Count > 0)
+            {
+                if (menu[SDKItemName] != null)
+                {
+                    menu.Instance.Remove(SDKItemName);
+                }
+            }
+            else if (menu[SDKItemName] == null)
+            {
+                ExecuteImpl(Bootstrap.Assembly);
+            }
+            /*
+            while (Assemblies.TryDequeue(out var assembly))
+            {
+                ExecuteImpl(assembly);
+            }*/
+        }
+
+        private static void ExecuteImpl(Assembly assembly, string assemblyName = null)
+        {
+            var name = assembly.GetName();
+
+            if (assemblyName == null)
+            {
+                assemblyName = name.Name;
+            }
+
+            var match = new Regex($@"Version{assemblyName} = ""(\d.\d.\d.\d)""").Match(data);
+
+            if (!match.Success)
+            {
+                return;
+            }
+
+            var webVersion = new Version(match.Groups[1].Value);
+            var local = name.Version;
+
         }
     }
 }

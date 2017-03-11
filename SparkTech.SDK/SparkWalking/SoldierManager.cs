@@ -10,7 +10,6 @@
 
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
-    using SparkTech.SDK.Executors;
     using SparkTech.SDK.Utils;
 
     using Tracker = SparkTech.SDK.Utils.ObjectTracker<EloBuddy.Obj_AI_Minion>;
@@ -101,7 +100,7 @@
             {
                 var type = minion.DetermineType();
 
-                if (type == AIMinionType.Ward || type == AIMinionType.Unknown)
+                if (type == AIMinionType.Unknown || type == AIMinionType.Ward || type == AIMinionType.Plant)
                 {
                     return MiscallenousCache.GetEmptyList<Obj_AI_Minion>();
                 }

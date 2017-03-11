@@ -93,6 +93,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Speech" />
     <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\EnumCache.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Utils\TickOperation.cs" />
     <Compile Include="Creator.cs" />
     <Compile Include="Web\Connection.cs" />
+    <Compile Include="Web\Licensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />
     <Compile Include="Web\Versioning.cs" />
   </ItemGroup>

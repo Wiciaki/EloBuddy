@@ -63,15 +63,13 @@
         /// </summary>
         static Creator()
         {
-            var languageItem = new MenuItem("st_sdk_about_language", LangCache.Names);
-
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
             MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations)
                            {
                                new Menu("st.sdk.about", "st_sdk_about")
                                    {
-                                       ["st.sdk.about.language"] = languageItem
+                                       ["st.sdk.about.language"] = new MenuItem("st_sdk_about_language", LangCache.Names)
                                    },
                 /*
                                {
@@ -101,13 +99,14 @@
 
             #region FirstInit
             {
-                var first = new MenuItem("error", true);
-                first.Instance.IsVisible = false;
-                MainMenu.Add("st.sdk.firstrun", first);
+                var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
+                MainMenu.Add("st.sdk.first", first);
                 FirstRun = first;
                 first.Bool = false;
             }
             #endregion
+
+            var languageItem = MainMenu.GetMenu("st.sdk.about")["st.sdk.about.language"];
 
             if (FirstRun)
             {
@@ -115,21 +114,19 @@
             }
 
             Language = languageItem.Enum<Language>();
-            MainMenu.Acquire();
-            Bootstrap.Notify();
 
             languageItem.PropertyChanged += delegate
                 {
                     Language = languageItem.Enum<Language>();
-
-                    MainMenu.Instances.ForEach(m => m.Acquire());
-
-                    var components = new List<MenuBase>();
-
-                    components.AddRange(MainMenu.Instances);
-                    components.AddRange(MainMenu.Instances.SelectMany(m => m.GetComponents()));
-                    components.ForEach(m => m.UpdateText());
+                    
+                    MainMenu.GetAllComponents().ForEach(m => m.UpdateText());
                 };
+
+            Console.WriteLine("FirstRun: " + FirstRun);
+            Console.WriteLine("Language: " + Language);
+            Console.WriteLine("SystemLanguage: " + SystemLanguage);
+
+            CodeFlow.Secure(Bootstrap.Release);
 
             /*
 
@@ -139,8 +136,6 @@
             version.Add("st.sdk.info.version.check", allow);
             var sdkVerion = new MenuItem(allow ? "Version - Checking failure!" : "Update checks disabled");
             version.Add("st.sdk.info.version", sdkVerion);
-
-            
 
             if (allow)
             {
@@ -207,47 +202,3 @@
         }
     }
 }
-
-/*
-
-/// <summary>
-/// Initializes static members of the <see cref="Translation"/> class
-/// </summary>
-static Translation()
-{
-var infos = EnumCache<Language>.Values.ToDictionary(
-language => language,
-language => new CultureInfo(EnumCache<Language>.Description(language)));
-
-var menu = Creator.MainMenu.GetMenu("sdk.about");
-menu.Add("sdk.language", new MenuItem("sdk_language"));
-
-var item = menu.Add("sdk.language.select", new MenuItem("sdk_language_select", EnumCache<Language>.Names));
-
-if (Creator.FirstRun)
-{
-var values = from pair in infos where pair.Value.Equals(CultureInfo.CurrentUICulture) select pair.Key;
-
-item.StringIndex = EnumCache<Language>.Values.IndexOf(values.SingleOrDefault());
-}
-
-item.PropertyChanged += delegate
-{
-    var selected = infos[item.Enum<Language>()];
-
-    if (CultureInfo.CurrentUICulture.Equals(selected))
-    {
-        return;
-    }
-
-    CultureInfo.CurrentUICulture = selected;
-
-    var items = new List<MenuBase>();
-
-    items.AddRange(MainMenu.MainMenus);
-    items.AddRange(MainMenu.MainMenus.SelectMany(m => m.Menus.Values));
-    items.AddRange(items.Cast<Menu>().SelectMany(m => m.Items.Values).ToList());
-    items.ForEach(m => m.UpdateText());
-};
-}
-*/

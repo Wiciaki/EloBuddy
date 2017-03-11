@@ -1,10 +1,11 @@
 ﻿namespace SparkTech.SDK.Web
 {
+    using System;
     using System.Net;
+    using System.Threading.Tasks;
 
-    using SparkTech.SDK.Executors;
+    using EloBuddy.SDK.Events;
 
-  //  [Trigger]
     public static class Connection
     {
         public delegate void PermissionChange(bool enabled);
@@ -24,14 +25,50 @@
                     WebClient = new WebClient();
                 };
 
-            var menu = Creator.MainMenu.GetMenu("st.web")["enable.main"];
-
-            menu.PropertyChanged += delegate
+            Loading.OnLoadingComplete += delegate
                 {
-                    PermissionChanged?.Invoke(IsAllowed = menu);
-                };
+                    var menu = Creator.MainMenu.GetMenu("st.web")["enable.main"];
 
-            IsAllowed = menu;
+                    menu.PropertyChanged += delegate
+                        {
+                            PermissionChanged?.Invoke(IsAllowed = menu);
+                        };
+
+                    IsAllowed = menu;
+
+                    if (IsAllowed)
+                    {
+                        PermissionChanged?.Invoke(true);
+                    }
+                };
+        }
+
+        public static void Execute(Action action)
+        {
+            var task = new Task(action);
+
+            if (IsAllowed)
+            {
+                task.Start();
+            }
+            else
+            {
+                PermissionChange change = null;
+
+                change = enabled =>
+                    {
+                        if (!enabled)
+                        {
+                            return;
+                        }
+
+                        PermissionChanged -= change;
+
+                        task.Start();
+                    };
+
+                PermissionChanged += change;
+            }
         }
     }
 }

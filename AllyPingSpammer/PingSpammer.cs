@@ -26,7 +26,7 @@
         [SuppressMessage("ReSharper", "ImplicitlyCapturedClosure", Justification = "These object should not be a subject to garbage collection.")]
         static PingSpammer()
         {
-            var allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally);
+            var allies = ObjectCache.GetNative<AIHeroClient>().FindAll(h => h.Team() == ObjectTeam.Ally);
             allies.RemoveAt(allies.FindIndex(champ => champ.IsMe));
 
             if (allies.Count == 0)
@@ -95,8 +95,6 @@
                 };
 
             CodeFlow.Secure(() => active.Bool = false);
-
-            MainMenu.GetAllComponents().ForEach(c => c.UpdateText()); // todo
         }
 
         /// <summary>

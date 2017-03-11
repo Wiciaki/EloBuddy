@@ -19,8 +19,6 @@
 
             this.Root = this;
 
-            this.Acquire();
-
             this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(this.GetText(), name);
 
             Instances.Add(this);
@@ -103,7 +101,7 @@
 
         internal readonly Dictionary<string, string> Translations = new Dictionary<string, string>();
 
-        internal void Acquire()
+        internal override string GetText()
         {
             this.Translations.Clear();
 
@@ -122,6 +120,8 @@
                     }
                 }
             }
+
+            return base.GetText();
         }
 
         #endregion

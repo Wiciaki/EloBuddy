@@ -1,8 +1,6 @@
 ﻿namespace Bootstrap
 {
-    using System;
     using System.Drawing;
-    using System.Globalization;
 
     using EloBuddy;
 
@@ -13,30 +11,29 @@
 
     public static class Program
     {
-        private static void Main(string[] args)
+        private static void Main(string[] args) => args.Init();
+    }
+
+    [Trigger]
+    public static class Bootstrap
+    {
+        static Bootstrap()
         {
-            args.Init();
-
-            EloBuddy.SDK.Events.Loading.OnLoadingComplete += delegate
+            Drawing.OnDraw += delegate
                 {
-                    Drawing.OnDraw += delegate
+                    foreach (var minion in ObjectCache.GetNative<Obj_AI_Minion>())
+                    {
+                        var t = minion.DetermineType();
+
+                        var text = t.ToString();
+
+                        if (t == AIMinionType.Unknown)
                         {
-                            foreach (var minion in ObjectCache.GetNative<Obj_AI_Minion>())
-                            {
-                                var t = minion.DetermineType();
+                            text += " | Name: " + minion.Name + " | BaseName: " + minion.BaseSkinName;
+                        }
 
-                                var text = t.ToString();
-
-                                if (t == AIMinionType.Unknown)
-                                {
-                                    text += " | Name: " + minion.Name + " | BaseName: " + minion.BaseSkinName;
-                                }
-
-                                Drawing.DrawText(Drawing.WorldToScreen(minion.Position), Color.Magenta, text, 25);
-                            }
-
-                            Drawing.DrawText(Drawing.WorldToScreen(ObjectCache.Player.Position), Color.Magenta, CultureInfo.InstalledUICulture.DisplayName, 25);
-                        };
+                        Drawing.DrawText(Drawing.WorldToScreen(minion.Position), Color.Magenta, text, 25);
+                    }
                 };
         }
     }

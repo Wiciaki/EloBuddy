@@ -21,16 +21,12 @@
 
         private static readonly Regex BraceFinderRegex = new Regex(@"[{}]");
 
-        internal string GetText()
+        internal virtual string GetText()
         {
-            if (this.Root == null)
-            {
-                Console.WriteLine("Null root " + this.GetType().Name);
-            }
-
             if (!this.Root.Translations.ContainsKey(this.TranslationKey))
             {
-                Console.WriteLine("Not present: "+ this.TranslationKey);
+                Console.WriteLine("Not present: " + this.TranslationKey);
+                return this.TranslationKey;
             }
 
             var translation = this.Root.Translations[this.TranslationKey];
