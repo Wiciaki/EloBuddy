@@ -51,13 +51,13 @@
             var hider = advanced.Add("st.ping.hide", new MenuItem("st_ping_advanced_hide", false));
             advanced.AddLabel("st_ping_advanced_hide_text");
 
-            var selectedHero = allies.Find(champ => champ.UniqueName() == hero.String);
+            var selectedHero = allies.Find(champ => champ.UniqueName() == hero);
             var r = new Random();
             var lastPing = 0;
 
             hero.PropertyChanged += delegate
                 {
-                    selectedHero = allies.Find(champ => champ.UniqueName() == hero.String);
+                    selectedHero = allies.Find(champ => champ.UniqueName() == hero);
                 };
 
             Game.OnTick += delegate

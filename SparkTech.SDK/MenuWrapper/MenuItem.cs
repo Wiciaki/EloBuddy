@@ -244,20 +244,20 @@
                 };
         }
 
+        /// <summary>
+        /// Gets or sets the current string index
+        /// </summary>
         public int StringIndex
         {
             get
             {
-                if (this.MenuItemType != Type.StringList)
-                {
-                    throw new InvalidOperationException("Invalid property called on a MenuItem!");
-                }
+                this.Assert(Type.StringList);
 
                 return this.stringIndex;
             }
             set
             {
-                if (this.stringIndex == value)
+                if (this.StringIndex == value)
                 {
                     return;
                 }
@@ -268,32 +268,52 @@
             }
         }
 
+        /// <summary>
+        /// Gets the list of string values used for this MenuItem
+        /// </summary>
         public List<string> StringValues
         {
             get
             {
-                if (this.MenuItemType != Type.StringList)
-                {
-                    throw new InvalidOperationException("Invalid property called on a MenuItem!");
-                }
+                this.Assert(Type.StringList);
 
-                return this.StringValues;
+                return this.stringTextValues;
             }
         }
 
+        /// <summary>
+        /// The string obtainer
+        /// </summary>
         public string String
         {
             get
             {
-                if (this.MenuItemType != Type.StringList)
-                {
-                    throw new InvalidOperationException("Invalid property called on a MenuItem!");
-                }
+                this.Assert(Type.StringList);
 
                 return this.stringVal;
             }
+            set
+            {
+                if (this == value)
+                {
+                    return;
+                }
+
+                var i = this.stringTextValues.IndexOf(value);
+
+                if (i < 0)
+                {
+                    throw new InvalidOperationException($"Item {value} doesn't exist in this StringList.");
+                }
+
+                this.StringIndex = i;
+            }
         }
         
+        /// <summary>
+        /// Implicitly obtains a string from the current instance
+        /// </summary>
+        /// <param name="item"></param>
         public static implicit operator string(MenuItem item)
         {
             return item.String;
@@ -303,11 +323,29 @@
 
         #region Enum
 
+        /// <summary>
+        /// Gets the current enum value
+        /// </summary>
+        /// <typeparam name="TEnum">The enumeration type</typeparam>
+        /// <returns>The enum instance</returns>
         public TEnum Enum<TEnum>() where TEnum : struct, IConvertible
         {
-            return EnumCache<TEnum>.Parse(this.String);
+            return EnumCache<TEnum>.Parse(this);
         }
 
         #endregion
+
+        /// <summary>
+        /// Asserts that the value matches
+        /// </summary>
+        /// <param name="menuItemType"></param>
+        /// <exception cref="InvalidOperationException">The assert failed</exception>
+        private void Assert(Type menuItemType)
+        {
+            if (menuItemType != Type.StringList)
+            {
+                throw new InvalidOperationException($"Invalid property called on a MenuItem! Got {menuItemType}, expected {this.MenuItemType}");
+            }
+        }
     }
 }

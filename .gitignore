@@ -237,3 +237,5 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+*.dll
+/SparkTech.SDK/SparkTech.SDK.dll.config

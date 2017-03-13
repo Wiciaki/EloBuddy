@@ -5,17 +5,12 @@
     using System.Globalization;
     using System.Windows;
 
-    using EloBuddy;
-    using EloBuddy.Sandbox;
-    using EloBuddy.SDK.Utils;
-
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
     using SparkTech.SDK.Web.Licensing;
-
-    using CheckBox = EloBuddy.SDK.Menu.Values.CheckBox;
+    
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
 
     /// <summary>
@@ -64,42 +59,24 @@
         {
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
-            MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations)
+            var replacements = new Dictionary<string, Func<string>>
+                                   {
+                                       ["licenseStatus"] = Bootstrap.Licensed.ToString
+                                   };
+
+            MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
                            {
-                               new Menu("st.sdk.about", "st_sdk_about")
+                               new QuickMenu("st.sdk.about")
                                    {
                                        ["st.sdk.about.language"] = new MenuItem("st_sdk_about_language", LangCache.Names),
-                                       ["st.sdk.about.shop"] = new MenuItem("st_sdk_about_shop", false)
-                                   },
-                /*
-                               {
-                                   "st.sdk.item1", new MenuItem("st_sdk_item1")
-                               },
-                               
-                               new Menu("st.sdk.web", "st_sdk_web")
-                               {
-                                   ["random.label"] = new MenuItem("st_sdk_randomlabel")
-                               },
-
-                               new Menu("st_sdk_menu2", "st.sdk.menu2")
-                               {
-                                   ["random.label"] = new MenuItem("st_sdk_randomlabel")
-                               },
-
-                               {
-                                   "st.sdk.item1", new MenuItem("st_sdk_item1")
-                               },
-                               {
-                                   "st.sdk.item2", new MenuItem("st_sdk_item2")
-                               },
-                               {
-                                   "st.sdk.item3", new MenuItem("st_sdk_item3")
-                               }*/
+                                       ["st.sdk.about.shop"] = new MenuItem("st_sdk_about_shop", false),
+                                       ["st.sdk.about.license"] = new MenuItem("st_sdk_about_license")
+                                   }
                            };
 
             #region FirstInit
             {
-                var first = new CheckBox("error") { IsVisible = false };
+                var first = new EloBuddy.SDK.Menu.Values.CheckBox("error") { IsVisible = false };
                 MainMenu.Instance.Add("st.sdk.first", first);
                 FirstRun = first.CurrentValue;
                 first.CurrentValue = false;
@@ -158,14 +135,16 @@
                                    ["error"] = "ERROR",
                                    ["st_sdk_about"] = "About",
                                    ["st_sdk_about_language"] = "Language",
-                                   ["st_sdk_about_shop"] = "Copy shop link"
+                                   ["st_sdk_about_shop"] = "Copy shop link",
+                                   ["st_sdk_about_license"] = "Subscription owned: {licenseStatus}"
                     };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
                                    ["st_sdk_about"] = "Informacje",
                                    ["st_sdk_about_language"] = "Język",
-                                   ["st_sdk_about_shop"] = "Skopiuj link do sklepu"
+                                   ["st_sdk_about_shop"] = "Skopiuj link do sklepu",
+                                   ["st_sdk_about_license"] = "Status subskrypcji: {licenseStatus}"
                     };
             }
         }

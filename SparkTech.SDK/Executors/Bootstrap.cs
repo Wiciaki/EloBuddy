@@ -31,12 +31,12 @@
         private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/Web/Versioning.cs";
 
         /// <summary>
-        /// Determines whether this instance is licensed
+        /// Determines whether this assembly is eligible for the premium features
         /// </summary>
         public static readonly bool Licensed;
 
         /// <summary>
-        /// The downloaded versioning data
+        /// The downloaded version data to be matched
         /// </summary>
         private static readonly string Data;
 

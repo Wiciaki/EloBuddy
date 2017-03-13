@@ -21,7 +21,7 @@
 
         private static readonly Regex BraceFinderRegex = new Regex(@"[{}]");
 
-        internal virtual string GetText()
+        protected internal virtual string GetText()
         {
             if (!this.Root.Translations.ContainsKey(this.TranslationKey))
             {

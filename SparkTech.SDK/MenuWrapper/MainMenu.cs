@@ -13,11 +13,13 @@
         /// </summary>
         public static readonly List<MainMenu> Instances = new List<MainMenu>();
 
-        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationObtainer) : base(name, translationKey)
+        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, Dictionary<string, Func<string>> replacements = null) : base(name, translationKey)
         {
-            this.obtainer = translationObtainer;
+            this.generator = translationGenerator;
 
             this.Root = this;
+
+            this.Replacements = replacements;
 
             this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(this.GetText(), name);
 
@@ -95,24 +97,24 @@
         /// <summary>
         /// Contains the pointers to current values of the keys
         /// </summary>
-        public readonly Dictionary<string, Func<string>> Replacements = new Dictionary<string, Func<string>>();
+        public readonly Dictionary<string, Func<string>> Replacements;
 
-        private readonly Func<Language, Dictionary<string, string>> obtainer;
+        private readonly Func<Language, Dictionary<string, string>> generator;
 
         internal readonly Dictionary<string, string> Translations = new Dictionary<string, string>();
 
-        internal override string GetText()
+        protected internal override string GetText()
         {
             this.Translations.Clear();
 
-            foreach (var pair in this.obtainer(Creator.Language))
+            foreach (var pair in this.generator(Creator.Language))
             {
                 this.Translations.Add(pair.Key, pair.Value);
             }
 
             if (Creator.Language != Language.English)
             {
-                foreach (var pair in this.obtainer(Language.English))
+                foreach (var pair in this.generator(Language.English))
                 {
                     if (!this.Translations.ContainsKey(pair.Key))
                     {
