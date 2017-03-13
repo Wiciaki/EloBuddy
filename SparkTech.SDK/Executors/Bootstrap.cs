@@ -10,11 +10,15 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Timers;
-   
+
+    using EloBuddy;
     using EloBuddy.SDK.Events;
 
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
+    using SparkTech.SDK.Web.Licensing;
+
+    using Version = System.Version;
 
     /// <summary>
     /// The component initializer
@@ -58,10 +62,12 @@
         /// Initializes static members of the <see cref="Bootstrap"/> class
         /// </summary>
         [CodeFlow.Unsafe]
-       // [PermissionSet(SecurityAction.Assert, Name = "FullTrust", Unrestricted = true)]
         static Bootstrap()
         {
-            AppDomain.CurrentDomain.DomainUnload += (sender, args) => Console.Title = "SparkTech reload...";
+            AppDomain.CurrentDomain.DomainUnload += delegate
+                {
+                    Console.Title = "SparkTech reload...";
+                };
 
             Timer = new Timer(225d);
 
@@ -98,8 +104,7 @@
             Flips.TrimExcess();
 
             MainMenu.GetAllComponents().ForEach(comp => comp.UpdateText());
-
-            Console.WriteLine("Licensed: " + Licensed);
+            
             Console.Title = "SparkTech.SDK";
         }
 

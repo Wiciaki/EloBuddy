@@ -55,7 +55,10 @@
             var r = new Random();
             var lastPing = 0;
 
-            hero.PropertyChanged += p => selectedHero = allies.Find(champ => champ.UniqueName() == hero.String);
+            hero.PropertyChanged += delegate
+                {
+                    selectedHero = allies.Find(champ => champ.UniqueName() == hero.String);
+                };
 
             Game.OnTick += delegate
                 {

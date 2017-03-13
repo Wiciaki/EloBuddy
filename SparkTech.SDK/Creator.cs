@@ -3,14 +3,19 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
+    using System.Windows;
 
+    using EloBuddy;
     using EloBuddy.Sandbox;
-    
+    using EloBuddy.SDK.Utils;
+
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
+    using SparkTech.SDK.Utils;
+    using SparkTech.SDK.Web.Licensing;
 
+    using CheckBox = EloBuddy.SDK.Menu.Values.CheckBox;
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
 
     /// <summary>
@@ -18,12 +23,6 @@
     /// </summary>
     /// <returns></returns>
     public delegate bool Predicate();
-
-    /// <summary>
-    /// The delegate used to handle PropertyChanged events
-    /// </summary>
-    /// <param name="propertyName"></param>
-    public delegate void PropertyChanged(string propertyName);
 
     /// <summary>
     /// The main event delegate used for handling most of the event data instances
@@ -69,7 +68,8 @@
                            {
                                new Menu("st.sdk.about", "st_sdk_about")
                                    {
-                                       ["st.sdk.about.language"] = new MenuItem("st_sdk_about_language", LangCache.Names)
+                                       ["st.sdk.about.language"] = new MenuItem("st_sdk_about_language", LangCache.Names),
+                                       ["st.sdk.about.shop"] = new MenuItem("st_sdk_about_shop", false)
                                    },
                 /*
                                {
@@ -99,10 +99,10 @@
 
             #region FirstInit
             {
-                var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
-                MainMenu.Add("st.sdk.first", first);
-                FirstRun = first;
-                first.Bool = false;
+                var first = new CheckBox("error") { IsVisible = false };
+                MainMenu.Instance.Add("st.sdk.first", first);
+                FirstRun = first.CurrentValue;
+                first.CurrentValue = false;
             }
             #endregion
 
@@ -122,62 +122,29 @@
                     MainMenu.GetAllComponents().ForEach(m => m.UpdateText());
                 };
 
+            MainMenu.GetMenu("st.sdk.about")["st.sdk.about.shop"].PropertyChanged += args =>
+                {
+                    args.Process = false;
+
+                    var token = License.GenerateToken();
+
+                    if (token == null)
+                    {
+                        Comms.Print("Failed to obtain a token.");
+                    }
+                    else
+                    {
+                        Clipboard.SetText("https://go.netlicensing.io/shop/v2/?shoptoken=" + License.GenerateToken());
+                        Comms.Print("Link copied to clipboard!");
+                    }
+                };
+
             Console.WriteLine("FirstRun: " + FirstRun);
             Console.WriteLine("Language: " + Language);
             Console.WriteLine("SystemLanguage: " + SystemLanguage);
+            Console.WriteLine("Licensed: " + Bootstrap.Licensed);
 
             CodeFlow.Secure(Bootstrap.Release);
-
-            /*
-
-            #region Version
-            var version = MainMenu.AddSubMenu("Version", "st.sdk.version");
-            var allow = new MenuItem("Allow update checks", true);
-            version.Add("st.sdk.info.version.check", allow);
-            var sdkVerion = new MenuItem(allow ? "Version - Checking failure!" : "Update checks disabled");
-            version.Add("st.sdk.info.version", sdkVerion);
-
-            if (allow)
-            {
-                
-
-                var assemblyName = Assembly.GetName();
-
-                new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args =>
-                    {
-                        if (!args.Success)
-                        {
-                            return;
-                        }
-
-                        sdkVerion.DisplayName = args.IsUpdated
-                                                    ? "Your copy of SparkTech.SDK is up to date"
-                                                    : "A new update is available!";
-
-                        args.Notify();
-                    };
-
-               
-            }
-            #endregion
-
-            */
-
-            /*
-
-            #region Info
-            {
-                var info = MainMenu.AddSubMenu("About", "st.sdk.info");
-                info.AddLabel($"Welcome, \"{SandboxConfig.Username}\" :)");
-                info.AddLabel($"License type: {(SandboxConfig.IsBuddy ? "Buddy" : "Pleb")}");
-                info.AddSeparator();
-                info.AddLabel("Please report any bugs or suggestions at:");
-                info.AddLabel("Skype: \"wiktorsharp\"");
-                info.AddLabel("Discord: @spark");
-            }
-            #endregion
-
-            */
         }
 
         private static Dictionary<string, string> GetTranslations(Language language)
@@ -191,14 +158,67 @@
                                    ["error"] = "ERROR",
                                    ["st_sdk_about"] = "About",
                                    ["st_sdk_about_language"] = "Language",
+                                   ["st_sdk_about_shop"] = "Copy shop link"
                     };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
                                    ["st_sdk_about"] = "Informacje",
                                    ["st_sdk_about_language"] = "Język",
+                                   ["st_sdk_about_shop"] = "Skopiuj link do sklepu"
                     };
             }
         }
+
+        /*
+
+#region Version
+var version = MainMenu.AddSubMenu("Version", "st.sdk.version");
+var allow = new MenuItem("Allow update checks", true);
+version.Add("st.sdk.info.version.check", allow);
+var sdkVerion = new MenuItem(allow ? "Version - Checking failure!" : "Update checks disabled");
+version.Add("st.sdk.info.version", sdkVerion);
+
+if (allow)
+{
+
+
+    var assemblyName = Assembly.GetName();
+
+    new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args =>
+        {
+            if (!args.Success)
+            {
+                return;
+            }
+
+            sdkVerion.DisplayName = args.IsUpdated
+                                        ? "Your copy of SparkTech.SDK is up to date"
+                                        : "A new update is available!";
+
+            args.Notify();
+        };
+
+
+}
+#endregion
+
+*/
+
+        /*
+
+        #region Info
+        {
+            var info = MainMenu.AddSubMenu("About", "st.sdk.info");
+            info.AddLabel($"Welcome, \"{SandboxConfig.Username}\" :)");
+            info.AddLabel($"License type: {(SandboxConfig.IsBuddy ? "Buddy" : "Pleb")}");
+            info.AddSeparator();
+            info.AddLabel("Please report any bugs or suggestions at:");
+            info.AddLabel("Skype: \"wiktorsharp\"");
+            info.AddLabel("Discord: @spark");
+        }
+        #endregion
+
+        */
     }
 }

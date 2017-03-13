@@ -5,7 +5,7 @@ namespace SparkTech.SDK.EventData
     using EloBuddy;
 
     /// <summary>
-    /// The instance containing the AfterPlayerAttack event args
+    /// The instance containing the AfterPlayerAttack event arguments
     /// </summary>
     public class AfterAttackEventArgs : EventArgs
     {

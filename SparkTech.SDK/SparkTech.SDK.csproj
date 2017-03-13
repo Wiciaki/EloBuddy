@@ -79,6 +79,7 @@
       <HintPath>C:\Program Files (x86)\EloBuddy\System\EloBuddy.SDK.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="SharpDX">
       <HintPath>C:\Program Files (x86)\EloBuddy\System\SharpDX.dll</HintPath>
       <Private>False</Private>
@@ -111,6 +112,7 @@
     <Compile Include="EventData\BeforeOrbwalkerAttack.cs" />
     <Compile Include="EventData\CheckPerformedEventArgs.cs" />
     <Compile Include="EventData\GameUpdateEventArgs.cs" />
+    <Compile Include="EventData\ValueChangedEventArgs.cs" />
     <Compile Include="EventData\UnkillableMinionsEventArgs.cs" />
     <Compile Include="Executors\Bootstrap.cs" />
     <Compile Include="Executors\CodeFlow.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="Utils\TickOperation.cs" />
     <Compile Include="Creator.cs" />
     <Compile Include="Web\Connection.cs" />
+    <Compile Include="Web\Licensing\License.cs" />
     <Compile Include="Web\Licensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />
     <Compile Include="Web\Versioning.cs" />

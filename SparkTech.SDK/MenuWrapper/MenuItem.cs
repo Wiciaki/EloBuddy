@@ -7,6 +7,7 @@
     using EloBuddy.SDK.Menu.Values;
     
     using SparkTech.SDK.Cache;
+    using SparkTech.SDK.EventData;
 
     public sealed class MenuItem : MenuBase
     {
@@ -32,11 +33,22 @@
             this.Instance.DisplayName = this.GetText();
         }
 
-        public event PropertyChanged PropertyChanged;
-        
-        private void OnPropertyChanged(string name)
+        public event EventDataHandler<ValueChangedEventArgs> PropertyChanged;
+
+        private int skipping;
+      
+        private ValueChangedEventArgs OnPropertyChanged(string name)
         {
-            this.PropertyChanged?.Invoke(name);
+            var args = new ValueChangedEventArgs(this, name);
+
+            if (this.skipping-- > 0)
+            {
+                return args;
+            }
+
+            this.PropertyChanged?.Invoke(args);
+
+            return args;
         }
 
         #region Label
@@ -68,7 +80,11 @@
                 {
                     this.boolVal = args.NewValue;
                     
-                    this.OnPropertyChanged(nameof(this.Bool));
+                    if (!this.OnPropertyChanged(nameof(this.Bool)).Process)
+                    {
+                        this.skipping = 2;
+                        item.CurrentValue = args.OldValue;
+                    }
                 };
         }
 
@@ -76,20 +92,18 @@
         {
             get
             {
-                if (this.MenuItemType != Type.Bool)
-                {
-                    throw new InvalidOperationException("Invalid property called on a MenuItem!");
-                }
-
-                return this.boolVal;
+                return this;
             }
             set
             {
+                if (this.boolVal == value)
+                {
+                    return;
+                }
+
                 this.boolVal = value;
 
                 ((ValueBase<bool>)this.Instance).CurrentValue = value;
-
-                this.OnPropertyChanged(nameof(this.Bool));
             }
         }
 
@@ -123,7 +137,11 @@
                 {
                     this.boolVal = args.NewValue;
 
-                    this.OnPropertyChanged(nameof(this.Bool));
+                    if (!this.OnPropertyChanged(nameof(this.Bool)).Process)
+                    {
+                        this.skipping = 2;
+                        item.CurrentValue = args.OldValue;
+                    }
                 };
         }
 
@@ -147,7 +165,11 @@
                 {
                     this.intVal = args.NewValue;
 
-                    this.OnPropertyChanged(nameof(this.Int));
+                    if (!this.OnPropertyChanged(nameof(this.Int)).Process)
+                    {
+                        this.skipping = 2;
+                        item.CurrentValue = args.OldValue;
+                    }
                 };
         }
 
@@ -164,11 +186,14 @@
             }
             set
             {
+                if (this.intVal == value)
+                {
+                    return;
+                }
+
                 this.intVal = value;
 
                 ((Slider)this.Instance).CurrentValue = value;
-
-                this.OnPropertyChanged(nameof(this.Int));
             }
         }
 
@@ -211,7 +236,11 @@
 
                     this.stringVal = this.stringTextValues[n];
 
-                    this.OnPropertyChanged(nameof(this.StringIndex));
+                    if (!this.OnPropertyChanged(nameof(this.StringIndex)).Process)
+                    {
+                        this.skipping = 2;
+                        item.CurrentValue = args.OldValue;
+                    }
                 };
         }
 
@@ -228,13 +257,14 @@
             }
             set
             {
+                if (this.stringIndex == value)
+                {
+                    return;
+                }
+
                 this.stringIndex = value;
-
                 this.stringVal = this.stringTextValues[value];
-
                 ((ComboBox)this.Instance).SelectedIndex = this.stringIndex;
-
-                this.OnPropertyChanged(nameof(this.StringIndex));
             }
         }
 
@@ -263,13 +293,11 @@
                 return this.stringVal;
             }
         }
-
-        /*
+        
         public static implicit operator string(MenuItem item)
         {
             return item.String;
         }
-        */
 
         #endregion
 
