@@ -47,12 +47,12 @@
 
             menu.Instance = this.Instance.AddSubMenu(menu.GetText(), menu.Name);
 
-            foreach (var pair in menu.PreAssing)
+            foreach (var pair in menu.PreAssign)
             {
                 menu.Instance.Add(pair.Key, pair.Value);
             }
 
-            menu.PreAssing.Clear();
+            menu.PreAssign.Clear();
 
             this.Menus.Add(menu.Name, menu);
 

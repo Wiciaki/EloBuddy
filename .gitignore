@@ -239,3 +239,5 @@ ModelManifest.xml
 .fake/
 *.dll
 /SparkTech.SDK/SparkTech.SDK.dll.config
+/SparkTech.SDK/SparkTech.SDK.dll.lastcodeanalysissucceeded
+/SparkTech.SDK/SparkTech.SDK.dll.CodeAnalysisLog.xml

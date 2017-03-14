@@ -14,7 +14,7 @@
 
         public readonly Dictionary<string, MenuItem> Items = new Dictionary<string, MenuItem>();
 
-        internal readonly Dictionary<string, ValueBase> PreAssing = new Dictionary<string, ValueBase>();
+        internal readonly Dictionary<string, ValueBase> PreAssign = new Dictionary<string, ValueBase>();
 
         public MenuItem this[string name]
         {
@@ -25,21 +25,7 @@
             }
             set
             {
-                if (this.Root != null)
-                {
-                    value.Root = this.Root;
-                }
-
-                this.Items[name] = value;
-
-                if (this.Instance != null)
-                {
-                    this.Instance.Add(name, value.Instance);
-                }
-                else
-                {
-                    this.PreAssing.Add(name, value.Instance);
-                }
+                this.Add(name, value);
             }
         }
 
@@ -50,12 +36,23 @@
 
         public MenuItem Add(string name, MenuItem item)
         {
-            if (this.Items.ContainsKey(name))
+            if (this.Root != null)
             {
-                throw new InvalidOperationException("Item already present");
+                item.Root = this.Root;
             }
 
-            return this[name] = item;
+            this.Items.Add(name, item);
+
+            if (this.Instance != null)
+            {
+                this.Instance.Add(name, item.Instance);
+            }
+            else
+            {
+                this.PreAssign.Add(name, item.Instance);
+            }
+
+            return item;
         }
 
         public override void UpdateText()
