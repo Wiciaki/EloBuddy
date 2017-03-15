@@ -10,15 +10,11 @@
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
     using System.Timers;
-
-    using EloBuddy;
+    
     using EloBuddy.SDK.Events;
 
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
-    using SparkTech.SDK.Web.Licensing;
-
-    using Version = System.Version;
 
     /// <summary>
     /// The component initializer
@@ -29,11 +25,6 @@
         /// The path to web version of the versioning class
         /// </summary>
         private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/Web/Versioning.cs";
-
-        /// <summary>
-        /// Determines whether this assembly is eligible for the premium features
-        /// </summary>
-        public static readonly bool Licensed;
 
         /// <summary>
         /// The downloaded version data to be matched
@@ -84,8 +75,6 @@
                 };
 
             Timer.Start();
-
-            Licensed = License.Obtain();
 
             using (var client = new WebClient())
             {

@@ -9,8 +9,8 @@
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
-    using SparkTech.SDK.Web.Licensing;
-    
+    using SparkTech.SDK.Web;
+
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
 
     /// <summary>
@@ -38,6 +38,11 @@
         public static readonly bool FirstRun;
 
         /// <summary>
+        /// Determines whether this assembly is eligible for the premium features
+        /// </summary>
+        public static readonly bool Licensed;
+
+        /// <summary>
         /// The SDK menu
         /// </summary>
         public static readonly MainMenu MainMenu;
@@ -57,11 +62,15 @@
         /// </summary>
         static Creator()
         {
+            var licensing = new LicenseLink("146f7c3c-e5aa-4529-84a7-cf2cf648f69d");
+
+            Licensed = licensing.IsOwned("SparkTech.SDK");
+
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
             var replacements = new Dictionary<string, Func<string>>
                                    {
-                                       ["licenseStatus"] = Bootstrap.Licensed.ToString
+                                       ["licenseStatus"] = Licensed.ToString
                                    };
 
             MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
@@ -103,23 +112,23 @@
                 {
                     args.Process = false;
 
-                    var token = License.GenerateToken();
+                    var path = licensing.GetShopLink();
 
-                    if (token == null)
+                    if (path != null)
                     {
-                        Comms.Print("Failed to obtain a token.");
+                        Clipboard.SetText(path);
+                        Comms.Print("Link copied to clipboard!");
                     }
                     else
                     {
-                        Clipboard.SetText("https://go.netlicensing.io/shop/v2/?shoptoken=" + License.GenerateToken());
-                        Comms.Print("Link copied to clipboard!");
+                        Comms.Print("Failed to obtain a token.");
                     }
                 };
 
             Console.WriteLine("FirstRun: " + FirstRun);
             Console.WriteLine("Language: " + Language);
             Console.WriteLine("SystemLanguage: " + SystemLanguage);
-            Console.WriteLine("Licensed: " + Bootstrap.Licensed);
+            Console.WriteLine("Licensed: " + Licensed);
 
             CodeFlow.Secure(Bootstrap.Release);
         }
@@ -132,7 +141,6 @@
                     return new Dictionary<string, string>
                                {
                                    ["st_sdk"] = "SparkTech.SDK",
-                                   ["error"] = "ERROR",
                                    ["st_sdk_about"] = "About",
                                    ["st_sdk_about_language"] = "Language",
                                    ["st_sdk_about_shop"] = "Copy shop link",

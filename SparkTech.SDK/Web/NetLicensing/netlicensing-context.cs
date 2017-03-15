@@ -1,4 +1,4 @@
-﻿namespace SparkTech.SDK.Web.Licensing
+﻿namespace SparkTech.SDK.Web.NetLicensing
 {
     using System;
     using System.CodeDom.Compiler;
@@ -17,7 +17,6 @@
     [XmlRoot("Signature", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignatureType
     {
-
         private SignedInfoType signedInfoField;
 
         private SignatureValueType signatureValueField;
@@ -148,6 +147,7 @@
                     result.put(p.name, p.Value);
                 }
             }
+
             if (l.list1 != null)
             {
                 foreach (list l1 in l.list1)
@@ -155,6 +155,7 @@
                     result.properties.Add(l1.name, convertFromList(l1));
                 }
             }
+
             return result;
         }
 
@@ -171,7 +172,7 @@
 
     public class Composition
     {
-        public Dictionary<String, Composition> properties { get; private set; }
+        public Dictionary<String, Composition> properties;
         public String value { get; set; }
 
         public Composition() // list
@@ -201,7 +202,6 @@
     [XmlRoot("SignedInfo", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignedInfoType
     {
-
         private CanonicalizationMethodType canonicalizationMethodField;
 
         private SignatureMethodType signatureMethodField;
@@ -274,7 +274,6 @@
     [XmlRoot("CanonicalizationMethod", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class CanonicalizationMethodType
     {
-
         private XmlNode[] anyField;
 
         private string algorithmField;
@@ -317,7 +316,6 @@
     [XmlType(Namespace = "http://www.w3.org/2000/09/xmldsig#")]
     public class X509IssuerSerialType
     {
-
         private string x509IssuerNameField;
 
         private string x509SerialNumberField;
@@ -359,7 +357,6 @@
     [XmlRoot("SignatureMethod", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignatureMethodType
     {
-
         private string hMACOutputLengthField;
 
         private XmlNode[] anyField;
@@ -419,7 +416,6 @@
     [XmlRoot("Reference", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class ReferenceType
     {
-
         private TransformType[] transformsField;
 
         private DigestMethodType digestMethodField;
@@ -525,7 +521,6 @@
     [XmlRoot("Transform", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class TransformType
     {
-
         private object[] itemsField;
 
         private string[] textField;
@@ -585,7 +580,6 @@
     [XmlRoot("DigestMethod", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class DigestMethodType
     {
-
         private XmlNode[] anyField;
 
         private string algorithmField;
@@ -629,7 +623,6 @@
     [XmlRoot("SignatureValue", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignatureValueType
     {
-
         private string idField;
 
         private byte[] valueField;
@@ -672,7 +665,6 @@
     [XmlRoot("KeyInfo", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class KeyInfoType
     {
-
         private object[] itemsField;
 
         private ItemsChoiceType2[] itemsElementNameField;
@@ -756,7 +748,6 @@
     [XmlRoot("KeyValue", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class KeyValueType
     {
-
         private object itemField;
 
         private string[] textField;
@@ -801,7 +792,6 @@
     [XmlRoot("DSAKeyValue", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class DSAKeyValueType
     {
-
         private byte[] pField;
 
         private byte[] qField;
@@ -924,7 +914,6 @@
     [XmlRoot("RSAKeyValue", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class RSAKeyValueType
     {
-
         private byte[] modulusField;
 
         private byte[] exponentField;
@@ -967,7 +956,6 @@
     [XmlRoot("PGPData", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class PGPDataType
     {
-
         private object[] itemsField;
 
         private ItemsChoiceType1[] itemsElementNameField;
@@ -1011,7 +999,6 @@
     [XmlType(Namespace = "http://www.w3.org/2000/09/xmldsig#", IncludeInSchema = false)]
     public enum ItemsChoiceType1
     {
-
         /// <remarks/>
         [XmlEnum("##any:")]
         Item,
@@ -1032,7 +1019,6 @@
     [XmlRoot("RetrievalMethod", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class RetrievalMethodType
     {
-
         private TransformType[] transformsField;
 
         private string uRIField;
@@ -1091,7 +1077,6 @@
     [XmlRoot("SPKIData", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SPKIDataType
     {
-
         private byte[][] sPKISexpField;
 
         private XmlElement anyField;
@@ -1134,7 +1119,6 @@
     [XmlRoot("X509Data", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class X509DataType
     {
-
         private object[] itemsField;
 
         private ItemsChoiceType[] itemsElementNameField;
@@ -1181,7 +1165,6 @@
     [XmlType(Namespace = "http://www.w3.org/2000/09/xmldsig#", IncludeInSchema = false)]
     public enum ItemsChoiceType
     {
-
         /// <remarks/>
         [XmlEnum("##any:")]
         Item,
@@ -1208,7 +1191,6 @@
     [XmlType(Namespace = "http://www.w3.org/2000/09/xmldsig#", IncludeInSchema = false)]
     public enum ItemsChoiceType2
     {
-
         /// <remarks/>
         [XmlEnum("##any:")]
         Item,
@@ -1244,7 +1226,6 @@
     [XmlRoot("Object", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class ObjectType
     {
-
         private XmlNode[] anyField;
 
         private string idField;
@@ -1320,7 +1301,6 @@
     [XmlRoot("Transforms", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class TransformsType
     {
-
         private TransformType[] transformField;
 
         /// <remarks/>
@@ -1347,7 +1327,6 @@
     [XmlRoot("Manifest", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class ManifestType
     {
-
         private ReferenceType[] referenceField;
 
         private string idField;
@@ -1390,7 +1369,6 @@
     [XmlRoot("SignatureProperties", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignaturePropertiesType
     {
-
         private SignaturePropertyType[] signaturePropertyField;
 
         private string idField;
@@ -1433,7 +1411,6 @@
     [XmlRoot("SignatureProperty", Namespace = "http://www.w3.org/2000/09/xmldsig#", IsNullable = false)]
     public class SignaturePropertyType
     {
-
         private XmlElement[] itemsField;
 
         private string[] textField;
@@ -1508,7 +1485,6 @@
     [XmlRoot(Namespace = "http://netlicensing.labs64.com/schema/context", IsNullable = false)]
     public class netlicensing
     {
-
         private SignatureType signatureField;
 
         private info[] infosField;
@@ -1613,7 +1589,6 @@
     [XmlType(Namespace = "http://netlicensing.labs64.com/schema/context")]
     public class info
     {
-
         private string idField;
 
         private info_enum typeField;
@@ -1704,7 +1679,6 @@
     [XmlType(AnonymousType = true, Namespace = "http://netlicensing.labs64.com/schema/context")]
     public class netlicensingItems
     {
-
         private item[] itemField;
 
         private string pagenumberField;
@@ -1810,7 +1784,6 @@
     [XmlType(Namespace = "http://netlicensing.labs64.com/schema/context")]
     public class item
     {
-
         private property[] propertyField;
 
         private list[] listField;
@@ -1868,7 +1841,6 @@
     [XmlType(Namespace = "http://netlicensing.labs64.com/schema/context")]
     public class property
     {
-
         private string nameField;
 
         private string valueField;
@@ -1910,7 +1882,6 @@
     [XmlType(Namespace = "http://netlicensing.labs64.com/schema/context")]
     public class list
     {
-
         private property[] propertyField;
 
         private list[] list1Field;

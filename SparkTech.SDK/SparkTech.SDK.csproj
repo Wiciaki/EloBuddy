@@ -149,8 +149,8 @@
     <Compile Include="Utils\TickOperation.cs" />
     <Compile Include="Creator.cs" />
     <Compile Include="Web\Connection.cs" />
-    <Compile Include="Web\Licensing\License.cs" />
-    <Compile Include="Web\Licensing\netlicensing-context.cs" />
+    <Compile Include="Web\License.cs" />
+    <Compile Include="Web\NetLicensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />
     <Compile Include="Web\Versioning.cs" />
   </ItemGroup>

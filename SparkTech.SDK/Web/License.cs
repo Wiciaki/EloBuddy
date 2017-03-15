@@ -1,4 +1,4 @@
-﻿namespace SparkTech.SDK.Web.Licensing
+﻿namespace SparkTech.SDK.Web
 {
     using System;
     using System.Collections.Generic;
@@ -9,12 +9,22 @@
     using System.Xml.Serialization;
 
     using EloBuddy.Sandbox;
+    using EloBuddy.SDK.Utils;
 
-    public static class License
+    using SparkTech.SDK.Web.NetLicensing;
+
+    public class LicenseLink
     {
+        private readonly string apiKey;
+
+        public LicenseLink(string apiKey)
+        {
+            this.apiKey = apiKey;
+        }
+
         private static readonly string UserName;
 
-        static License()
+        static LicenseLink()
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -28,20 +38,20 @@
             UserName = u;
         }
 
-        public static bool Obtain()
+        public bool IsOwned(string productNumber)
         {
             var parameters = new Dictionary<string, string>
                                  {
-                                     ["productNumber"] = "SparkTech.SDK",
-                                     ["licenseeName"] = ""
+                                     ["productNumber"] = productNumber,
+                                     ["licenseeName"] = string.Empty
                                  };
 
-            var req = Request(parameters, false);
+            var req = this.ServerCall(parameters, false);
 
             return req != null && new ValidationResult(req).validations.Values.Any(c => c.properties["valid"].value == "true");
         }
 
-        public static string GenerateToken()
+        public string GetShopLink()
         {
             if (UserName == null)
             {
@@ -54,14 +64,21 @@
                                      ["licenseeNumber"] = UserName
                                  };
 
-            var property = Request(parameters, true)?.items.item[0].property;
+            var req = this.ServerCall(parameters, true);
 
-            return property == null ? null : Array.Find(property, p => p.name == "number").Value;
+            if (req == null)
+            {
+                return null;
+            }
+
+            var token = Array.Find(req.items.item[0].property, p => p.name == "number").Value;
+
+            return "https://go.netlicensing.io/shop/v2/?shoptoken=" + token;
         }
 
-        private static netlicensing Request(Dictionary<string, string> parameters, bool token)
+        private netlicensing ServerCall(Dictionary<string, string> parameters, bool token)
         {
-            var requestPayload = new StringBuilder();
+            var requestPayload = string.Empty;
             var first = true;
 
             foreach (var param in parameters)
@@ -72,12 +89,12 @@
                 }
                 else
                 {
-                    requestPayload.Append("&");
+                    requestPayload += "&";
                 }
 
-                requestPayload.Append(WebUtility.UrlEncode(param.Key));
-                requestPayload.Append("=");
-                requestPayload.Append(WebUtility.UrlEncode(param.Value));
+                requestPayload += WebUtility.UrlEncode(param.Key);
+                requestPayload += "=";
+                requestPayload += WebUtility.UrlEncode(param.Value);
             }
 
             var link = "https://go.netlicensing.io/core/v2/rest/";
@@ -97,15 +114,15 @@
             {
                 request = (HttpWebRequest)WebRequest.Create(link);
             }
-            catch (SecurityException ex)
+            catch (SecurityException)
             {
-                Log.Exception(ex, "SparkTech.SDK can't establish a connection due to sandbox. Skipping the connection...");
+                Logger.Warn("SparkTech.SDK: Failed to exchange data with the license server due to locked sandbox environment.");
                 return null;
             }
 
-            request.UserAgent = $"NetLicensing/C# {Environment.Version} (http://netlicensing.io)";
+            request.UserAgent = $"NetLicensing - C# - Spark - {Environment.Version} (http://netlicensing.io)";
             request.Method = token ? "POST" : "GET";
-            request.Credentials = new NetworkCredential("apiKey", "146f7c3c-e5aa-4529-84a7-cf2cf648f69d");
+            request.Credentials = new NetworkCredential("apiKey", this.apiKey);
             request.PreAuthenticate = true;
             request.Accept = "application/xml";
             request.SendChunked = false;
@@ -113,30 +130,19 @@
             if (token)
             {
                 request.ContentType = "application/x-www-form-urlencoded";
-                var byteArray = Encoding.UTF8.GetBytes(requestPayload.ToString());
-                request.ContentLength = byteArray.Length;
+                var bytes = Encoding.UTF8.GetBytes(requestPayload);
+                request.ContentLength = bytes.Length;
 
-                var dataStream = request.GetRequestStream();
-                dataStream.Write(byteArray, 0, byteArray.Length);
-                dataStream.Close();
+                var stream = request.GetRequestStream();
+                stream.Write(bytes, 0, bytes.Length);
+                stream.Close();
             }
 
-            using (var response = (HttpWebResponse)request.GetResponse())
+            using (var response = request.GetResponse())
             {
-                if (response.StatusCode == HttpStatusCode.NoContent)
-                {
-                    return null;
-                }
-
-                var stream = response.GetResponseStream();
-
-                if (stream == null)
-                {
-                    return null;
-                }
-
-                Console.WriteLine("SparkTech.SDK: Server connection success.");
-                return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(stream);
+                Logger.Info("SparkTech.SDK: Successfully exchanged data with the license server.");
+                // ReSharper disable once AssignNullToNotNullAttribute
+                return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(response.GetResponseStream());
             }
         }
     }
