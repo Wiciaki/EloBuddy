@@ -4,6 +4,8 @@
     using System.Collections.Generic;
     using System.Linq;
 
+    using EloBuddy.SDK.Utils;
+
     using SparkTech.SDK.Enumerations;
 
     public sealed class MainMenu : Menu
@@ -13,7 +15,7 @@
         /// </summary>
         public static readonly List<MainMenu> Instances = new List<MainMenu>();
 
-        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, Dictionary<string, Func<string>> replacements = null) : base(name, translationKey)
+        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null) : base(name, translationKey)
         {
             this.generator = translationGenerator;
 
@@ -95,30 +97,56 @@
         #region Translation Stuff
 
         /// <summary>
+        /// Processes with the text update of all items
+        /// </summary>
+        public static void Refresh()
+        {
+            GetAllComponents().ForEach(component => component.UpdateText());
+        }
+
+        /// <summary>
+        /// Gets a translation for the specified key
+        /// </summary>
+        /// <param name="translationKey">The translation key</param>
+        /// <returns></returns>
+        public string GetTranslation(string translationKey)
+        {
+            string v;
+
+            if (this.translations.TryGetValue(translationKey, out v))
+            {
+                return v;
+            }
+
+            Logger.Warn($"Suitable translation string for \"{translationKey}\" was not provided.");
+            return translationKey;
+        }
+
+        /// <summary>
         /// Contains the pointers to current values of the keys
         /// </summary>
         public readonly Dictionary<string, Func<string>> Replacements;
 
         private readonly Func<Language, Dictionary<string, string>> generator;
 
-        internal readonly Dictionary<string, string> Translations = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> translations = new Dictionary<string, string>();
 
         protected internal override string GetText()
         {
-            this.Translations.Clear();
+            this.translations.Clear();
 
             foreach (var pair in this.generator(Creator.Language))
             {
-                this.Translations.Add(pair.Key, pair.Value);
+                this.translations.Add(pair.Key, pair.Value);
             }
 
             if (Creator.Language != Language.English)
             {
                 foreach (var pair in this.generator(Language.English))
                 {
-                    if (!this.Translations.ContainsKey(pair.Key))
+                    if (!this.translations.ContainsKey(pair.Key))
                     {
-                        this.Translations.Add(pair.Key, pair.Value);
+                        this.translations.Add(pair.Key, pair.Value);
                     }
                 }
             }

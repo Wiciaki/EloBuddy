@@ -12,6 +12,7 @@
     using System.Timers;
     
     using EloBuddy.SDK.Events;
+    using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
@@ -83,17 +84,18 @@
 
             HandleTrigger(Assembly);
         }
-
-        [CodeFlow.Unsafe]
+        
         internal static void Release()
         {
+            MainMenu.Refresh();
+
             Timer.Stop();
             Timer.Dispose();
             Flips.Clear();
             Flips.TrimExcess();
-
-            MainMenu.GetAllComponents().ForEach(comp => comp.UpdateText());
             
+            GC.Collect();
+
             Console.Title = "SparkTech.SDK";
         }
 
@@ -121,7 +123,7 @@
                 {
                     //Versioning.Handle(assembly);
 
-                    foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Length > 0).OrderBy(type => type.Name))
+                    foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Cast<TriggerAttribute>().Any(trigger => trigger.Eligible)).OrderBy(type => type.Name))
                     {
                         try
                         {
@@ -129,7 +131,7 @@
                         }
                         catch (TypeInitializationException ex)
                         {
-                            Log.Exception(ex);
+                            Logger.Exception($"Couldn't invoke \"{type.FullName}\"!", ex);
                         }
                     }
                 };

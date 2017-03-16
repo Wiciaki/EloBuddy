@@ -23,13 +23,7 @@
 
         protected internal virtual string GetText()
         {
-            if (!this.Root.Translations.ContainsKey(this.TranslationKey))
-            {
-                Console.WriteLine("Not present: " + this.TranslationKey);
-                return this.TranslationKey;
-            }
-
-            var translation = this.Root.Translations[this.TranslationKey];
+            var translation = this.Root.GetTranslation(this.TranslationKey);
 
             var matches = from Match match in BracesAroundTextRegex.Matches(translation) select match.Groups[0].Value;
 

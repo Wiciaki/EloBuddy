@@ -19,8 +19,7 @@
         {
             get
             {
-                MenuItem item;
-                return this.Items.TryGetValue(name, out item) ? item : null;
+                return this.Items[name];
             }
             set
             {
@@ -64,9 +63,9 @@
             this.Instance.AddSeparator(height);
         }
 
-        public void AddLabel(string translationKey)
+        public MenuItem AddLabel(string translationKey)
         {
-            this.Add(translationKey.Replace('_', '.'), new MenuItem(translationKey));
+            return this.Add(translationKey.Replace('_', '.'), new MenuItem(translationKey));
         }
 
         IEnumerator<MenuItem> IEnumerable<MenuItem>.GetEnumerator()

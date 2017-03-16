@@ -17,6 +17,8 @@
     {
         private readonly string apiKey;
 
+        private string shop;
+
         public LicenseLink(string apiKey)
         {
             this.apiKey = apiKey;
@@ -58,6 +60,11 @@
                 return null;
             }
 
+            if (this.shop != null)
+            {
+                return this.shop;
+            }
+
             var parameters = new Dictionary<string, string>
                                  {
                                      ["tokenType"] = "SHOP",
@@ -73,7 +80,7 @@
 
             var token = Array.Find(req.items.item[0].property, p => p.name == "number").Value;
 
-            return "https://go.netlicensing.io/shop/v2/?shoptoken=" + token;
+            return this.shop = "https://go.netlicensing.io/shop/v2/?shoptoken=" + token;
         }
 
         private netlicensing ServerCall(Dictionary<string, string> parameters, bool token)
@@ -120,7 +127,7 @@
                 return null;
             }
 
-            request.UserAgent = $"NetLicensing - C# - Spark - {Environment.Version} (http://netlicensing.io)";
+            request.UserAgent = "NetLicensing - Custom client by Spark - C# - " + Environment.Version;
             request.Method = token ? "POST" : "GET";
             request.Credentials = new NetworkCredential("apiKey", this.apiKey);
             request.PreAuthenticate = true;

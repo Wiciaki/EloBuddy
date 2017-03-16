@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Threading;
     using System.Windows;
 
     using SparkTech.SDK.Enumerations;
@@ -12,19 +13,6 @@
     using SparkTech.SDK.Web;
 
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
-
-    /// <summary>
-    /// The delegate used for passing argument-less Boolean pointers
-    /// </summary>
-    /// <returns></returns>
-    public delegate bool Predicate();
-
-    /// <summary>
-    /// The main event delegate used for handling most of the event data instances
-    /// </summary>
-    /// <typeparam name="TEventArgs">The destination event arguments</typeparam>
-    /// <param name="args">The actual event data</param>
-    public delegate void EventDataHandler<in TEventArgs>(TEventArgs args) where TEventArgs : EventArgs;
 
     /// <summary>
     /// The variable storage and menu initializer
@@ -68,7 +56,7 @@
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
-            var replacements = new Dictionary<string, Func<string>>
+            var replacements = new ReservedCollection
                                    {
                                        ["licenseStatus"] = Licensed.ToString
                                    };
@@ -85,10 +73,10 @@
 
             #region FirstInit
             {
-                var first = new EloBuddy.SDK.Menu.Values.CheckBox("error") { IsVisible = false };
-                MainMenu.Instance.Add("st.sdk.first", first);
-                FirstRun = first.CurrentValue;
-                first.CurrentValue = false;
+                var first = new MenuItem("error", false) { Instance = { IsVisible = false } };
+                MainMenu.Add("st.sdk.first", first);
+                FirstRun = first;
+                first.Bool = false;
             }
             #endregion
 
@@ -105,24 +93,32 @@
                 {
                     Language = languageItem.Enum<Language>();
                     
-                    MainMenu.GetAllComponents().ForEach(m => m.UpdateText());
+                    MainMenu.Refresh();
                 };
 
             MainMenu.GetMenu("st.sdk.about")["st.sdk.about.shop"].PropertyChanged += args =>
                 {
                     args.Process = false;
 
-                    var path = licensing.GetShopLink();
+                    var thread = new Thread(() =>
+                        {
+                            var path = licensing.GetShopLink();
 
-                    if (path != null)
-                    {
-                        Clipboard.SetText(path);
-                        Comms.Print("Link copied to clipboard!");
-                    }
-                    else
-                    {
-                        Comms.Print("Failed to obtain a token.");
-                    }
+                            CodeFlow.Secure(delegate
+                                    {
+                                        if (path == null)
+                                        {
+                                            Comms.Print(MainMenu.GetTranslation("st_sdk_license_token_fail"));
+                                            return;
+                                        }
+                                        
+                                        Clipboard.SetText(path);
+                                        Comms.Print(MainMenu.GetTranslation("st_sdk_license_token_success"));
+                                    });
+                        });
+
+                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Start();
                 };
 
             Console.WriteLine("FirstRun: " + FirstRun);
@@ -140,6 +136,9 @@
                 default:
                     return new Dictionary<string, string>
                                {
+                                   ["error"] = "ERROR",
+                                   ["st_sdk_license_token_success"] = "Link copied to clipboard!",
+                                   ["st_sdk_license_token_fail"] = "Failed to obtain a token!",
                                    ["st_sdk"] = "SparkTech.SDK",
                                    ["st_sdk_about"] = "About",
                                    ["st_sdk_about_language"] = "Language",
@@ -149,6 +148,8 @@
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
+                                   ["st_sdk_license_token_success"] = "Link skopiowany do schowka!",
+                                   ["st_sdk_license_token_fail"] = "Wystąpił błąd przy generowaniu tokena!",
                                    ["st_sdk_about"] = "Informacje",
                                    ["st_sdk_about_language"] = "Język",
                                    ["st_sdk_about_shop"] = "Skopiuj link do sklepu",

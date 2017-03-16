@@ -4,6 +4,7 @@
     using System.Collections.Generic;
 
     using EloBuddy;
+    using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.Executors;
 
@@ -42,7 +43,7 @@
                         }
                         catch (Exception ex)
                         {
-                            Log.Exception(ex, "TickOperation action failed!");
+                            Logger.Exception("TickOperation action failed!", ex);
                         }
                     }
                 };
