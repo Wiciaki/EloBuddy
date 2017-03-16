@@ -138,7 +138,6 @@
     <Compile Include="SparkWalking\TargetData.cs" />
     <Compile Include="Targeting\TargetAcquire.cs" />
     <Compile Include="Targeting\Weight.cs" />
-    <Compile Include="Types.cs" />
     <Compile Include="Utils\Comms.cs" />
     <Compile Include="Utils\Converters.cs" />
     <Compile Include="Utils\Extensions.cs" />
@@ -156,7 +155,7 @@
     <Compile Include="Web\Versioning.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="App.config" />
     <None Include="SparkTech.SDK.ruleset" />
   </ItemGroup>
   <ItemGroup>
