@@ -1,21 +1,18 @@
 ﻿namespace SparkTech.SDK.Executors
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
     using System.Timers;
     
     using EloBuddy.SDK.Events;
     using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.MenuWrapper;
-    using SparkTech.SDK.Web;
 
     /// <summary>
     /// The component initializer
@@ -61,7 +58,7 @@
                     Console.Title = "SparkTech reload...";
                 };
 
-            Timer = new Timer(225d);
+            Timer = new Timer(230d);
 
             var index = 0;
 
@@ -137,9 +134,9 @@
                 };
         }
 
-        private static readonly ConcurrentQueue<Assembly> Assemblies = new ConcurrentQueue<Assembly>();
+        /*
 
-        private static string data;
+        private static readonly ConcurrentQueue<Assembly> Assemblies = new ConcurrentQueue<Assembly>();
 
         [CodeFlow.Unsafe]
         internal static void Handle(Assembly assembly)
@@ -190,7 +187,7 @@
             while (Assemblies.TryDequeue(out var assembly))
             {
                 ExecuteImpl(assembly);
-            }*/
+            }
         }
 
         private static void ExecuteImpl(Assembly assembly, string assemblyName = null)
@@ -212,6 +209,6 @@
             var webVersion = new Version(match.Groups[1].Value);
             var local = name.Version;
 
-        }
+        }*/
     }
 }
