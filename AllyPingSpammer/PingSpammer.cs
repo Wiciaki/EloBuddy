@@ -72,24 +72,30 @@
                                ["pingtype"] = new MenuItem("pingtype", EnumCache<PingCategory>.Names),
                                ["separator2"] = new MenuItem(10),
                                ["pingtype.rand"] = new MenuItem("pingtype_rand", false),
-                               ["polygon"] = new MenuItem("polygon", false),
-                               ["separator3"] = new MenuItem(),
-                               ["active"] = new MenuItem("active", false),
-                               ["separator4"] = new MenuItem(),
+                               ["polygon"] = new MenuItem("polygon", false), ["separator3"] = new MenuItem(),
+                               ["active"] = new MenuItem("active", false), ["separator4"] = new MenuItem(),
                                ["button"] = new MenuItem("button", false, KeyBind.BindTypes.HoldActive, 'H', 'J')
-            };
+                           };
 
             MainMenu.Add(new QuickMenu("advanced")
-                         {
-                             ["delay"] = new MenuItem("delay", 3000, 200, 10000),
-                             ["delay.rand"] = new MenuItem("delay_rand", false),
-                             ["separator1"] = new MenuItem(),
-                             ["difference"] = new MenuItem("difference", 200, 20, 800),
-                             ["hide"] = new MenuItem("hide", false),
-                             ["hide.text"] = new MenuItem("hide_text")
-            });
+                    {
+                        ["delay"] = new MenuItem("delay", 3000, 200, 10000),
+                        ["delay.rand"] = new MenuItem("delay_rand", false),
+                        ["separator1"] = new MenuItem(),
+                        ["difference"] = new MenuItem("difference", 200, 20, 800),
+                        ["hide"] = new MenuItem("hide", false),
+                        ["hide.text"] = new MenuItem("hide_text")
+                    });
+
+            delay = MainMenu.GetMenu("advanced")["delay"];
+
+            AssignHero();
 
             MainMenu["hero"].PropertyChanged += args => AssignHero();
+            MainMenu["active"].Bool = false;
+
+            Game.OnTick += OnTick;
+            Drawing.OnDraw += OnDraw;
 
             Chat.OnClientSideMessage += arg =>
                 {
@@ -98,15 +104,6 @@
                         arg.Process = false;
                     }
                 };
-
-            CodeFlow.Secure(delegate
-                    {
-                        MainMenu["active"].Bool = false;
-
-                        Game.OnTick += OnTick;
-                    });
-
-            Drawing.OnDraw += OnDraw;
         }
 
         private static void OnTick(EventArgs eventArgs)
@@ -130,7 +127,7 @@
 
             var time = Game.Time.ToTicks();
 
-            if (lastPingTime + delay > time)
+            if (lastPingTime + MainMenu.GetMenu("advanced")["delay"] > time)
             {
                 return;
             }
@@ -141,7 +138,7 @@
 
             if (MainMenu.GetMenu("advanced")["delay.rand"])
             {
-                MainMenu["delay"].Int = RandomInst.Next(200, 10000);
+                MainMenu.GetMenu("advanced")["delay"].Int = RandomInst.Next(2000, 10000);
             }
         }
 
@@ -240,7 +237,7 @@
                     return new Dictionary<string, string>
                                {
                                    ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojuszników, addon się nie ładuje...",
-                                   ["time_to_ping"] = "Pingi za: [TIME]",
+                                   ["time_to_ping"] = "Pinguje za: [TIME]",
 
                                    ["spam_who"] = "Sojusznik do spamowania",
                                    ["pingtype"] = "Rodzaj pingu",
