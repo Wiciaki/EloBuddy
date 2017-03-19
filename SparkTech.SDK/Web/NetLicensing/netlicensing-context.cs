@@ -95,9 +95,9 @@
         }
     }
 
-    public class ValidationResult
+    internal class ValidationResult
     {
-        public Dictionary<String, Composition> validations;
+        internal Dictionary<String, Composition> validations;
 
         public ValidationResult(netlicensing source)
         {

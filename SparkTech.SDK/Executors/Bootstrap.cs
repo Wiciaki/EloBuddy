@@ -8,7 +8,7 @@
     using System.Runtime.CompilerServices;
     using System.Text.RegularExpressions;
     using System.Timers;
-    
+
     using EloBuddy.SDK.Events;
     using EloBuddy.SDK.Utils;
 
@@ -53,11 +53,6 @@
         [CodeFlow.Unsafe]
         static Bootstrap()
         {
-            AppDomain.CurrentDomain.DomainUnload += delegate
-                {
-                    Console.Title = "SparkTech reload...";
-                };
-
             Timer = new Timer(230d);
 
             var index = 0;
@@ -74,14 +69,22 @@
 
             Timer.Start();
 
+            AppDomain.CurrentDomain.DomainUnload += delegate
+                {
+                    Console.Title = "SparkTech reload...";
+                };
+
             using (var client = new WebClient())
             {
                 Data = client.DownloadString(VersioningWebPath);
             }
 
-            HandleTrigger(Assembly);
+            Process(Assembly);
         }
-        
+
+        /// <summary>
+        /// Notifies the bootstrap that the initialization has finished
+        /// </summary>
         internal static void Release()
         {
             MainMenu.Refresh();
@@ -90,7 +93,7 @@
             Timer.Dispose();
             Flips.Clear();
             Flips.TrimExcess();
-            
+
             GC.Collect();
 
             Console.Title = "SparkTech.SDK";
@@ -105,110 +108,51 @@
         {
             Array.ForEach(args, Console.WriteLine);
 
-            var assembly = Assembly.GetCallingAssembly();
-
-            HandleTrigger(assembly);
+            Process(Assembly.GetCallingAssembly());
         }
 
         /// <summary>
         /// Invokes .cctors of types with the <see cref="TriggerAttribute"/> in the specified assembly
         /// </summary>
-        /// <param name="assembly">The assembly to have its types invoked</param>
-        private static void HandleTrigger(Assembly assembly)
-        {
-            Loading.OnLoadingComplete += delegate
+        /// <param name="assembly">The assembly to have its trigger types invoked</param>
+        [CodeFlow.Unsafe]
+        private static void Process(Assembly assembly) => Loading.OnLoadingComplete += delegate
+            {
+                foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Cast<TriggerAttribute>().Any(trigger => trigger.Eligible)).OrderBy(type => type.Name))
                 {
-                    //Versioning.Handle(assembly);
-
-                    foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Cast<TriggerAttribute>().Any(trigger => trigger.Eligible)).OrderBy(type => type.Name))
+                    try
                     {
-                        try
-                        {
-                            RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-                        }
-                        catch (TypeInitializationException ex)
-                        {
-                            Logger.Exception($"Couldn't invoke \"{type.FullName}\"!", ex);
-                        }
+                        RuntimeHelpers.RunClassConstructor(type.TypeHandle);
                     }
-                };
-        }
+                    catch (TypeInitializationException ex)
+                    {
+                        Logger.Exception($"Couldn't invoke \"{type.FullName}\"!", ex.InnerException);
+                    }
+                }
+                
+                var assemblyName = assembly.GetName();
+                var split = assemblyName.Name.Split('.');
+                var name = split[split.Length - 1];
 
-        /*
+                var match = new Regex($@"Version{name} = ""(\d.\d.\d.\d)""").Match(Data);
 
-        private static readonly ConcurrentQueue<Assembly> Assemblies = new ConcurrentQueue<Assembly>();
-
-        [CodeFlow.Unsafe]
-        internal static void Handle(Assembly assembly)
-        {
-            return;
-
-            Assemblies.Enqueue(assembly);
-
-            Match();
-        }
-
-        [CodeFlow.Unsafe]
-        private static async void Download()
-        {
-            data = await Connection.WebClient.DownloadStringTaskAsync(VersioningWebPath).ConfigureAwait(false);
-
-            CodeFlow.Secure(Match);
-        }
-
-        [CodeFlow.Unsafe]
-        private static void Match()
-        {
-            if (data == null)
-            {
-                if (Connection.IsAllowed)
+                if (!match.Success)
                 {
-                    new Task(Download).Start();
+                    return;
                 }
 
-                return;
-            }
+                name = name.ToLower();
 
-            var menu = Creator.MainMenu.GetMenu("sdk.versioning");
-            const string SDKItemName = "sdk.version";
+                var menu = Creator.MainMenu.GetMenu("st.sdk.update");
+                var webVersion = new Version(match.Groups[1].Value);
+                var local = assemblyName.Version;
+                var update = webVersion > local;
 
-            if (Assemblies.Count > 0)
-            {
-                if (menu[SDKItemName] != null)
-                {
-                    menu.Instance.Remove(SDKItemName);
-                }
-            }
-            else if (menu[SDKItemName] == null)
-            {
-                ExecuteImpl(Bootstrap.Assembly);
-            }
-            /*
-            while (Assemblies.TryDequeue(out var assembly))
-            {
-                ExecuteImpl(assembly);
-            }
-        }
+                Creator.MainMenu.Replacements.Add(name, () => update ? $"{local} => {webVersion}" : local.ToString());
 
-        private static void ExecuteImpl(Assembly assembly, string assemblyName = null)
-        {
-            var name = assembly.GetName();
+                menu[$"st.sdk.update.{name}.note"] = new MenuItem($"st_sdk_update_{name}_note");
+                menu[$"st.sdk.update.{name}.info"] = new MenuItem($"st_sdk_updated_{(!update ? "yes" : "no")}_{name}");
 
-            if (assemblyName == null)
-            {
-                assemblyName = name.Name;
-            }
-
-            var match = new Regex($@"Version{assemblyName} = ""(\d.\d.\d.\d)""").Match(data);
-
-            if (!match.Success)
-            {
-                return;
-            }
-
-            var webVersion = new Version(match.Groups[1].Value);
-            var local = name.Version;
-
-        }*/
+            };
     }
 }

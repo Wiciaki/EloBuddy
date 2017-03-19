@@ -13,20 +13,20 @@
 
     using SparkTech.SDK.Web.NetLicensing;
 
-    public class LicenseLink
+    public class LicenseServer
     {
         private readonly string apiKey;
 
         private string shop;
 
-        public LicenseLink(string apiKey)
+        public LicenseServer(string apiKey)
         {
             this.apiKey = apiKey;
         }
 
-        private static readonly string UserName;
+        public static readonly string Username;
 
-        static LicenseLink()
+        static LicenseServer()
         {
             ServicePointManager.Expect100Continue = false;
 
@@ -34,13 +34,13 @@
 
             if (string.IsNullOrEmpty(u) || u == "Guest")
             {
-                UserName = null;
+                Username = null;
             }
 
-            UserName = u;
+            Username = u;
         }
 
-        public bool IsOwned(string productNumber)
+        public bool CheckOwned(string productNumber)
         {
             var parameters = new Dictionary<string, string>
                                  {
@@ -55,7 +55,7 @@
 
         public string GetShopLink()
         {
-            if (UserName == null)
+            if (Username == null)
             {
                 return null;
             }
@@ -68,7 +68,7 @@
             var parameters = new Dictionary<string, string>
                                  {
                                      ["tokenType"] = "SHOP",
-                                     ["licenseeNumber"] = UserName
+                                     ["licenseeNumber"] = Username
                                  };
 
             var req = this.ServerCall(parameters, true);
@@ -112,7 +112,7 @@
             }
             else
             {
-                link += "licensee/" + UserName + "/validate?" + requestPayload;
+                link += "licensee/" + Username + "/validate?" + requestPayload;
             }
 
             HttpWebRequest request;

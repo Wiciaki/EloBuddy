@@ -15,6 +15,8 @@
         {
             Label,
 
+            Separator,
+
             Bool,
 
             KeyBind,
@@ -28,9 +30,35 @@
 
         public readonly Type MenuItemType;
 
+        private readonly Predicate predicate;
+
         public override void UpdateText()
         {
+            if (this.MenuItemType == Type.Separator)
+            {
+                return;
+            }
+
             this.Instance.DisplayName = this.GetText();
+
+            if (this.predicate != null)
+            {
+                this.Instance.IsVisible = this.predicate();
+            }
+        }
+
+
+        /// <summary>
+        /// Asserts that the value matches
+        /// </summary>
+        /// <param name="menuItemType"></param>
+        /// <exception cref="InvalidOperationException">The assert failed</exception>
+        private void Assert(Type menuItemType)
+        {
+            if (this.MenuItemType != menuItemType)
+            {
+                throw new InvalidOperationException($"Invalid property called on a MenuItem! Got {menuItemType}, expected {this.MenuItemType}");
+            }
         }
 
         public event EventDataHandler<ValueChangedEventArgs> PropertyChanged;
@@ -51,11 +79,29 @@
             return args;
         }
 
+        #region Separator
+
+        public MenuItem(int height = 25) : base(null)
+        {
+            this.Instance = new Separator(height);
+
+            this.MenuItemType = Type.Separator;
+        }
+
+        #endregion
+
         #region Label
 
-        public MenuItem(string translationName) : base(translationName)
+        public MenuItem(string translationName, Predicate predicate = null) : base(translationName)
         {
             this.Instance = new Label("PLACEHOLDER");
+
+            if (predicate != null)
+            {
+                this.Instance.IsVisible = predicate();
+            }
+
+            this.predicate = predicate;
 
             this.MenuItemType = Type.Label;
         }
@@ -96,6 +142,8 @@
             }
             set
             {
+                this.Assert(Type.Bool);
+
                 if (this.boolVal == value)
                 {
                     return;
@@ -177,15 +225,14 @@
         {
             get
             {
-                if (this.MenuItemType != Type.Int)
-                {
-                    throw new InvalidOperationException("Invalid property called on a MenuItem!");
-                }
+                this.Assert(Type.Int);
 
                 return this.intVal;
             }
             set
             {
+                this.Assert(Type.Int);
+
                 if (this.intVal == value)
                 {
                     return;
@@ -257,6 +304,8 @@
             }
             set
             {
+                this.Assert(Type.StringList);
+
                 if (this.StringIndex == value)
                 {
                     return;
@@ -334,18 +383,5 @@
         }
 
         #endregion
-
-        /// <summary>
-        /// Asserts that the value matches
-        /// </summary>
-        /// <param name="menuItemType"></param>
-        /// <exception cref="InvalidOperationException">The assert failed</exception>
-        private void Assert(Type menuItemType)
-        {
-            if (menuItemType != Type.StringList)
-            {
-                throw new InvalidOperationException($"Invalid property called on a MenuItem! Got {menuItemType}, expected {this.MenuItemType}");
-            }
-        }
     }
 }

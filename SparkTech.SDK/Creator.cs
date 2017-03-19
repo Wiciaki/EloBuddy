@@ -31,9 +31,14 @@
         public static readonly bool Licensed;
 
         /// <summary>
-        /// The SDK menu
+        /// The main menu of the SDK
         /// </summary>
         public static readonly MainMenu MainMenu;
+
+        /// <summary>
+        /// The license server for the assembly
+        /// </summary>
+        public static readonly LicenseServer LicenseServer = new LicenseServer("146f7c3c-e5aa-4529-84a7-cf2cf648f69d");
 
         /// <summary>
         /// The language used by the machine
@@ -50,9 +55,7 @@
         /// </summary>
         static Creator()
         {
-            var licensing = new LicenseLink("146f7c3c-e5aa-4529-84a7-cf2cf648f69d");
-
-            Licensed = licensing.IsOwned("SparkTech.SDK");
+            Licensed = LicenseServer.CheckOwned("SparkTech.SDK");
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
@@ -63,12 +66,15 @@
 
             MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
                            {
-                               new QuickMenu("st.sdk.about")
+                               new QuickMenu("st.sdk.update"),
+
+                               new QuickMenu("st.sdk.license")
                                    {
-                                       ["st.sdk.about.language"] = new MenuItem("st_sdk_about_language", LangCache.Names),
-                                       ["st.sdk.about.shop"] = new MenuItem("st_sdk_about_shop", false),
-                                       ["st.sdk.about.license"] = new MenuItem("st_sdk_about_license")
-                                   }
+                                       ["st.sdk.license.shop"] = new MenuItem("st_sdk_license_shop", false),
+                                       ["st.sdk.license.status"] = new MenuItem("st_sdk_license_status")
+                                   },
+
+                               { "st.sdk.language", new MenuItem("language", LangCache.Names) }
                            };
 
             #region FirstInit
@@ -80,7 +86,7 @@
             }
             #endregion
 
-            var languageItem = MainMenu.GetMenu("st.sdk.about")["st.sdk.about.language"];
+            var languageItem = MainMenu["st.sdk.language"];
 
             if (FirstRun)
             {
@@ -92,39 +98,43 @@
             languageItem.PropertyChanged += delegate
                 {
                     Language = languageItem.Enum<Language>();
-                    
+
                     MainMenu.Refresh();
                 };
 
-            MainMenu.GetMenu("st.sdk.about")["st.sdk.about.shop"].PropertyChanged += args =>
+            MainMenu.GetMenu("st.sdk.license")["st.sdk.license.shop"].PropertyChanged += args =>
                 {
                     args.Process = false;
 
                     var thread = new Thread(() =>
                         {
-                            var path = licensing.GetShopLink();
+                            var path = LicenseServer.GetShopLink();
 
                             CodeFlow.Secure(delegate
+                                {
+                                    if (path == null)
                                     {
-                                        if (path == null)
-                                        {
-                                            Comms.Print(MainMenu.GetTranslation("st_sdk_license_token_fail"));
-                                            return;
-                                        }
-                                        
-                                        Clipboard.SetText(path);
-                                        Comms.Print(MainMenu.GetTranslation("st_sdk_license_token_success"));
-                                    });
+                                        Comms.Print(MainMenu.GetTranslation("st_sdk_token_fail"));
+                                        return;
+                                    }
+
+                                    Clipboard.SetText(path);
+                                    Comms.Print(MainMenu.GetTranslation("st_sdk_token_success"));
+                                });
                         });
 
                     thread.SetApartmentState(ApartmentState.STA);
                     thread.Start();
                 };
 
+            Console.WriteLine();
+            Console.WriteLine("=== SparkTech.SDK variables ===");
             Console.WriteLine("FirstRun: " + FirstRun);
             Console.WriteLine("Language: " + Language);
             Console.WriteLine("SystemLanguage: " + SystemLanguage);
             Console.WriteLine("Licensed: " + Licensed);
+            Console.WriteLine("===============================");
+            Console.WriteLine();
 
             CodeFlow.Secure(Bootstrap.Release);
         }
@@ -137,64 +147,89 @@
                     return new Dictionary<string, string>
                                {
                                    ["error"] = "ERROR",
-                                   ["st_sdk_license_token_success"] = "Link copied to clipboard!",
-                                   ["st_sdk_license_token_fail"] = "Failed to obtain a token!",
+
                                    ["st_sdk"] = "SparkTech.SDK",
-                                   ["st_sdk_about"] = "About",
-                                   ["st_sdk_about_language"] = "Language",
-                                   ["st_sdk_about_shop"] = "Copy shop link",
-                                   ["st_sdk_about_license"] = "Subscription owned: {licenseStatus}"
-                    };
+
+                                   ["st_sdk_token_success"] = "Link copied to clipboard!",
+                                   ["st_sdk_token_fail"] = "Failed to obtain a token!",
+
+                                   #region Updater
+
+                                   ["st_sdk_update"] = "Updates",
+
+                                   ["st_sdk_update_sdk_note"] = "SparkTech.SDK version status:",
+                                   ["st_sdk_update_allypingspammer_note"] = "Pinging capabilities of AllyPingSpammer:",
+
+                                   ["st_sdk_updated_yes_sdk"] = "You are using the updated version, which is {sdk}",
+                                   ["st_sdk_updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdk}",
+
+                                   ["st_sdk_updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammer}",
+                                   ["st_sdk_updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammer}",
+
+                                   #endregion
+
+                                   ["st_sdk_license"] = "Subscription",
+                                   ["st_sdk_license_shop"] = "Copy shop link",
+                                   ["st_sdk_license_status"] = "Subscription owned: {licenseStatus}",
+                                   
+                                   ["language"] = "Language"
+                               };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["st_sdk_license_token_success"] = "Link skopiowany do schowka!",
-                                   ["st_sdk_license_token_fail"] = "Wystąpił błąd przy generowaniu tokena!",
-                                   ["st_sdk_about"] = "Informacje",
-                                   ["st_sdk_about_language"] = "Język",
-                                   ["st_sdk_about_shop"] = "Skopiuj link do sklepu",
-                                   ["st_sdk_about_license"] = "Status subskrypcji: {licenseStatus}"
-                    };
+                                   ["st_sdk_token_success"] = "Link skopiowany do schowka!",
+                                   ["st_sdk_token_fail"] = "Wystąpił błąd przy generowaniu tokena!",
+
+                                   #region Updater
+
+                                   ["st_sdk_update"] = "Aktualizacje",
+
+                                   ["st_sdk_update_sdk_note"] = "Status wersji SparkTech.SDK:",
+                                   ["st_sdk_update_allypingspammer_note"] = "Moc pingowania AllyPingSpammera:",
+
+                                   ["st_sdk_updated_yes_sdk"] = "Używasz aktualnej wersji ({sdk})",
+                                   ["st_sdk_updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdk}",
+
+                                   ["st_sdk_updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammer}",
+                                   ["st_sdk_updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammer}",
+
+                                   #endregion
+
+                                   ["st_sdk_license"] = "Subskrypcja",
+                                   ["st_sdk_license_shop"] = "Skopiuj link do sklepu",
+                                   ["st_sdk_license_status"] = "Status subskrypcji: {licenseStatus}",
+
+                                   ["language"] = "Język",
+                               };
             }
         }
 
         /*
-
 #region Version
 var version = MainMenu.AddSubMenu("Version", "st.sdk.version");
 var allow = new MenuItem("Allow update checks", true);
 version.Add("st.sdk.info.version.check", allow);
 var sdkVerion = new MenuItem(allow ? "Version - Checking failure!" : "Update checks disabled");
 version.Add("st.sdk.info.version", sdkVerion);
-
 if (allow)
 {
-
-
     var assemblyName = Assembly.GetName();
-
     new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args =>
         {
             if (!args.Success)
             {
                 return;
             }
-
             sdkVerion.DisplayName = args.IsUpdated
                                         ? "Your copy of SparkTech.SDK is up to date"
                                         : "A new update is available!";
-
             args.Notify();
         };
-
-
 }
 #endregion
-
 */
 
         /*
-
         #region Info
         {
             var info = MainMenu.AddSubMenu("About", "st.sdk.info");
@@ -206,7 +241,6 @@ if (allow)
             info.AddLabel("Discord: @spark");
         }
         #endregion
-
         */
     }
 }

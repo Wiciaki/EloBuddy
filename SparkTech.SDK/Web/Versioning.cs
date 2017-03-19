@@ -5,11 +5,11 @@
         /// <summary>
         /// The version for the current assembly
         /// </summary>
-        public const string VersionSDK = "0.2.1.4";
+        public const string VersionSDK = "0.2.1.5";
 
         /// <summary>
         /// The version for the <see cref="E:AllyPingSpammer"/>
         /// </summary>
-        public const string VersionAllyPingSpammer = "2.1.0.4";
+        public const string VersionAllyPingSpammer = "2.2.0.0";
     }
 }
