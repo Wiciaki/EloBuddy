@@ -72,8 +72,10 @@
                                ["pingtype"] = new MenuItem("pingtype", EnumCache<PingCategory>.Names),
                                ["separator2"] = new MenuItem(10),
                                ["pingtype.rand"] = new MenuItem("pingtype_rand", false),
-                               ["polygon"] = new MenuItem("polygon", false), ["separator3"] = new MenuItem(),
-                               ["active"] = new MenuItem("active", false), ["separator4"] = new MenuItem(),
+                               ["polygon"] = new MenuItem("polygon", false),
+                               ["separator3"] = new MenuItem(),
+                               ["active"] = new MenuItem("active", false),
+                               ["separator4"] = new MenuItem(),
                                ["button"] = new MenuItem("button", false, KeyBind.BindTypes.HoldActive, 'H', 'J')
                            };
 
@@ -179,9 +181,7 @@
 
             for (var i = 0; i < 6; i++)
             {
-                var target = new Vector2(pos.X + 500f * (float)Math.Cos(i), pos.Y + 500f * (float)Math.Sin(i));
-
-                TacticalMap.SendPing(type, Randomization.Randomize(target, diff));
+                TacticalMap.SendPing(type, Randomization.Randomize(new Vector2(pos.X + 500f * (float)Math.Cos(i), pos.Y + 500f * (float)Math.Sin(i)), diff));
             }
         }
 
@@ -236,7 +236,7 @@
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojuszników, addon się nie ładuje...",
+                                   ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojusznikow, addon sie nie laduje...",
                                    ["time_to_ping"] = "Pinguje za: [TIME]",
 
                                    ["spam_who"] = "Sojusznik do spamowania",

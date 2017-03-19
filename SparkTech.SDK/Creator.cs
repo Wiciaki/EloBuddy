@@ -200,6 +200,7 @@
                                    ["st_sdk_license_status"] = "Status subskrypcji: {licenseStatus}",
 
                                    ["language"] = "Język",
+                                   ["update_available"] = "Updates are available. Check the menu for more details."
                                };
             }
         }

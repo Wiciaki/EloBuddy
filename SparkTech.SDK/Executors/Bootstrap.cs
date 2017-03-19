@@ -13,6 +13,7 @@
     using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.MenuWrapper;
+    using SparkTech.SDK.Utils;
 
     /// <summary>
     /// The component initializer
@@ -153,6 +154,10 @@
                 menu[$"st.sdk.update.{name}.note"] = new MenuItem($"st_sdk_update_{name}_note");
                 menu[$"st.sdk.update.{name}.info"] = new MenuItem($"st_sdk_updated_{(!update ? "yes" : "no")}_{name}");
 
+                if (update)
+                {
+                    Comms.Print(Creator.MainMenu.GetTranslation("update_available"));
+                }
             };
     }
 }
