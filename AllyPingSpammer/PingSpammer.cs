@@ -92,8 +92,8 @@
             MainMenu["hero"].PropertyChanged += args => AssignHero();
             MainMenu["active"].Bool = false;
 
-            Game.OnUpdate += OnUpdate;
-            CodeFlow.Secure(() => Drawing.OnDraw += OnDraw);
+            CodeFlow.Secure(() => Game.OnUpdate += OnUpdate);
+            Drawing.OnDraw += OnDraw;
 
             Chat.OnClientSideMessage += arg =>
                 {
