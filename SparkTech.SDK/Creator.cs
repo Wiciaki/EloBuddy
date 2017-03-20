@@ -17,7 +17,6 @@
     /// <summary>
     /// The variable storage and menu initializer
     /// </summary>
-    [Trigger]
     public static class Creator
     {
         /// <summary>
@@ -55,13 +54,7 @@
         /// </summary>
         static Creator()
         {
-            Console.Title = "Obtaining license...";
-
-            Bootstrap.Release();
-
             Licensed = LicenseServer.CheckOwned("SparkTech.SDK");
-
-            Console.Title = "SparkTech.SDK";
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 

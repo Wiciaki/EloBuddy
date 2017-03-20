@@ -82,22 +82,22 @@
                 Data = client.DownloadString(VersioningWebPath);
             }
 
+            Loading.OnLoadingComplete += delegate
+                {
+                    Timer.Stop();
+                    Timer.Dispose();
+                    Flips.Clear();
+                    Flips.TrimExcess();
+
+                    Console.Title = "Obtaining license...";
+
+                    RuntimeHelpers.RunClassConstructor(typeof(Creator).TypeHandle);
+                    CodeFlow.Secure(MainMenu.Rebuild);
+
+                    Console.Title = "SparkTech.SDK";
+                };
+
             Process(Assembly);
-        }
-
-        /// <summary>
-        /// Notifies the bootstrap that the initialization has finished
-        /// </summary>
-        internal static void Release()
-        {
-            Timer.Stop();
-            Timer.Dispose();
-            Flips.Clear();
-            Flips.TrimExcess();
-
-            GC.Collect();
-
-            CodeFlow.Secure(MainMenu.Rebuild);
         }
 
         /// <summary>
