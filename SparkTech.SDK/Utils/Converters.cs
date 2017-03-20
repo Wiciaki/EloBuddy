@@ -2,6 +2,10 @@
 {
     using System;
 
+    using EloBuddy.SDK;
+
+    using SharpDX;
+
     public static class Converters
     {
         public static int ToTicks(this float seconds)
@@ -37,6 +41,11 @@
         public static double Root(this double value, double level = 2d)
         {
             return Math.Pow(value, 1d / level);
+        }
+
+        public static Vector2 ToVector2(this Vector3 vector3)
+        {
+            return new Vector2(vector3.X, vector3.Y);
         }
     }
 }

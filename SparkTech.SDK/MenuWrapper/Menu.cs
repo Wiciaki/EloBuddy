@@ -39,7 +39,10 @@
                 item.Root = this.Root;
             }
 
-            this.Items.Add(name, item);
+            if (item.MenuItemType != MenuItem.Type.Separator)
+            {
+                this.Items.Add(name, item);
+            }
 
             if (this.Instance != null)
             {

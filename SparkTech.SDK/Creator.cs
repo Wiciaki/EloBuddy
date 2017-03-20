@@ -55,7 +55,13 @@
         /// </summary>
         static Creator()
         {
+            Console.Title = "Obtaining license...";
+
+            Bootstrap.Release();
+
             Licensed = LicenseServer.CheckOwned("SparkTech.SDK");
+
+            Console.Title = "SparkTech.SDK";
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
@@ -66,27 +72,33 @@
 
             MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
                            {
-                               new QuickMenu("st.sdk.update"),
+                               new QuickMenu("update"),
 
-                               new QuickMenu("st.sdk.license")
+                               new QuickMenu("license")
                                    {
-                                       ["st.sdk.license.shop"] = new MenuItem("st_sdk_license_shop", false),
-                                       ["st.sdk.license.status"] = new MenuItem("st_sdk_license_status")
+                                       ["license.shop"] = new MenuItem("license_shop", false),
+                                       ["separator1"] = new MenuItem(10),
+                                       ["license.status"] = new MenuItem("license_status", null, true),
+                                       ["separator2"] = new MenuItem(),
+                                       ["license.note"] = new MenuItem("license_note")
                                    },
 
-                               { "st.sdk.language", new MenuItem("language", LangCache.Names) }
+                               { "language", new MenuItem("language", LangCache.Names) },
+                               { "separator1", new MenuItem() },
+                               { "contact", new MenuItem("contact") },
+                               { "comms.note", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
                            };
 
             #region FirstInit
             {
                 var first = new MenuItem("error", false) { Instance = { IsVisible = false } };
-                MainMenu.Add("st.sdk.first", first);
+                MainMenu.Add("first", first);
                 FirstRun = first;
                 first.Bool = false;
             }
             #endregion
 
-            var languageItem = MainMenu["st.sdk.language"];
+            var languageItem = MainMenu["language"];
 
             if (FirstRun)
             {
@@ -95,14 +107,14 @@
 
             Language = languageItem.Enum<Language>();
 
-            languageItem.PropertyChanged += delegate
+            languageItem.PropertyChanged += args =>
                 {
-                    Language = languageItem.Enum<Language>();
+                    Language = args.Sender.Enum<Language>();
 
-                    MainMenu.Refresh();
+                    MainMenu.Rebuild();
                 };
 
-            MainMenu.GetMenu("st.sdk.license")["st.sdk.license.shop"].PropertyChanged += args =>
+            MainMenu.GetMenu("license")["license.shop"].PropertyChanged += args =>
                 {
                     args.Process = false;
 
@@ -114,12 +126,12 @@
                                 {
                                     if (path == null)
                                     {
-                                        Comms.Print(MainMenu.GetTranslation("st_sdk_token_fail"));
+                                        Comms.Print(MainMenu.GetTranslation("token_fail"));
                                         return;
                                     }
 
                                     Clipboard.SetText(path);
-                                    Comms.Print(MainMenu.GetTranslation("st_sdk_token_success"));
+                                    Comms.Print(MainMenu.GetTranslation("token_success"));
                                 });
                         });
 
@@ -128,15 +140,13 @@
                 };
 
             Console.WriteLine();
-            Console.WriteLine("=== SparkTech.SDK variables ===");
-            Console.WriteLine("FirstRun: " + FirstRun);
-            Console.WriteLine("Language: " + Language);
-            Console.WriteLine("SystemLanguage: " + SystemLanguage);
-            Console.WriteLine("Licensed: " + Licensed);
-            Console.WriteLine("===============================");
+            Console.WriteLine("|====== SparkTech.SDK variables ======|");
+            Console.WriteLine("|          FirstRun: " + FirstRun + "            |");
+            Console.WriteLine("|         Language: " + Language + "           |");
+            Console.WriteLine("|     SystemLanguage: " + SystemLanguage + "         |");
+            Console.WriteLine("|         Licensed: " + Licensed + "             |");
+            Console.WriteLine("|=====================================|");
             Console.WriteLine();
-
-            CodeFlow.Secure(Bootstrap.Release);
         }
 
         private static Dictionary<string, string> GetTranslations(Language language)
@@ -150,98 +160,67 @@
 
                                    ["st_sdk"] = "SparkTech.SDK",
 
-                                   ["st_sdk_token_success"] = "Link copied to clipboard!",
-                                   ["st_sdk_token_fail"] = "Failed to obtain a token!",
+                                   ["token_success"] = "Link copied to clipboard!",
+                                   ["token_fail"] = "Failed to obtain a token!",
 
                                    #region Updater
 
-                                   ["st_sdk_update"] = "Updates",
+                                   ["update"] = "Updates",
 
-                                   ["st_sdk_update_sdk_note"] = "SparkTech.SDK version status:",
-                                   ["st_sdk_update_allypingspammer_note"] = "Pinging capabilities of AllyPingSpammer:",
+                                   ["update_note_sdk"] = "SparkTech.SDK version status:",
+                                   ["update_note_allypingspammer"] = "Pinging capabilities of AllyPingSpammer:",
 
-                                   ["st_sdk_updated_yes_sdk"] = "You are using the updated version, which is {sdk}",
-                                   ["st_sdk_updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdk}",
+                                   ["updated_yes_sdk"] = "You are using the updated version, which is {sdk}",
+                                   ["updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdk}",
 
-                                   ["st_sdk_updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammer}",
-                                   ["st_sdk_updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammer}",
+                                   ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammer}",
+                                   ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammer}",
+
+                                   ["update_available"] = "Updates are available. Check the menu for more details.",
 
                                    #endregion
 
-                                   ["st_sdk_license"] = "Subscription",
-                                   ["st_sdk_license_shop"] = "Copy shop link",
-                                   ["st_sdk_license_status"] = "Subscription owned: {licenseStatus}",
-                                   
-                                   ["language"] = "Language"
+                                   ["license"] = "Subscription",
+                                   ["license_shop"] = "Press to generate an unique shop link",
+                                   ["license_status"] = "Subscription owned: {licenseStatus}",
+                                   ["license_note"] = "A subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way to keep me motivated.\nPlease visit the shop website to find our more.",
+
+                                   ["language"] = "Language",
+                                   ["contact"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:\nDiscord: \"Spark\"\nSkype: \"wiktorsharp\"",
+                                   ["i_dont_speak_spaghetti"] = "You shouldn't be seeing this.",
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["st_sdk_token_success"] = "Link skopiowany do schowka!",
-                                   ["st_sdk_token_fail"] = "Wystąpił błąd przy generowaniu tokena!",
+                                   ["token_success"] = "Link skopiowany do schowka!",
+                                   ["token_fail"] = "Wystapil blad przy generowaniu tokena!",
 
                                    #region Updater
 
-                                   ["st_sdk_update"] = "Aktualizacje",
+                                   ["update"] = "Aktualizacje",
 
-                                   ["st_sdk_update_sdk_note"] = "Status wersji SparkTech.SDK:",
-                                   ["st_sdk_update_allypingspammer_note"] = "Moc pingowania AllyPingSpammera:",
+                                   ["update_note_sdk"] = "Status wersji SparkTech.SDK:",
+                                   ["update_note_allypingspammer"] = "Moc pingowania AllyPingSpammera:",
 
-                                   ["st_sdk_updated_yes_sdk"] = "Używasz aktualnej wersji ({sdk})",
-                                   ["st_sdk_updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdk}",
+                                   ["updated_yes_sdk"] = "Używasz aktualnej wersji ({sdk})",
+                                   ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdk}",
 
-                                   ["st_sdk_updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammer}",
-                                   ["st_sdk_updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammer}",
+                                   ["updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammer}",
+                                   ["updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammer}",
+
+                                   ["update_available"] = "Aktualizacje są dostępne. Sprawdź menu, by poznać szczegóły.",
 
                                    #endregion
 
-                                   ["st_sdk_license"] = "Subskrypcja",
-                                   ["st_sdk_license_shop"] = "Skopiuj link do sklepu",
-                                   ["st_sdk_license_status"] = "Status subskrypcji: {licenseStatus}",
+                                   ["license"] = "Subskrypcja",
+                                   ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
+                                   ["license_status"] = "Status subskrypcji: {licenseStatus}",
+                                   ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",
-                                   ["update_available"] = "Updates are available. Check the menu for more details."
-                               };
+                                   ["contact"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:\nDiscord: \"Spark\"\nSkype: \"wiktorsharp\"",
+                    };
             }
         }
-
-        /*
-#region Version
-var version = MainMenu.AddSubMenu("Version", "st.sdk.version");
-var allow = new MenuItem("Allow update checks", true);
-version.Add("st.sdk.info.version.check", allow);
-var sdkVerion = new MenuItem(allow ? "Version - Checking failure!" : "Update checks disabled");
-version.Add("st.sdk.info.version", sdkVerion);
-if (allow)
-{
-    var assemblyName = Assembly.GetName();
-    new SparkTechUpdater(assemblyName.Version, assemblyName.Name, "SDK").CheckPerformed += args =>
-        {
-            if (!args.Success)
-            {
-                return;
-            }
-            sdkVerion.DisplayName = args.IsUpdated
-                                        ? "Your copy of SparkTech.SDK is up to date"
-                                        : "A new update is available!";
-            args.Notify();
-        };
-}
-#endregion
-*/
-
-        /*
-        #region Info
-        {
-            var info = MainMenu.AddSubMenu("About", "st.sdk.info");
-            info.AddLabel($"Welcome, \"{SandboxConfig.Username}\" :)");
-            info.AddLabel($"License type: {(SandboxConfig.IsBuddy ? "Buddy" : "Pleb")}");
-            info.AddSeparator();
-            info.AddLabel("Please report any bugs or suggestions at:");
-            info.AddLabel("Skype: \"wiktorsharp\"");
-            info.AddLabel("Discord: @spark");
-        }
-        #endregion
-        */
     }
 }

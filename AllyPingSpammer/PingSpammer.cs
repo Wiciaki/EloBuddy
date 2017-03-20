@@ -4,8 +4,6 @@
     using System.Collections.Generic;
 
     using EloBuddy;
-    using EloBuddy.SDK;
-    using EloBuddy.SDK.Menu.Values;
 
     using SharpDX;
 
@@ -76,7 +74,7 @@
                                ["separator3"] = new MenuItem(),
                                ["active"] = new MenuItem("active", false),
                                ["separator4"] = new MenuItem(),
-                               ["button"] = new MenuItem("button", false, KeyBind.BindTypes.HoldActive, 'H', 'J')
+                               ["button"] = new MenuItem("button", false, KeyBindType.Hold, 'H', 'J')
                            };
 
             MainMenu.Add(new QuickMenu("advanced")
@@ -89,15 +87,13 @@
                         ["hide.text"] = new MenuItem("hide_text")
                     });
 
-            delay = MainMenu.GetMenu("advanced")["delay"];
-
             AssignHero();
 
             MainMenu["hero"].PropertyChanged += args => AssignHero();
             MainMenu["active"].Bool = false;
 
-            Game.OnTick += OnTick;
-            Drawing.OnDraw += OnDraw;
+            Game.OnUpdate += OnUpdate;
+            CodeFlow.Secure(() => Drawing.OnDraw += OnDraw);
 
             Chat.OnClientSideMessage += arg =>
                 {
@@ -108,11 +104,15 @@
                 };
         }
 
-        private static void OnTick(EventArgs eventArgs)
+        /// <summary>
+        /// Executes every time the game updates
+        /// </summary>
+        /// <param name="args">The empty event data</param>
+        private static void OnUpdate(EventArgs args)
         {
             if (MainMenu["button"])
             {
-                Illuminati(Game.CursorPos.To2D());
+                Illuminati(Game.CursorPos);
                 return;
             }
 
@@ -123,7 +123,7 @@
 
             if (MainMenu["polygon"])
             {
-                Illuminati(targetHero.Position.To2D());
+                Illuminati(targetHero.Position);
                 return;
             }
 
@@ -136,7 +136,7 @@
 
             OnPinged(time);
 
-            TacticalMap.SendPing(MainMenu["pingtype"].Enum<PingCategory>(), Randomization.Randomize(targetHero.Position.To2D(), MainMenu.GetMenu("advanced")["difference"]));
+            TacticalMap.SendPing(MainMenu["pingtype"].Enum<PingCategory>(), Randomization.Randomize(targetHero.Position.ToVector2(), MainMenu.GetMenu("advanced")["difference"]));
 
             if (MainMenu.GetMenu("advanced")["delay.rand"])
             {
@@ -144,11 +144,18 @@
             }
         }
 
+        /// <summary>
+        /// Assigns a new hero to the targetHero variable
+        /// </summary>
         private static void AssignHero()
         {
             targetHero = Allies.Find(hero => hero.UniqueName() == MainMenu["hero"]);
         }
 
+        /// <summary>
+        /// Sets up variables, delays and randomization after when the ping is executed
+        /// </summary>
+        /// <param name="time"></param>
         private static void OnPinged(int time)
         {
             if (MainMenu["pingtype.rand"])
@@ -163,7 +170,7 @@
         /// Performs an illuminati ping at the specified location
         /// </summary>
         /// <param name="pos"></param>
-        private static void Illuminati(Vector2 pos)
+        private static void Illuminati(Vector3 pos)
         {
             var time = Game.Time.ToTicks();
 
@@ -197,9 +204,9 @@
             }
 
             var pos = Drawing.WorldToScreen(Game.CursorPos);
-            var time = (int)((lastPingTime + delay - Game.Time.ToTicks()) / 1000f);
+            var time = (lastPingTime + delay - Game.Time.ToTicks()) / 1000f;
 
-            Drawing.DrawText(pos.X - 30, pos.Y + 50, Color.Gold, MainMenu.GetTranslation("time_to_ping").Replace("[TIME]", $"{time}"));
+            Drawing.DrawText(pos.X - 30, pos.Y + 50, Color.Gold, MainMenu.GetTranslation("time_to_ping").Replace("[TIME]", $"{time:F1}"));
         }
 
         /// <summary>

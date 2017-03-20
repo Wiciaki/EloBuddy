@@ -7,7 +7,7 @@
     using System.Reflection;
 
     using EloBuddy;
-    using EloBuddy.SDK;
+    using EloBuddy.SDK.Utils;
 
     using SharpDX;
 
@@ -196,7 +196,16 @@
                 }
             }
 
-            Player = (AIHeroClient)GameObjectList.Single(o => o.IsMe);
+            try
+            {
+                Player = (AIHeroClient)GameObjectList.Single(o => o.IsMe);
+            }
+            catch (InvalidOperationException)
+            {
+                Logger.Error("Player not found! (Did the game finish?)");
+                throw;
+            }
+
 
             var alliedTeam = Player.Team;
 
@@ -207,26 +216,6 @@
                                      [GameObjectTeam.Neutral] = ObjectTeam.Neutral,
                                      [GameObjectTeam.Unknown] = ObjectTeam.Unknown
                                  };
-
-            /*
-             * 
-             * UPDATE
-             * Now, hopefully this subscription is obsolete.
-             * Still needs to pass some extra tests, though...
-             * 
-             * 
-            // I don't find OnDelete too reliable when it comes to keeping the lists tidy so I'll additionally go for OnUpdate
-            Game.OnUpdate += delegate
-            {
-                int index;
-
-                while ((index = GameObjectList.FindIndex(o => !o.IsValid())) >= 0)
-                {
-                    Process(GameObjectList[index], false);
-                }
-            };
-
-             */
 
             GameObject.OnCreate += (sender, args) => Process(sender, true);
             GameObject.OnDelete += (sender, args) => Process(sender, false);
@@ -322,6 +311,8 @@
                 container.AddRange(Wards);
             if ((type & MinionType.Pet) != 0)
                 container.AddRange(Pets);
+            if ((type & MinionType.Plant) != 0)
+                container.AddRange(Plants);
             if ((type & MinionType.Jungle) != 0)
                 container.AddRange(JungleMinions);
             if ((type & MinionType.Other) != 0)
@@ -348,6 +339,8 @@
                 container.AddRange(Wards);
             if ((type & MinionType.Pet) != 0)
                 container.AddRange(Pets);
+            if ((type & MinionType.Plant) != 0)
+                container.AddRange(Plants);
             if ((type & MinionType.Jungle) != 0)
                 container.AddRange(JungleMinions);
             if ((type & MinionType.Other) != 0)
@@ -356,11 +349,11 @@
             range *= range;
 
             if (from.IsZero)
-                from = Player.ServerPosition.To2D();
+                from = Player.ServerPosition.ToVector2();
 
             var infinity = float.IsPositiveInfinity(range);
 
-            return Selector(container, team, true, false, @base => infinity || Vector2.DistanceSquared(@base.ServerPosition.To2D(), from) <= range);
+            return Selector(container, team, true, false, @base => infinity || Vector2.DistanceSquared(@base.ServerPosition.ToVector2(), from) <= range);
         }
 
         /// <summary>

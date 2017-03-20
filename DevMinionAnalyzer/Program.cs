@@ -1,4 +1,4 @@
-﻿namespace Bootstrap
+﻿namespace DevMinionAnalyzer
 {
     using System.Drawing;
 
@@ -15,9 +15,9 @@
     }
 
     [Trigger]
-    public static class Bootstrap
+    public static class Analyzer
     {
-        static Bootstrap()
+        static Analyzer()
         {
             Drawing.OnDraw += delegate
                 {
@@ -32,7 +32,9 @@
                             text += " | Name: " + minion.Name + " | BaseName: " + minion.BaseSkinName;
                         }
 
-                        Drawing.DrawText(Drawing.WorldToScreen(minion.Position), Color.Magenta, text, 25);
+                        var pos = Drawing.WorldToScreen(minion.Position);
+
+                        Drawing.DrawText(pos.X - 200, pos.Y, Color.Gold, text);
                     }
                 };
         }

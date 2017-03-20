@@ -102,6 +102,7 @@
     <Compile Include="Cache\ObjectCache.cs" />
     <Compile Include="Enumerations\AIMinionType.cs" />
     <Compile Include="Enumerations\HumanizerMode.cs" />
+    <Compile Include="Enumerations\KeyBindType.cs" />
     <Compile Include="Enumerations\Language.cs" />
     <Compile Include="Cache\MinionType.cs" />
     <Compile Include="Enumerations\Mode.cs" />

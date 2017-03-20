@@ -11,7 +11,7 @@
 
     using EloBuddy.SDK.Events;
     using EloBuddy.SDK.Utils;
-
+    
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
 
@@ -54,6 +54,8 @@
         [CodeFlow.Unsafe]
         static Bootstrap()
         {
+            Console.Title = "Connecting to GitHub...";
+
             Timer = new Timer(230d);
 
             var index = 0;
@@ -88,8 +90,6 @@
         /// </summary>
         internal static void Release()
         {
-            MainMenu.Refresh();
-
             Timer.Stop();
             Timer.Dispose();
             Flips.Clear();
@@ -97,7 +97,7 @@
 
             GC.Collect();
 
-            Console.Title = "SparkTech.SDK";
+            CodeFlow.Secure(MainMenu.Rebuild);
         }
 
         /// <summary>
@@ -144,15 +144,15 @@
 
                 name = name.ToLower();
 
-                var menu = Creator.MainMenu.GetMenu("st.sdk.update");
+                var menu = Creator.MainMenu.GetMenu("update");
                 var webVersion = new Version(match.Groups[1].Value);
                 var local = assemblyName.Version;
                 var update = webVersion > local;
 
                 Creator.MainMenu.Replacements.Add(name, () => update ? $"{local} => {webVersion}" : local.ToString());
 
-                menu[$"st.sdk.update.{name}.note"] = new MenuItem($"st_sdk_update_{name}_note");
-                menu[$"st.sdk.update.{name}.info"] = new MenuItem($"st_sdk_updated_{(!update ? "yes" : "no")}_{name}");
+                menu[$"note.{name}"] = new MenuItem($"update_note_{name}", null, true);
+                menu[$"info.{name}"] = new MenuItem($"updated_{(!update ? "yes" : "no")}_{name}");
 
                 if (update)
                 {

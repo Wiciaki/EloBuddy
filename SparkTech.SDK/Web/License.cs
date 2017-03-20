@@ -137,6 +137,7 @@
             if (token)
             {
                 request.ContentType = "application/x-www-form-urlencoded";
+
                 var bytes = Encoding.UTF8.GetBytes(requestPayload);
                 request.ContentLength = bytes.Length;
 
@@ -147,7 +148,7 @@
 
             using (var response = request.GetResponse())
             {
-                Logger.Info("SparkTech.SDK: Successfully exchanged data with the license server.");
+                Logger.Debug("SparkTech.SDK: Successfully exchanged data with the license server.");
                 // ReSharper disable once AssignNullToNotNullAttribute
                 return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(response.GetResponseStream());
             }

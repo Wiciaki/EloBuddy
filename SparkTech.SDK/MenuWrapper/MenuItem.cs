@@ -7,6 +7,7 @@
     using EloBuddy.SDK.Menu.Values;
     
     using SparkTech.SDK.Cache;
+    using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.EventData;
 
     public sealed class MenuItem : MenuBase
@@ -92,9 +93,9 @@
 
         #region Label
 
-        public MenuItem(string translationName, Predicate predicate = null) : base(translationName)
+        public MenuItem(string translationName, Predicate predicate = null, bool groupLabel = false) : base(translationName)
         {
-            this.Instance = new Label("PLACEHOLDER");
+            this.Instance = groupLabel ? new GroupLabel("PLACEHOLDER") : new Label("PLACEHOLDER");
 
             if (predicate != null)
             {
@@ -171,9 +172,22 @@
 
         #region Keybind
 
-        public MenuItem(string translationName, bool defVal, KeyBind.BindTypes bindType, char defKey, char defKey2) : base(translationName)
+        private static KeyBind.BindTypes ConvertEnum(KeyBindType bindType)
         {
-            var item = new KeyBind("PLACEHOLDER", defVal, bindType, defKey, defKey2);
+            switch (bindType)
+            {
+                case KeyBindType.Hold:
+                    return KeyBind.BindTypes.HoldActive;
+                case KeyBindType.Toggle:
+                    return KeyBind.BindTypes.PressToggle;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(bindType));
+        }
+
+        public MenuItem(string translationName, bool defVal, KeyBindType bindType, char defKey, char defKey2) : base(translationName)
+        {
+            var item = new KeyBind("PLACEHOLDER", defVal, ConvertEnum(bindType), defKey, defKey2);
 
             this.Instance = item;
 

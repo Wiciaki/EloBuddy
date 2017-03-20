@@ -34,8 +34,13 @@
         Jungle = 1 << 4,
 
         /// <summary>
+        /// The plant flag
+        /// </summary>
+        Plant = 1 << 5,
+
+        /// <summary>
         /// The other flag
         /// </summary>
-        Other = 1 << 5
+        Other = 1 << 6
     }
 }

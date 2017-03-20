@@ -99,7 +99,7 @@
         /// <summary>
         /// Processes with the text update of all items
         /// </summary>
-        public static void Refresh()
+        public static void Rebuild()
         {
             GetAllComponents().ForEach(component => component.UpdateText());
         }
