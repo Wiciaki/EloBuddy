@@ -25,6 +25,60 @@
     public static class PingSpammer
     {
         /// <summary>
+        /// The translation obtainer
+        /// </summary>
+        /// <param name="language">The specified language</param>
+        /// <returns></returns>
+        private static Dictionary<string, string> GenerateTranslations(Language language)
+        {
+            switch (language)
+            {
+                default:
+                    return new Dictionary<string, string>
+                               {
+                                   ["st_ping"] = "AllyPingSpammer",
+
+                                   ["notify_no_allies"] = "[AllyPingSpammer] No allies detected, the addon will now quit...",
+                                   ["time_to_ping"] = "Pinging in: [TIME]",
+
+                                   ["spam_who"] = "Ally to be spammed",
+                                   ["pingtype"] = "Ping category",
+                                   ["pingtype_rand"] = "^ Randomize ping category",
+                                   ["polygon"] = "Use illuminati polygon pings",
+                                   ["active"] = "TILT THE SHIT OUT OF MOTHERFUCKER",
+                                   ["button"] = "Press for an illuminati ping at mouse location",
+
+                                   ["advanced"] = "Advanced",
+                                   ["delay"] = "Delay between single pings",
+                                   ["delay_rand"] = "^ Randomize delay",
+                                   ["difference"] = "Maximal click point randomization",
+                                   ["hide"] = "Chat blocker active",
+                                   ["hide_text"] = "Prevents \"You have to wait before issuing more pings.\" from displaying in your chat\n"
+                               };
+                case Language.Polish:
+                    return new Dictionary<string, string>
+                               {
+                                   ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojusznikow, addon sie nie laduje...",
+                                   ["time_to_ping"] = "Pinguje za: [TIME]",
+
+                                   ["spam_who"] = "Sojusznik do spamowania",
+                                   ["pingtype"] = "Rodzaj pingu",
+                                   ["pingtype_rand"] = "^ Losowy rodzaj pingu",
+                                   ["polygon"] = "Używaj sześciokątnych illuminati pingów",
+                                   ["active"] = "WKURWIAJ TEGO DEBILA",
+                                   ["button"] = "Wciśnij, by pingować illuminati na żądanie",
+
+                                   ["advanced"] = "Zaawansowane",
+                                   ["delay"] = "Opóźnienie pomiędzy pojedyńczymi pingami",
+                                   ["delay_rand"] = "^ Losowe opóźnienie",
+                                   ["difference"] = "Maksymalna odległość od celu",
+                                   ["hide"] = "Blokuj chat",
+                                   ["hide_text"] = "Blokuje \"Musisz poczekać, by wyświetlić więcej pingów.\" przed wyświetlaniem się na czacie"
+                               };
+            }
+        }
+
+        /// <summary>
         /// The main menu for this addon
         /// </summary>
         private static readonly MainMenu MainMenu;
@@ -213,60 +267,6 @@
             var time = (lastPingTime + delay - Game.Time.ToTicks()) / 1000f;
 
             Drawing.DrawText(pos.X - 30, pos.Y + 50, Color.Gold, MainMenu.GetTranslation("time_to_ping").Replace("[TIME]", $"{time:F1}"));
-        }
-
-        /// <summary>
-        /// The generator of the translations
-        /// </summary>
-        /// <param name="language">The specified language</param>
-        /// <returns></returns>
-        private static Dictionary<string, string> GenerateTranslations(Language language)
-        {
-            switch (language)
-            {
-                default:
-                    return new Dictionary<string, string>
-                               {
-                                   ["st_ping"] = "AllyPingSpammer",
-
-                                   ["notify_no_allies"] = "[AllyPingSpammer] No allies detected, the addon will now quit...",
-                                   ["time_to_ping"] = "Pinging in: [TIME]",
-
-                                   ["spam_who"] = "Ally to be spammed",
-                                   ["pingtype"] = "Ping category",
-                                   ["pingtype_rand"] = "^ Randomize ping category",
-                                   ["polygon"] = "Use illuminati polygon pings",
-                                   ["active"] = "TILT THE SHIT OUT OF MOTHERFUCKER",
-                                   ["button"] = "Press for an illuminati ping at mouse location",
-
-                                   ["advanced"] = "Advanced",
-                                   ["delay"] = "Delay between single pings",
-                                   ["delay_rand"] = "^ Randomize delay",
-                                   ["difference"] = "Maximal click point randomization",
-                                   ["hide"] = "Chat blocker active",
-                                   ["hide_text"] = "Prevents \"You have to wait before issuing more pings.\" from displaying in your chat\n"
-                    };
-                case Language.Polish:
-                    return new Dictionary<string, string>
-                               {
-                                   ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojusznikow, addon sie nie laduje...",
-                                   ["time_to_ping"] = "Pinguje za: [TIME]",
-
-                                   ["spam_who"] = "Sojusznik do spamowania",
-                                   ["pingtype"] = "Rodzaj pingu",
-                                   ["pingtype_rand"] = "^ Losowy rodzaj pingu",
-                                   ["polygon"] = "Używaj sześciokątnych illuminati pingów",
-                                   ["active"] = "WKURWIAJ TEGO DEBILA",
-                                   ["button"] = "Wciśnij, by pingować illuminati na żądanie",
-
-                                   ["advanced"] = "Zaawansowane",
-                                   ["delay"] = "Opóźnienie pomiędzy pojedyńczymi pingami",
-                                   ["delay_rand"] = "^ Losowe opóźnienie",
-                                   ["difference"] = "Maksymalna odległość od celu",
-                                   ["hide"] = "Blokuj chat",
-                                   ["hide_text"] = "Blokuje \"Musisz poczekać, by wyświetlić więcej pingów.\" przed wyświetlaniem się na czacie"
-                    };
-            }
         }
     }
 }
