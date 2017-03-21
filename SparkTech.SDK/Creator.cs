@@ -6,6 +6,7 @@
     using System.Threading;
     using System.Windows;
 
+    using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
@@ -13,6 +14,34 @@
     using SparkTech.SDK.Web;
 
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
+
+    #region Delegates
+
+    /// <summary>
+    /// The delegate used for passing argument-less Boolean pointers
+    /// </summary>
+    /// <returns></returns>
+    public delegate bool Predicate();
+
+    /// <summary>
+    /// The main event delegate used for handling most of the event data instances
+    /// </summary>
+    /// <typeparam name="TEventArgs">The destination event arguments</typeparam>
+    /// <param name="args">The actual event data</param>
+    public delegate void EventDataHandler<in TEventArgs>(TEventArgs args) where TEventArgs : EventArgs;
+
+    #endregion
+
+    #region Shortcuts
+
+    public static class Shortcuts
+    {
+        public static Random RandomInst = new Random();
+
+        public static EloBuddy.AIHeroClient PlayerInst => ObjectCache.Player;
+    }
+
+    #endregion
 
     /// <summary>
     /// The variable storage and menu initializer
