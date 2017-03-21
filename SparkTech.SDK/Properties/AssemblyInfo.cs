@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Resources;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -37,3 +38,5 @@ using SparkTech.SDK.Web;
 [assembly: AssemblyVersion(Versioning.VersionSDK)]
 [assembly: AssemblyFileVersion(Versioning.VersionSDK)]
 [assembly: SecurityRules(SecurityRuleSet.Level2)]
+[assembly: NeutralResourcesLanguage("en-US")]
+

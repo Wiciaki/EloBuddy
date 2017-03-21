@@ -102,7 +102,14 @@
 
             languageItem.PropertyChanged += args =>
                 {
-                    Language = args.Sender.Enum<Language>();
+                    var lang = args.Sender.Enum<Language>();
+
+                    if (lang == Language)
+                    {
+                        return;
+                    }
+                    
+                    Language = lang;
 
                     MainMenu.Rebuild();
                 };
@@ -132,13 +139,15 @@
                     thread.Start();
                 };
 
+            CodeFlow.Secure(MainMenu.Rebuild);
+
             Console.WriteLine();
-            Console.WriteLine("|====== SparkTech.SDK variables ======|");
-            Console.WriteLine("|          FirstRun: " + FirstRun + "            |");
-            Console.WriteLine("|         Language: " + Language + "           |");
-            Console.WriteLine("|     SystemLanguage: " + SystemLanguage + "         |");
-            Console.WriteLine("|         Licensed: " + Licensed + "             |");
-            Console.WriteLine("|=====================================|");
+            Console.WriteLine("====== SparkTech.SDK variables ======");
+            Console.WriteLine("          FirstRun: " + FirstRun + "            ");
+            Console.WriteLine("         Language: " + Language + "           ");
+            Console.WriteLine("     SystemLanguage: " + SystemLanguage + "         ");
+            Console.WriteLine("         Licensed: " + Licensed + "             ");
+            Console.WriteLine("=====================================");
             Console.WriteLine();
         }
 
@@ -163,11 +172,11 @@
                                    ["update_note_sdk"] = "SparkTech.SDK version status:",
                                    ["update_note_allypingspammer"] = "Pinging capabilities of AllyPingSpammer:",
 
-                                   ["updated_yes_sdk"] = "You are using the updated version, which is {sdk}",
-                                   ["updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdk}",
+                                   ["updated_yes_sdk"] = "You are using the updated version, which is {sdkVersion}",
+                                   ["updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdkVersion}",
 
-                                   ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammer}",
-                                   ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammer}",
+                                   ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammerVersion}",
+                                   ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammerVersion}",
 
                                    ["update_available"] = "Updates are available. Check the menu for more details.",
 
@@ -180,7 +189,7 @@
 
                                    ["language"] = "Language",
                                    ["contact"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:\nDiscord: \"Spark\"\nSkype: \"wiktorsharp\"",
-                                   ["i_dont_speak_spaghetti"] = "You shouldn't be seeing this.",
+                                   ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.",
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>
@@ -195,11 +204,11 @@
                                    ["update_note_sdk"] = "Status wersji SparkTech.SDK:",
                                    ["update_note_allypingspammer"] = "Moc pingowania AllyPingSpammera:",
 
-                                   ["updated_yes_sdk"] = "Używasz aktualnej wersji ({sdk})",
-                                   ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdk}",
+                                   ["updated_yes_sdk"] = "Używasz aktualnej wersji ({sdkVersion})",
+                                   ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdkVersion}",
 
-                                   ["updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammer}",
-                                   ["updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammer}",
+                                   ["updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammerVersion}",
+                                   ["updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammerVersion}",
 
                                    ["update_available"] = "Aktualizacje są dostępne. Sprawdź menu, by poznać szczegóły.",
 

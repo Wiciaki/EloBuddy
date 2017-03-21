@@ -11,7 +11,7 @@
 
     using EloBuddy.SDK.Events;
     using EloBuddy.SDK.Utils;
-    
+
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
 
@@ -31,22 +31,9 @@
         private static readonly string Data;
 
         /// <summary>
-        /// The timer
-        /// </summary>
-        private static readonly Timer Timer;
-
-        /// <summary>
-        /// The flip list
-        /// </summary>
-        private static readonly List<string> Flips = new List<string>(4)
-                                                       {
-                                                           @"\", "|", "/", "-"
-                                                       };
-
-        /// <summary>
         /// The object representation of the currently executing assembly
         /// </summary>
-        public static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
+        public static readonly Assembly Assembly;
 
         /// <summary>
         /// Initializes static members of the <see cref="Bootstrap"/> class
@@ -56,26 +43,31 @@
         {
             Console.Title = "Connecting to GitHub...";
 
-            Timer = new Timer(230d);
-
-            var index = 0;
-
-            Timer.Elapsed += delegate
-                {
-                    if (++index == Flips.Count)
-                    {
-                        index = 0;
-                    }
-
-                    Console.Title = "SparkTech load... " + Flips[index];
-                };
-
-            Timer.Start();
-
             AppDomain.CurrentDomain.DomainUnload += delegate
                 {
                     Console.Title = "SparkTech reload...";
                 };
+
+            var flips = new List<string>(4)
+                            {
+                                @"\", "|", "/", "-"
+                            };
+
+            var timer = new Timer(230d);
+
+            var index = 0;
+
+            timer.Elapsed += delegate // TODO: Escape implicitly captured closure
+                {
+                    if (++index == flips.Count)
+                    {
+                        index = 0;
+                    }
+
+                    Console.Title = "SparkTech load... " + flips[index];
+                };
+
+            timer.Start();
 
             using (var client = new WebClient())
             {
@@ -84,20 +76,19 @@
 
             Loading.OnLoadingComplete += delegate
                 {
-                    Timer.Stop();
-                    Timer.Dispose();
-                    Flips.Clear();
-                    Flips.TrimExcess();
+                    timer.Stop();
+                    timer.Dispose();
+                    flips.Clear();
+                    flips.TrimExcess();
 
                     Console.Title = "Obtaining license...";
 
-                    RuntimeHelpers.RunClassConstructor(typeof(Creator).TypeHandle);
-                    CodeFlow.Secure(MainMenu.Rebuild);
+                    ExecuteConstructor(typeof(Creator));
 
                     Console.Title = "SparkTech.SDK";
                 };
 
-            Process(Assembly);
+            Process(Assembly = Assembly.GetExecutingAssembly());
         }
 
         /// <summary>
@@ -119,11 +110,11 @@
         [CodeFlow.Unsafe]
         private static void Process(Assembly assembly) => Loading.OnLoadingComplete += delegate
             {
-                foreach (var type in assembly.GetTypes().Where(type => type.GetCustomAttributes(typeof(TriggerAttribute), false).Cast<TriggerAttribute>().Any(trigger => trigger.Eligible)).OrderBy(type => type.Name))
+                foreach (var type in assembly.GetTypes().Where(HasActiveTrigger).OrderBy(type => type.Name))
                 {
                     try
                     {
-                        RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+                        ExecuteConstructor(type);
                     }
                     catch (TypeInitializationException ex)
                     {
@@ -149,7 +140,7 @@
                 var local = assemblyName.Version;
                 var update = webVersion > local;
 
-                Creator.MainMenu.Replacements.Add(name, () => update ? $"{local} => {webVersion}" : local.ToString());
+                Creator.MainMenu.Replacements.Add(name + "Version", () => update ? $"{local} => {webVersion}" : $"{local}");
 
                 menu[$"note.{name}"] = new MenuItem($"update_note_{name}", null, true);
                 menu[$"info.{name}"] = new MenuItem($"updated_{(!update ? "yes" : "no")}_{name}");
@@ -159,5 +150,23 @@
                     Comms.Print(Creator.MainMenu.GetTranslation("update_available"));
                 }
             };
+
+        /// <summary>
+        /// Run the static constructor of the specified type
+        /// </summary>
+        /// <param name="type">The provided type</param>
+        private static void ExecuteConstructor(Type type) => RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+
+        /// <summary>
+        /// Determines whether the specified type should be initialized
+        /// </summary>
+        /// <param name="type">The type to be inspected</param>
+        /// <returns>A value determining whether the type should be invoked</returns>
+        private static bool HasActiveTrigger(Type type)
+        {
+            var attributes = type.GetCustomAttributes(typeof(TriggerAttribute), false);
+
+            return attributes.Length == 1 && ((TriggerAttribute)attributes[0]).Eligible;
+        }
     }
 }

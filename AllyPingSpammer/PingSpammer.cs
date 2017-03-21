@@ -47,7 +47,7 @@
         /// <summary>
         /// The length of the last delay set
         /// </summary>
-        private static int delay;
+        private static int delay = 8000;
 
         /// <summary>
         /// The entry point for an addon
@@ -88,20 +88,26 @@
                     });
 
             AssignHero();
+            Pinged(Game.Time.ToTicks());
 
             MainMenu["hero"].PropertyChanged += args => AssignHero();
             MainMenu["active"].Bool = false;
 
-            CodeFlow.Secure(() => Game.OnUpdate += OnUpdate);
+            Chat.OnClientSideMessage += OnClientSideMessage;
+            Game.OnUpdate += OnUpdate;
             Drawing.OnDraw += OnDraw;
+        }
 
-            Chat.OnClientSideMessage += arg =>
-                {
-                    if (MainMenu.GetMenu("advanced")["hide"] && arg.Message == "You must wait before issuing more pings.")
-                    {
-                        arg.Process = false;
-                    }
-                };
+        /// <summary>
+        /// Executes everytime a local chat message is being processed
+        /// </summary>
+        /// <param name="args">The event data</param>
+        private static void OnClientSideMessage(ChatClientSideMessageEventArgs args)
+        {
+            if (MainMenu.GetMenu("advanced")["hide"] && args.Message == "You must wait before issuing more pings.")
+            {
+                args.Process = false;
+            }
         }
 
         /// <summary>
@@ -134,7 +140,7 @@
                 return;
             }
 
-            OnPinged(time);
+            Pinged(time);
 
             TacticalMap.SendPing(MainMenu["pingtype"].Enum<PingCategory>(), Randomization.Randomize(targetHero.Position.ToVector2(), MainMenu.GetMenu("advanced")["difference"]));
 
@@ -156,7 +162,7 @@
         /// Sets up variables, delays and randomization after when the ping is executed
         /// </summary>
         /// <param name="time"></param>
-        private static void OnPinged(int time)
+        private static void Pinged(int time)
         {
             if (MainMenu["pingtype.rand"])
             {
@@ -181,7 +187,7 @@
 
             delay = RandomInst.Next(6000, 20000);
 
-            OnPinged(time);
+            Pinged(time);
 
             var type = MainMenu["pingtype"].Enum<PingCategory>();
             var diff = MainMenu.GetMenu("advanced")["difference"] / 10;

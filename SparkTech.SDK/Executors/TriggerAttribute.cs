@@ -5,7 +5,7 @@
     using EloBuddy;
 
     using static SparkTech.SDK.Shortcuts;
-
+    
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     public class TriggerAttribute : Attribute
     {

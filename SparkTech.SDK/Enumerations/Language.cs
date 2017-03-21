@@ -11,12 +11,12 @@
         /// The <see cref="English"/> language
         /// </summary>
         [Description("en-US")]
-        English, 
+        English = 0,
 
         /// <summary>
         /// The <see cref="Polish"/> language
         /// </summary>
         [Description("pl-PL")]
-        Polish
+        Polish = 1
     }
 }
