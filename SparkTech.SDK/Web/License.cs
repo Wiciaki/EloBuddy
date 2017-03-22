@@ -13,19 +13,69 @@
 
     using SparkTech.SDK.Web.NetLicensing;
 
+    /// <summary>
+    /// Acts like a bridge between the current game and the licensing server
+    /// </summary>
     public class LicenseServer
     {
+        /// <summary>
+        /// The current EloBuddy username
+        /// </summary>
+        public static readonly string Username;
+
+        /// <summary>
+        /// Obtains a list of the product modules owned
+        /// </summary>
+        /// <param name="productName">The specified product name</param>
+        /// <returns>A list of product modules active for the specified product</returns>
+        public List<string> GetModulesOwned(string productName)
+        {
+            return this.ServerCall(productName)?.items.item
+                       .Where(item => Array.Exists(item.property, prop => prop.name == "valid" && prop.Value == "true"))
+                       .Select(item => Array.Find(item.property, prop => prop.name == "productModuleNumber").Value)
+                       .ToList() ?? new List<string>(0);
+        }
+
+        /// <summary>
+        /// Generates a new shop link
+        /// </summary>
+        /// <returns>The current shop URL</returns>
+        public string GetShopLink()
+        {
+            if (Username == null)
+            {
+                return null;
+            }
+
+            var req = this.ServerCall();
+
+            if (req == null)
+            {
+                return null;
+            }
+
+            var token = Array.Find(req.items.item[0].property, p => p.name == "number").Value;
+
+            return $"https://go.netlicensing.io/shop/v2/?shoptoken={token}/";
+        }
+
+        /// <summary>
+        /// The API key to be used in the connection
+        /// </summary>
         private readonly string apiKey;
 
-        private string shop;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LicenseServer"/> class
+        /// </summary>
+        /// <param name="apiKey">The API key to be used</param>
         public LicenseServer(string apiKey)
         {
             this.apiKey = apiKey;
         }
 
-        public static readonly string Username;
-
+        /// <summary>
+        /// Initializes static members of the <see cref="LicenseServer"/> class
+        /// </summary>
         static LicenseServer()
         {
             ServicePointManager.Expect100Continue = false;
@@ -40,70 +90,14 @@
             Username = u;
         }
 
-        public bool CheckOwned(string productNumber)
+        /// <summary>
+        /// Transfers the data between the server and the library
+        /// </summary>
+        /// <param name="productName">The product number to have the license validated</param>
+        /// <returns>The netlicensing context</returns>
+        private netlicensing ServerCall(string productName = null)
         {
-            var parameters = new Dictionary<string, string>
-                                 {
-                                     ["productNumber"] = productNumber,
-                                     ["licenseeName"] = string.Empty
-                                 };
-
-            var req = this.ServerCall(parameters, false);
-
-            return req != null && new ValidationResult(req).validations.Values.Any(c => c.properties["valid"].value == "true");
-        }
-
-        public string GetShopLink()
-        {
-            if (Username == null)
-            {
-                return null;
-            }
-
-            if (this.shop != null)
-            {
-                return this.shop;
-            }
-
-            var parameters = new Dictionary<string, string>
-                                 {
-                                     ["tokenType"] = "SHOP",
-                                     ["licenseeNumber"] = Username
-                                 };
-
-            var req = this.ServerCall(parameters, true);
-
-            if (req == null)
-            {
-                return null;
-            }
-
-            var token = Array.Find(req.items.item[0].property, p => p.name == "number").Value;
-
-            return this.shop = "https://go.netlicensing.io/shop/v2/?shoptoken=" + token;
-        }
-
-        private netlicensing ServerCall(Dictionary<string, string> parameters, bool token)
-        {
-            var requestPayload = string.Empty;
-            var first = true;
-
-            foreach (var param in parameters)
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    requestPayload += "&";
-                }
-
-                requestPayload += WebUtility.UrlEncode(param.Key);
-                requestPayload += "=";
-                requestPayload += WebUtility.UrlEncode(param.Value);
-            }
-
+            var token = productName == null;
             var link = "https://go.netlicensing.io/core/v2/rest/";
 
             if (token)
@@ -112,7 +106,7 @@
             }
             else
             {
-                link += "licensee/" + Username + "/validate?" + requestPayload;
+                link += $"licensee/{Username}/validate?productNumber={productName}";
             }
 
             HttpWebRequest request;
@@ -127,7 +121,9 @@
                 return null;
             }
 
-            request.UserAgent = "NetLicensing - Custom client by Spark - C# - " + Environment.Version;
+            Console.Title = "Connecting to NetLicensing...";
+
+            request.UserAgent = $"NetLicensing/Wiciaki/.NET {Environment.Version}";
             request.Method = token ? "POST" : "GET";
             request.Credentials = new NetworkCredential("apiKey", this.apiKey);
             request.PreAuthenticate = true;
@@ -138,7 +134,7 @@
             {
                 request.ContentType = "application/x-www-form-urlencoded";
 
-                var bytes = Encoding.UTF8.GetBytes(requestPayload);
+                var bytes = Encoding.UTF8.GetBytes($"tokenType=SHOP&licenseeNumber={Username}");
                 request.ContentLength = bytes.Length;
 
                 var stream = request.GetRequestStream();
@@ -146,11 +142,35 @@
                 stream.Close();
             }
 
-            using (var response = request.GetResponse())
+            try
             {
-                Logger.Debug("SparkTech.SDK: Successfully exchanged data with the license server.");
-                // ReSharper disable once AssignNullToNotNullAttribute
-                return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(response.GetResponseStream());
+                using (var response = request.GetResponse())
+                {
+                    var stream = response.GetResponseStream();
+
+                    if (stream == null)
+                    {
+                        throw new WebException("No response obtained!");
+                    }
+
+                    Logger.Debug("SparkTech.SDK: Successfully exchanged data with the license server.");
+                    return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(stream);
+                }
+            }
+            catch (WebException)
+            {
+                Logger.Error("SparkTech.SDK: Connection error. Potential reason: User not registered in database.");
+
+                if (!token)
+                {
+                    Logger.Error("SparkTech.SDK: Please check whether the provided product number is correct and that \"Auto-create Licensee\" is enabled for the product.");
+                }
+
+                return null;
+            }
+            finally
+            {
+                Console.Title = "SparkTech.SDK";
             }
         }
     }

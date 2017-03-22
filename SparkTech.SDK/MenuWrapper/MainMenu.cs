@@ -13,7 +13,7 @@
         /// <summary>
         /// Gets a list of all main menus
         /// </summary>
-        public static readonly List<MainMenu> Instances = new List<MainMenu>();
+        private static readonly List<MainMenu> Instances = new List<MainMenu>();
 
         public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null) : base(name, translationKey)
         {
@@ -69,6 +69,11 @@
         public MenuItem GetItem(string name)
         {
             return this[name] ?? this.Menus.Values.Select(menu => menu[name]).FirstOrDefault(item => item != null);
+        }
+
+        public static MainMenu GetMainMenu(string name)
+        {
+            return Instances.Find(main => main.Name == name);
         }
 
         public List<MenuBase> GetComponents()

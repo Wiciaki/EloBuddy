@@ -102,7 +102,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Cache\EnumCache.cs" />
-    <Compile Include="Cache\MiscallenousCache.cs" />
     <Compile Include="Cache\ObjectCache.cs" />
     <Compile Include="Enumerations\AIMinionType.cs" />
     <Compile Include="Enumerations\HumanizerMode.cs" />

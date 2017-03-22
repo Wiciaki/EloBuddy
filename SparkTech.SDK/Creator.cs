@@ -83,7 +83,9 @@
         /// </summary>
         static Creator()
         {
-            Licensed = LicenseServer.CheckOwned("SparkTech.SDK");
+            var modules = LicenseServer.GetModulesOwned("SparkTech.SDK");
+
+            Licensed = modules.Count > 0;
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 

@@ -81,11 +81,9 @@
                     flips.Clear();
                     flips.TrimExcess();
 
-                    Console.Title = "Obtaining license...";
+                    Console.Title = "SparkTech.SDK";
 
                     ExecuteConstructor(typeof(Creator));
-
-                    Console.Title = "SparkTech.SDK";
                 };
 
             Process(Assembly = Assembly.GetExecutingAssembly());

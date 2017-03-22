@@ -91,7 +91,7 @@
 
             if (!target.IsValidTarget() || target.Distance(ownerPos) > 1000F)
             {
-                return MiscallenousCache.GetEmptyList<Obj_AI_Minion>();
+                return new List<Obj_AI_Minion>(0);
             }
 
             var minion = target as Obj_AI_Minion;
@@ -102,14 +102,14 @@
 
                 if (type == AIMinionType.Unknown || type == AIMinionType.Ward || type == AIMinionType.Plant)
                 {
-                    return MiscallenousCache.GetEmptyList<Obj_AI_Minion>();
+                    return new List<Obj_AI_Minion>(0);
                 }
             }
             else
             {
                 if (!(target is AIHeroClient))
                 {
-                    return MiscallenousCache.GetEmptyList<Obj_AI_Minion>();
+                    return new List<Obj_AI_Minion>(0);
                 }
             }
 

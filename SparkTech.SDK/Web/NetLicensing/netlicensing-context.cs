@@ -2,7 +2,6 @@
 {
     using System;
     using System.CodeDom.Compiler;
-    using System.Collections.Generic;
     using System.ComponentModel;
     using System.Diagnostics;
     using System.Xml;
@@ -92,104 +91,6 @@
             {
                 this.idField = value;
             }
-        }
-    }
-
-    internal class ValidationResult
-    {
-        internal Dictionary<String, Composition> validations;
-
-        public ValidationResult(netlicensing source)
-        {
-            validations = new Dictionary<String, Composition>();
-            if (source.items.item == null)
-            {
-                return;
-            }
-            foreach (item i in source.items.item)
-            {
-                Composition pmValidateProperties = new Composition();
-                String productModuleNumber = null;
-                if (i.property != null)
-                {
-                    foreach (property p in i.property)
-                    {
-                        switch (p.name)
-                        {
-                            case "productModuleNumber":
-                                productModuleNumber = p.Value;
-                                break;
-                            default:
-                                pmValidateProperties.put(p.name, p.Value);
-                                break;
-                        }
-                    }
-                }
-                if (i.list != null)
-                {
-                    foreach (list l in i.list)
-                    {
-                        pmValidateProperties.properties.Add(l.name, convertFromList(l));
-                    }
-                }
-
-                setProductModuleValidation(productModuleNumber, pmValidateProperties);
-            }
-        }
-
-        private Composition convertFromList(list l)
-        {
-            Composition result = new Composition();
-            if (l.property != null)
-            {
-                foreach (property p in l.property)
-                {
-                    result.put(p.name, p.Value);
-                }
-            }
-
-            if (l.list1 != null)
-            {
-                foreach (list l1 in l.list1)
-                {
-                    result.properties.Add(l1.name, convertFromList(l1));
-                }
-            }
-
-            return result;
-        }
-
-        public Composition getProductModuleValidation(String productModuleNumber)
-        {
-            return validations[productModuleNumber];
-        }
-
-        internal void setProductModuleValidation(String productModuleNumber, Composition productModuleValidaton)
-        {
-            validations.Add(productModuleNumber, productModuleValidaton);
-        }
-    }
-
-    public class Composition
-    {
-        public Dictionary<String, Composition> properties;
-        public String value { get; set; }
-
-        public Composition() // list
-        {
-            properties = new Dictionary<String, Composition>();
-            this.value = null;
-        }
-
-        public Composition(String value) // property
-        {
-            properties = null;
-            this.value = value;
-        }
-
-        public void put(String key, String value)
-        {
-            properties.Add(key, new Composition(value));
         }
     }
 

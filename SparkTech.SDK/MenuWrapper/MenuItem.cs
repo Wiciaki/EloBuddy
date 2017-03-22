@@ -48,7 +48,6 @@
             }
         }
 
-
         /// <summary>
         /// Asserts that the value matches
         /// </summary>
@@ -66,18 +65,24 @@
 
         private int skipping;
       
-        private ValueChangedEventArgs OnPropertyChanged(string name)
+        private bool InvokeAndDetermine(string name)
         {
-            var args = new ValueChangedEventArgs(this, name);
-
             if (this.skipping-- > 0)
             {
-                return args;
+                return false;
             }
+
+            var args = new ValueChangedEventArgs(this, name);
 
             this.PropertyChanged?.Invoke(args);
 
-            return args;
+            if (!args.Process)
+            {
+                this.skipping = 2;
+                return true;
+            }
+
+            return false;
         }
 
         #region Separator
@@ -127,9 +132,8 @@
                 {
                     this.boolVal = args.NewValue;
                     
-                    if (!this.OnPropertyChanged(nameof(this.Bool)).Process)
+                    if (this.InvokeAndDetermine(nameof(this.Bool)))
                     {
-                        this.skipping = 2;
                         item.CurrentValue = args.OldValue;
                     }
                 };
@@ -152,7 +156,7 @@
 
                 this.boolVal = value;
 
-                ((ValueBase<bool>)this.Instance).CurrentValue = value;
+                this.Instance.Cast<ValueBase<bool>>().CurrentValue = value;
             }
         }
 
@@ -199,9 +203,8 @@
                 {
                     this.boolVal = args.NewValue;
 
-                    if (!this.OnPropertyChanged(nameof(this.Bool)).Process)
+                    if (this.InvokeAndDetermine(nameof(this.Bool)))
                     {
-                        this.skipping = 2;
                         item.CurrentValue = args.OldValue;
                     }
                 };
@@ -227,9 +230,8 @@
                 {
                     this.intVal = args.NewValue;
 
-                    if (!this.OnPropertyChanged(nameof(this.Int)).Process)
+                    if (this.InvokeAndDetermine(nameof(this.Int)))
                     {
-                        this.skipping = 2;
                         item.CurrentValue = args.OldValue;
                     }
                 };
@@ -254,7 +256,7 @@
 
                 this.intVal = value;
 
-                ((Slider)this.Instance).CurrentValue = value;
+                this.Instance.Cast<Slider>().CurrentValue = value;
             }
         }
 
@@ -297,9 +299,8 @@
 
                     this.stringVal = this.stringTextValues[n];
 
-                    if (!this.OnPropertyChanged(nameof(this.StringIndex)).Process)
+                    if (this.InvokeAndDetermine(nameof(this.StringIndex)))
                     {
-                        this.skipping = 2;
                         item.CurrentValue = args.OldValue;
                     }
                 };
@@ -327,7 +328,7 @@
 
                 this.stringIndex = value;
                 this.stringVal = this.stringTextValues[value];
-                ((ComboBox)this.Instance).SelectedIndex = this.stringIndex;
+                this.Instance.Cast<ComboBox>().SelectedIndex = this.stringIndex;
             }
         }
 
