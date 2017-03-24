@@ -228,6 +228,11 @@
 
             item.OnValueChange += (sender, args) =>
                 {
+                    if (args.NewValue == args.OldValue)
+                    {
+                        return;
+                    }
+
                     this.intVal = args.NewValue;
 
                     if (this.InvokeAndDetermine(nameof(this.Int)))
@@ -293,6 +298,11 @@
 
             item.OnValueChange += (sender, args) =>
                 {
+                    if (args.NewValue == args.OldValue)
+                    {
+                        return;
+                    }
+
                     var n = args.NewValue;
 
                     this.stringIndex = n;

@@ -8,22 +8,34 @@
 
     using SparkTech.SDK.Enumerations;
 
-    public sealed class MainMenu : Menu
+    public class MainMenu : Menu
     {
         /// <summary>
         /// Gets a list of all main menus
         /// </summary>
         private static readonly List<MainMenu> Instances = new List<MainMenu>();
 
-        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null) : base(name, translationKey)
+        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null) : this(name, translationKey)
         {
             this.generator = translationGenerator;
-
-            this.Root = this;
 
             this.Replacements = replacements;
 
             this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(this.GetText(), name);
+        }
+
+        protected MainMenu(string searchedName, string translationKey, ReservedCollection replacements, Func<Language, Dictionary<string, string>> translationGenerator) : this(searchedName, translationKey)
+        {
+            this.generator = translationGenerator;
+
+            this.Replacements = replacements;
+
+            this.Instance = EloBuddy.SDK.Menu.MainMenu.MenuInstances.Values.Select(list => list.Find(item => item.UniqueMenuId == searchedName)).FirstOrDefault(menu => menu != null);
+        }
+
+        private MainMenu(string name, string translationKey) : base(name, translationKey)
+        {
+            this.Root = this;
 
             Instances.Add(this);
         }
@@ -47,7 +59,7 @@
                 m.UpdateText();
             }
 
-            menu.Instance = this.Instance.AddSubMenu(menu.GetText(), menu.Name);
+            menu.Instance = this.Instance.AddSubMenu("PLACEHOLDER", menu.Name);
 
             foreach (var pair in menu.PreAssign)
             {
@@ -79,7 +91,7 @@
         public List<MenuBase> GetComponents()
         {
             var components = new List<MenuBase>();
-            
+
             components.AddRange(this.Items.Values);
             components.AddRange(this.Menus.Values);
             components.AddRange(this.Menus.Values.SelectMany(m => m.Items.Values));
@@ -136,7 +148,7 @@
 
         private readonly Dictionary<string, string> translations = new Dictionary<string, string>();
 
-        protected internal override string GetText()
+        protected sealed override string GetText()
         {
             this.translations.Clear();
 

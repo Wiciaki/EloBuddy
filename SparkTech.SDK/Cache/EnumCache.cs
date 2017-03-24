@@ -11,7 +11,7 @@
     ///     Exposes the enumeration for fast access
     /// </summary>
     /// <typeparam name="TEnum">The enumeration type to be cached</typeparam>
-    [SuppressMessage("ReSharper", "StaticMemberInGenericType", Justification = "The members differ for every generic type provided, therefore the supression is fine.")]
+    [SuppressMessage("ReSharper", "StaticMemberInGenericType", Justification = "The members differ for every type param provided, therefore the suppression is fine.")]
     public static class EnumCache<TEnum> where TEnum : struct, IConvertible
     {
         #region Static Fields
@@ -43,7 +43,7 @@
         /// <summary>
         ///     Initializes static members of the <see cref="EnumCache{TEnum}" /> class
         /// </summary>
-        /// <exception cref="InvalidOperationException">TEnum is not an enum</exception>
+        /// <exception cref="InvalidOperationException"><see cref="TEnum"/> is not of an enumerable type</exception>
         static EnumCache()
         {
             if (!typeof(TEnum).IsEnum)
@@ -75,7 +75,7 @@
         ///     Retrieves a description from the specified <see cref="TEnum" />
         ///     <para>This returns null if the item has no description</para>
         /// </summary>
-        /// <param name="item"></param>
+        /// <param name="item">The value to have its description read</param>
         /// <returns></returns>
         public static string Description(TEnum item) => Descriptions[item];
 

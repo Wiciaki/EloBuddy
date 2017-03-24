@@ -21,9 +21,9 @@
     public static class Bootstrap
     {
         /// <summary>
-        /// The path to web version of the versioning class
+        /// The path to web version of the version data class
         /// </summary>
-        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/Web/Versioning.cs";
+        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionData.cs";
 
         /// <summary>
         /// The downloaded version data to be matched

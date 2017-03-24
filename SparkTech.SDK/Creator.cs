@@ -10,6 +10,7 @@
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
+    using SparkTech.SDK.SparkWalking;
     using SparkTech.SDK.Utils;
     using SparkTech.SDK.Web;
 
@@ -83,15 +84,37 @@
         /// </summary>
         static Creator()
         {
-            var modules = LicenseServer.GetModulesOwned("SparkTech.SDK");
+            DateTime subscriptionExpiry;
 
-            Licensed = modules.Count > 0;
+            Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out subscriptionExpiry);
+
+            var timeLeft = "not applicable";
+
+            if (Licensed)
+            {
+                var timeDifference = subscriptionExpiry - DateTime.Now;
+                var days = timeDifference.Days;
+
+                if (days > 3650)
+                {
+                    timeLeft = "never";
+                }
+                else if (days > 0)
+                {
+                    timeLeft = $"{days} days";
+                }
+                else
+                {
+                    timeLeft = $"{timeDifference.Hours} hours";
+                }
+            }
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
 
             var replacements = new ReservedCollection
                                    {
-                                       ["licenseStatus"] = Licensed.ToString
+                                       ["licenseStatus"] = Licensed.ToString,
+                                       ["subExpiry"] = () => timeLeft
                                    };
 
             MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
@@ -133,15 +156,8 @@
 
             languageItem.PropertyChanged += args =>
                 {
-                    var lang = args.Sender.Enum<Language>();
-
-                    if (lang == Language)
-                    {
-                        return;
-                    }
-                    
-                    Language = lang;
-
+                    Language = args.Sender.Enum<Language>();
+                    Console.WriteLine("Rebuild");
                     MainMenu.Rebuild();
                 };
 
@@ -149,25 +165,19 @@
                 {
                     args.Process = false;
 
-                    var thread = new Thread(() =>
-                        {
-                            var path = LicenseServer.GetShopLink();
+                    var path = LicenseServer.GetShopLink();
 
-                            CodeFlow.Secure(delegate
+                    CodeFlow.Secure(delegate
+                            {
+                                if (path == null)
                                 {
-                                    if (path == null)
-                                    {
-                                        Comms.Print(MainMenu.GetTranslation("token_fail"));
-                                        return;
-                                    }
+                                    Comms.Print(MainMenu.GetTranslation("token_fail"));
+                                    return;
+                                }
 
-                                    Clipboard.SetText(path);
-                                    Comms.Print(MainMenu.GetTranslation("token_success"));
-                                });
-                        });
-
-                    thread.SetApartmentState(ApartmentState.STA);
-                    thread.Start();
+                                Clipboard.SetText(path);
+                                Comms.Print(MainMenu.GetTranslation("token_success"));
+                            });
                 };
 
             CodeFlow.Secure(MainMenu.Rebuild);
@@ -182,6 +192,11 @@
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Generates translations for the specified language
+        /// </summary>
+        /// <param name="language">The specified language</param>
+        /// <returns>A dictionary with all the translations available</returns>
         private static Dictionary<string, string> GetTranslations(Language language)
         {
             switch (language)
@@ -201,13 +216,16 @@
                                    ["update"] = "Updates",
 
                                    ["update_note_sdk"] = "SparkTech.SDK version status:",
-                                   ["update_note_allypingspammer"] = "Pinging capabilities of AllyPingSpammer:",
-
                                    ["updated_yes_sdk"] = "You are using the updated version, which is {sdkVersion}",
                                    ["updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdkVersion}",
 
+                                   ["update_note_allypingspammer"] = "Pinging capabilities of AllyPingSpammer:",
                                    ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammerVersion}",
                                    ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammerVersion}",
+
+                                   ["update_note_lissandra"] = ":",
+                                   ["updated_yes_lissandra"] = "FREEEEZE! ({lissandraVersion})",
+                                   ["updated_no_lissandra"] = "Need more ice cubes... Update is available! {lissandraVersion}",
 
                                    ["update_available"] = "Updates are available. Check the menu for more details.",
 
@@ -215,7 +233,7 @@
 
                                    ["license"] = "Subscription",
                                    ["license_shop"] = "Press to generate an unique shop link",
-                                   ["license_status"] = "Subscription owned: {licenseStatus}",
+                                   ["license_status"] = "Subscription owned: {licenseStatus}.\nExpires on: {subExpiry}",
                                    ["license_note"] = "A subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way to keep me motivated.\nPlease visit the shop website to find our more.",
 
                                    ["language"] = "Language",
@@ -233,13 +251,16 @@
                                    ["update"] = "Aktualizacje",
 
                                    ["update_note_sdk"] = "Status wersji SparkTech.SDK:",
-                                   ["update_note_allypingspammer"] = "Moc pingowania AllyPingSpammera:",
-
                                    ["updated_yes_sdk"] = "Używasz aktualnej wersji ({sdkVersion})",
                                    ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdkVersion}",
 
+                                   ["update_note_allypingspammer"] = "Moc pingowania AllyPingSpammera:",
                                    ["updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammerVersion}",
                                    ["updated_no_allypingspammer"] = "Niedobór pingów! Proszę, zaktualizuj: {allypingspammerVersion}",
+
+                                   ["update_note_lissandra"] = "Wersja Lissandry:",
+                                   ["updated_yes_lissandra"] = "Aktualna. ({lissandraVersion})",
+                                   ["updated_no_lissandra"] = "Deficyt kostek lodu.... aktualizacja potrzebna! {lissandraVersion}",
 
                                    ["update_available"] = "Aktualizacje są dostępne. Sprawdź menu, by poznać szczegóły.",
 
@@ -247,7 +268,7 @@
 
                                    ["license"] = "Subskrypcja",
                                    ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
-                                   ["license_status"] = "Status subskrypcji: {licenseStatus}",
+                                   ["license_status"] = "Status subskrypcji: {licenseStatus}.\nWygasa: {subExpiry}",
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",

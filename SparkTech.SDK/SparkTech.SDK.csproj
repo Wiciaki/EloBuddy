@@ -36,7 +36,7 @@
     <CodeAnalysisRuleSet>SparkTech.SDK.ruleset</CodeAnalysisRuleSet>
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>
@@ -155,7 +155,7 @@
     <Compile Include="Web\License.cs" />
     <Compile Include="Web\NetLicensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />
-    <Compile Include="Web\Versioning.cs" />
+    <Compile Include="VersionData.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -109,7 +109,7 @@
         static PingSpammer()
         {
             Allies = ObjectCache.GetNative<AIHeroClient>().FindAll(h => h.Team() == ObjectTeam.Ally);
-            Allies.RemoveAt(Allies.FindIndex(champ => champ.IsMe));
+            Allies.RemoveAll(h => h.IsMe);
 
             if (Allies.Count == 0)
             {
@@ -142,13 +142,12 @@
                     });
 
             AssignHero();
-            Pinged(Game.Time.ToTicks());
 
             MainMenu["hero"].PropertyChanged += args => AssignHero();
             MainMenu["active"].Bool = false;
 
             Chat.OnClientSideMessage += OnClientSideMessage;
-            Game.OnUpdate += OnUpdate;
+            Game.OnTick += OnTick;
             Drawing.OnDraw += OnDraw;
         }
 
@@ -165,10 +164,10 @@
         }
 
         /// <summary>
-        /// Executes every time the game updates
+        /// Executes every time the core sends a tick request
         /// </summary>
         /// <param name="args">The empty event data</param>
-        private static void OnUpdate(EventArgs args)
+        private static void OnTick(EventArgs args)
         {
             if (MainMenu["button"])
             {

@@ -1,8 +1,6 @@
 ﻿namespace SparkTech.SDK.Web
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Net;
     using System.Security;
     using System.Text;
@@ -14,26 +12,54 @@
     using SparkTech.SDK.Web.NetLicensing;
 
     /// <summary>
-    /// Acts like a bridge between the current game and the licensing server
+    /// Acts like a bridge between the current game instance and the licensing server
     /// </summary>
     public class LicenseServer
     {
         /// <summary>
-        /// The current EloBuddy username
+        /// The currently used EloBuddy account name
         /// </summary>
         public static readonly string Username;
 
         /// <summary>
-        /// Obtains a list of the product modules owned
+        /// Determines whether the user has an active subscription for the specified product
         /// </summary>
-        /// <param name="productName">The specified product name</param>
-        /// <returns>A list of product modules active for the specified product</returns>
-        public List<string> GetModulesOwned(string productName)
+        /// <param name="productName">The product to be searched for</param>
+        /// <param name="expiryDate">The time the subscription expires</param>
+        /// <returns></returns>
+        public bool GetSubscription(string productName, out DateTime expiryDate)
         {
-            return this.ServerCall(productName)?.items.item
-                       .Where(item => Array.Exists(item.property, prop => prop.name == "valid" && prop.Value == "true"))
-                       .Select(item => Array.Find(item.property, prop => prop.name == "productModuleNumber").Value)
-                       .ToList() ?? new List<string>(0);
+            var req = this.ServerCall(productName);
+
+            if (req != null)
+            {
+                foreach (var item in req.items.item)
+                {
+                    foreach (var prop in item.property)
+                    {
+                        if (prop.name == "licensingModel")
+                        {
+                            switch (prop.Value)
+                            {
+                                case "Subscription":
+                                    if (Array.Exists(item.property, p => p.name == "valid" && p.Value == "true"))
+                                    {
+                                        expiryDate = DateTime.Parse(Array.Find(item.property, p => p.name == "expires").Value);
+
+                                        return expiryDate > DateTime.Now;
+                                    }
+                                    break;
+                                default:
+                                    Logger.Error($"The licensing model \"{prop.Value}\" was not implemented, please contact Spark to get it added.");
+                                    break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            expiryDate = default(DateTime);
+            return false;
         }
 
         /// <summary>
@@ -123,7 +149,7 @@
 
             Console.Title = "Connecting to NetLicensing...";
 
-            request.UserAgent = $"NetLicensing/Wiciaki/.NET {Environment.Version}";
+            request.UserAgent = $"NetLicensing/Spark's client/.NET \"{Environment.Version}\"";
             request.Method = token ? "POST" : "GET";
             request.Credentials = new NetworkCredential("apiKey", this.apiKey);
             request.PreAuthenticate = true;
@@ -132,14 +158,14 @@
 
             if (token)
             {
-                request.ContentType = "application/x-www-form-urlencoded";
-
                 var bytes = Encoding.UTF8.GetBytes($"tokenType=SHOP&licenseeNumber={Username}");
                 request.ContentLength = bytes.Length;
+                request.ContentType = "application/x-www-form-urlencoded";
 
-                var stream = request.GetRequestStream();
-                stream.Write(bytes, 0, bytes.Length);
-                stream.Close();
+                using (var stream = request.GetRequestStream())
+                {
+                    stream.Write(bytes, 0, bytes.Length);
+                }
             }
 
             try
@@ -159,7 +185,7 @@
             }
             catch (WebException)
             {
-                Logger.Error("SparkTech.SDK: Connection error. Potential reason: User not registered in database.");
+                Logger.Error("SparkTech.SDK: Connection error. Potential reason: User not registered in database for this API key.");
 
                 if (!token)
                 {

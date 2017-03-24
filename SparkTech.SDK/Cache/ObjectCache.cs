@@ -88,9 +88,9 @@
         /// </summary>
         private static readonly List<Obj_AI_Minion> Wards;
 
-        // The compiler can't know we're going to use reflection!
 #pragma warning disable 649
-#pragma warning disable 169
+#pragma warning disable 169 // The compiler just can't know we're going to use reflection!
+#pragma warning disable RCS1169
 
         /// <summary>
         ///     Contains all the <see cref="AttackableUnit" /> instances
@@ -139,6 +139,7 @@
 
 #pragma warning restore 649
 #pragma warning restore 169
+#pragma warning restore RCS1169
 
         #endregion
 
@@ -202,10 +203,9 @@
             }
             catch (InvalidOperationException)
             {
-                Logger.Error("Player not found! (Did the game finish?)");
-                throw;
+                Logger.Error("Player not found! (Invalid game state?)");
+                Player = ObjectManager.Player;
             }
-
 
             var alliedTeam = Player.Team;
 
