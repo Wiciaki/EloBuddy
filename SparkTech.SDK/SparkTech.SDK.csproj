@@ -155,7 +155,7 @@
     <Compile Include="Web\License.cs" />
     <Compile Include="Web\NetLicensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />
-    <Compile Include="VersionData.cs" />
+    <Compile Include="VersionInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -203,7 +203,7 @@
             }
             catch (InvalidOperationException)
             {
-                Logger.Error("Player not found! (Invalid game state?)");
+                Logger.Error("SparkTech.SDK: Player not found! (Bad cache request?)");
                 Player = ObjectManager.Player;
             }
 

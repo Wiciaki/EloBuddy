@@ -3,14 +3,12 @@
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Threading;
     using System.Windows;
 
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
-    using SparkTech.SDK.SparkWalking;
     using SparkTech.SDK.Utils;
     using SparkTech.SDK.Web;
 
@@ -92,20 +90,20 @@
 
             if (Licensed)
             {
-                var timeDifference = subscriptionExpiry - DateTime.Now;
-                var days = timeDifference.Days;
+                var span = subscriptionExpiry - DateTime.Now;
+                var days = span.Days;
 
                 if (days > 3650)
                 {
                     timeLeft = "never";
                 }
-                else if (days > 0)
+                else if (span.Days > 0)
                 {
                     timeLeft = $"{days} days";
                 }
                 else
                 {
-                    timeLeft = $"{timeDifference.Hours} hours";
+                    timeLeft = $"{span.Hours} hours";
                 }
             }
 
@@ -117,7 +115,7 @@
                                        ["subExpiry"] = () => timeLeft
                                    };
 
-            MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements)
+            MainMenu = new MainMenu("st.sdk", "settings", GetTranslations, replacements)
                            {
                                new QuickMenu("update"),
 
@@ -157,7 +155,7 @@
             languageItem.PropertyChanged += args =>
                 {
                     Language = args.Sender.Enum<Language>();
-                    Console.WriteLine("Rebuild");
+
                     MainMenu.Rebuild();
                 };
 
@@ -206,7 +204,7 @@
                                {
                                    ["error"] = "ERROR",
 
-                                   ["st_sdk"] = "SparkTech.SDK",
+                                   ["settings"] = "SparkTech.SDK",
 
                                    ["token_success"] = "Link copied to clipboard!",
                                    ["token_fail"] = "Failed to obtain a token!",
@@ -223,7 +221,7 @@
                                    ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammerVersion}",
                                    ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammerVersion}",
 
-                                   ["update_note_lissandra"] = ":",
+                                   ["update_note_lissandra"] = "Lissandra version:",
                                    ["updated_yes_lissandra"] = "FREEEEZE! ({lissandraVersion})",
                                    ["updated_no_lissandra"] = "Need more ice cubes... Update is available! {lissandraVersion}",
 
@@ -237,7 +235,7 @@
                                    ["license_note"] = "A subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way to keep me motivated.\nPlease visit the shop website to find our more.",
 
                                    ["language"] = "Language",
-                                   ["contact"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:\nDiscord: \"Spark\"\nSkype: \"wiktorsharp\"",
+                                   ["contact"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:\nDiscord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                                    ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.",
                                };
                 case Language.Polish:
@@ -272,7 +270,7 @@
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",
-                                   ["contact"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:\nDiscord: \"Spark\"\nSkype: \"wiktorsharp\"",
+                                   ["contact"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:\nDiscord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                     };
             }
         }

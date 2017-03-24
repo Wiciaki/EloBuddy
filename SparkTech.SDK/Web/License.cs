@@ -125,6 +125,7 @@
         {
             var token = productName == null;
             var link = "https://go.netlicensing.io/core/v2/rest/";
+            var username = WebUtility.UrlEncode(Username);
 
             if (token)
             {
@@ -132,7 +133,7 @@
             }
             else
             {
-                link += $"licensee/{Username}/validate?productNumber={productName}";
+                link += $"licensee/{username}/validate?productNumber={productName}";
             }
 
             HttpWebRequest request;
@@ -158,7 +159,7 @@
 
             if (token)
             {
-                var bytes = Encoding.UTF8.GetBytes($"tokenType=SHOP&licenseeNumber={Username}");
+                var bytes = Encoding.UTF8.GetBytes($"tokenType=SHOP&licenseeNumber={username}");
                 request.ContentLength = bytes.Length;
                 request.ContentType = "application/x-www-form-urlencoded";
 

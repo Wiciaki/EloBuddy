@@ -1,6 +1,6 @@
 ﻿namespace SparkTech.SDK
 {
-    public static class VersionData
+    public static class VersionInfo
     {
         public const string VersionSDK = "0.2.1.9";
 

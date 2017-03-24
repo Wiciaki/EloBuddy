@@ -59,7 +59,8 @@
                 m.UpdateText();
             }
 
-            menu.Instance = this.Instance.AddSubMenu("PLACEHOLDER", menu.Name);
+            menu.Instance = this.Instance.AddSubMenu("SparkTech.SDK", menu.Name);
+            menu.UpdateText();
 
             foreach (var pair in menu.PreAssign)
             {

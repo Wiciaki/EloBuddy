@@ -23,7 +23,7 @@
         /// <summary>
         /// The path to web version of the version data class
         /// </summary>
-        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionData.cs";
+        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionInfo.cs";
 
         /// <summary>
         /// The downloaded version data to be matched
@@ -93,10 +93,21 @@
         /// Handles the application entry point arguments
         /// </summary>
         /// <param name="args">The empty, non-null string array</param>
+        /// <exception cref="ArgumentException">The array wasn't empty</exception>
+        /// <exception cref="ArgumentNullException">The array was equal to null</exception>
         [CodeFlow.Unsafe]
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void Init(this string[] args)
         {
-            Array.ForEach(args, Console.WriteLine);
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            if (args.Length != 0)
+            {
+                throw new ArgumentException("args.Length != 0");
+            }
 
             Process(Assembly.GetCallingAssembly());
         }

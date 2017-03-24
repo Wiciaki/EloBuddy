@@ -61,9 +61,24 @@
             this.Instance.DisplayName = this.GetText();
         }
 
-        public void AddSeparator(int height = 25)
+        public MenuItem AddSeparator(int height = 25)
         {
-            this.Instance.AddSeparator(height);
+            string separatorText;
+
+            for (var i = 0; ; i++)
+            {
+                var key = $"separator{i}";
+
+                if (this.Items.ContainsKey(key))
+                {
+                    continue;
+                }
+
+                separatorText = key;
+                break;
+            }
+
+            return this.Add(separatorText, new MenuItem(height));
         }
 
         public MenuItem AddLabel(string translationKey)
