@@ -21,16 +21,14 @@
 
             this.Replacements = replacements;
 
-            this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(this.GetText(), name);
-        }
+            var text = this.GetText();
 
-        protected MainMenu(string searchedName, string translationKey, ReservedCollection replacements, Func<Language, Dictionary<string, string>> translationGenerator) : this(searchedName, translationKey)
-        {
-            this.generator = translationGenerator;
+            if (text == "SparkTech.SDK")
+            {
+                text = "༼ つ ◕_◕ ༽つ";
+            }
 
-            this.Replacements = replacements;
-
-            this.Instance = EloBuddy.SDK.Menu.MainMenu.MenuInstances.Values.Select(list => list.Find(item => item.UniqueMenuId == searchedName)).FirstOrDefault(menu => menu != null);
+            this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(text, name);
         }
 
         private MainMenu(string name, string translationKey) : base(name, translationKey)

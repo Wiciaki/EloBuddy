@@ -231,7 +231,7 @@
 
                                    ["license"] = "Subscription",
                                    ["license_shop"] = "Press to generate an unique shop link",
-                                   ["license_status"] = "Subscription owned: {licenseStatus}.\nExpires on: {subExpiry}",
+                                   ["license_status"] = "Subscription owned: {licenseStatus}.\nExpires in: {subExpiry}",
                                    ["license_note"] = "A subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way to keep me motivated.\nPlease visit the shop website to find our more.",
 
                                    ["language"] = "Language",
@@ -266,7 +266,7 @@
 
                                    ["license"] = "Subskrypcja",
                                    ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
-                                   ["license_status"] = "Status subskrypcji: {licenseStatus}.\nWygasa: {subExpiry}",
+                                   ["license_status"] = "Status subskrypcji: {licenseStatus}.\nWygasa za: {subExpiry}",
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",

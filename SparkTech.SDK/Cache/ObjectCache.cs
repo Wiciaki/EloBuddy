@@ -197,14 +197,9 @@
                 }
             }
 
-            try
+            if (Game.Mode == GameMode.Running)
             {
                 Player = (AIHeroClient)GameObjectList.Single(o => o.IsMe);
-            }
-            catch (InvalidOperationException)
-            {
-                Logger.Error("SparkTech.SDK: Player not found! (Bad cache request?)");
-                Player = ObjectManager.Player;
             }
 
             var alliedTeam = Player.Team;

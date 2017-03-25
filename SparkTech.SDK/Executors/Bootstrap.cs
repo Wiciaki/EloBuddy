@@ -42,6 +42,7 @@
         static Bootstrap()
         {
             Console.Title = "Connecting to GitHub...";
+            Console.WriteLine();
 
             AppDomain.CurrentDomain.DomainUnload += delegate
                 {
@@ -93,7 +94,6 @@
         /// Handles the application entry point arguments
         /// </summary>
         /// <param name="args">The empty, non-null string array</param>
-        /// <exception cref="ArgumentException">The array wasn't empty</exception>
         /// <exception cref="ArgumentNullException">The array was equal to null</exception>
         [CodeFlow.Unsafe]
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -104,9 +104,13 @@
                 throw new ArgumentNullException(nameof(args));
             }
 
-            if (args.Length != 0)
+            if (args.Length != 1)
             {
-                throw new ArgumentException("args.Length != 0");
+                Console.WriteLine("args.Length != 1");
+            }
+            else if (args[0] != null)
+            {
+                Console.WriteLine("args[0] != null");
             }
 
             Process(Assembly.GetCallingAssembly());
