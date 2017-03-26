@@ -197,10 +197,7 @@
                 }
             }
 
-            if (Game.Mode == GameMode.Running)
-            {
-                Player = (AIHeroClient)GameObjectList.Single(o => o.IsMe);
-            }
+            Player = Game.Mode == GameMode.Running ? (AIHeroClient)GameObjectList.Single(o => o.IsMe) : ObjectManager.Player;
 
             var alliedTeam = Player.Team;
 

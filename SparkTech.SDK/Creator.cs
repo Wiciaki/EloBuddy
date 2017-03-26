@@ -85,7 +85,7 @@
 
             Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out subscriptionExpiry);
 
-            var timeLeft = "not applicable";
+            var timeLeft = "-/-";
 
             if (Licensed)
             {
@@ -152,6 +152,11 @@
             }
 
             Language = languageItem.Enum<Language>();
+
+            if (Language != Language.English)
+            {
+                MainMenu.Rebuild();
+            }
 
             languageItem.PropertyChanged += args =>
                 {

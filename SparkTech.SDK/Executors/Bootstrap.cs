@@ -135,14 +135,16 @@
                     }
                 }
                 
+                
                 var assemblyName = assembly.GetName();
                 var split = assemblyName.Name.Split('.');
                 var name = split[split.Length - 1];
 
-                var match = new Regex($@"Version{name} = ""(\d.\d.\d.\d)""").Match(Data);
+                var match = new Regex($@"Version{name} = ""(\d+.\d+.\d+.\d+)""").Match(Data);
 
                 if (!match.Success)
                 {
+                    Console.WriteLine(name);
                     return;
                 }
 
