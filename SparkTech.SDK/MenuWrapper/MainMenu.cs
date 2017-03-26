@@ -30,11 +30,6 @@
             }
         }
 
-        public sealed override void UpdateText()
-        {
-            this.Instance.DisplayName = this.GetText().ToUpper();
-        }
-
         private MainMenu(string name, string translationKey) : base(name, translationKey)
         {
             this.Root = this;
@@ -177,7 +172,7 @@
                 }
             }
 
-            return base.GetText();
+            return base.GetText().ToUpper();
         }
 
         #endregion

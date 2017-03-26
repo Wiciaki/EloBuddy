@@ -57,7 +57,7 @@
             return item;
         }
 
-        public override void UpdateText()
+        public sealed override void UpdateText()
         {
             this.Instance.DisplayName = this.GetText();
         }
