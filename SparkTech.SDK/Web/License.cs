@@ -29,29 +29,32 @@
         /// <returns></returns>
         public bool GetSubscription(string productName, out DateTime expiryDate)
         {
-            var req = this.ServerCall(productName);
-
-            if (req != null)
+            if (Username != null)
             {
-                foreach (var item in req.items.item)
-                {
-                    foreach (var prop in item.property)
-                    {
-                        if (prop.name == "licensingModel")
-                        {
-                            switch (prop.Value)
-                            {
-                                case "Subscription":
-                                    if (Array.Exists(item.property, p => p.name == "valid" && p.Value == "true"))
-                                    {
-                                        expiryDate = DateTime.Parse(Array.Find(item.property, p => p.name == "expires").Value);
+                var req = this.ServerCall(productName);
 
-                                        return expiryDate > DateTime.Now;
-                                    }
-                                    break;
-                                default:
-                                    Logger.Error($"The licensing model \"{prop.Value}\" was not implemented, please contact Spark to get it added.");
-                                    break;
+                if (req != null)
+                {
+                    foreach (var item in req.items.item)
+                    {
+                        foreach (var prop in item.property)
+                        {
+                            if (prop.name == "licensingModel")
+                            {
+                                switch (prop.Value)
+                                {
+                                    case "Subscription":
+                                        if (Array.Exists(item.property, p => p.name == "valid" && p.Value == "true"))
+                                        {
+                                            expiryDate = DateTime.Parse(Array.Find(item.property, p => p.name == "expires").Value);
+
+                                            return expiryDate > DateTime.Now;
+                                        }
+                                        break;
+                                    default:
+                                        Logger.Error($"The licensing model \"{prop.Value}\" was not implemented, please contact Spark to get it added.");
+                                        break;
+                                }
                             }
                         }
                     }

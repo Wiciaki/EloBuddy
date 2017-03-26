@@ -12,11 +12,10 @@
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.EventData;
-    using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
-    using SparkTech.SDK.Web;
 
+    using UnitCache = SparkTech.SDK.Cache.EnumCache<Enumerations.UnitType>;
     using Color = System.Drawing.Color;
     using DrawingClass = EloBuddy.Drawing;
     using HealthPrediction = EloBuddy.SDK.Prediction.Health;
@@ -26,7 +25,6 @@
     /// <summary>
     /// An alternative to the <see cref="EloBuddy.SDK.Orbwalker"/> class.
     /// </summary>
- // [Trigger]
     public class SparkWalker
     {
         #region Menus
@@ -34,28 +32,195 @@
         /// <summary>
         /// The main menu instance of the orbwalker
         /// </summary>
-        protected static readonly MainMenu Menu = new MainMenu("st_orb", "st_orb", null);
+        protected static readonly MainMenu Menu = new MainMenu("xorbwalker", "xorbwalker", GenerateTranslations);
 
         /// <summary>
         /// The targeting submenu instance
         /// </summary>
-        protected static readonly Menu Targeting = Menu.AddSubMenu("Targeting", "targeting");
+        protected static readonly Menu Targeting = Menu.Add(new QuickMenu("targeting"));
 
         /// <summary>
         /// The targeting submenu instance
         /// </summary>
-        protected static readonly Menu Keybinds = Menu.AddSubMenu("Keybinds", "keybinds");
+        protected static readonly Menu Keybinds = Menu.Add(new QuickMenu("keybinds"));
 
         /// <summary>
         /// The miscalenous submenu instance
         /// </summary>
-        protected static readonly Menu Misc = Menu.AddSubMenu("Miscallenous", "misc");
+        protected static readonly Menu Misc = Menu.Add(new QuickMenu("misc"));
 
         /// <summary>
         /// The <see cref="Dictionary{TKey, TValue}"/> chain
         /// </summary>
         protected static readonly Dictionary<Mode, Menu> ModeMenu = new Dictionary<Mode, Menu>(EnumCache<Mode>.Count);
 
+        #endregion
+
+        #region Menu Builder
+
+        private static Dictionary<string, string> GenerateTranslations(Language language)
+        {
+            switch (language)
+            {
+                default:
+                    return new Dictionary<string, string>
+                               {
+                                   ["orb"] = "XOrbwalker", ["targeting"] = "Targeting",
+                                   ["keybinds"] = "Keybinds", ["misc"] = "Miscallenous",
+                                   ["combo"] = "Combo", ["laneclear"] = "Laneclear",
+                                   ["harass"] = "Harass", ["lasthit"] = "LastHit",
+                                   ["freeze"] = "Freeze", ["flee"] = "Flee"
+                               };
+                case Language.Polish: return new Dictionary<string, string>();
+            }
+        }
+        /*
+        static SparkWalker()
+        {
+            var heroes = ObjectCache.GetNative<AIHeroClient>();
+            var allies = heroes.FindAll(h => h.Team() == ObjectTeam.Ally);
+            var enemies = heroes.FindAll(h => h.Team() == ObjectTeam.Enemy);
+
+            Priorities = new List<string>(EnumCache<UnitType>.Count);
+
+            for (var i = 0; i < EnumCache<UnitType>.Count; i++)
+            {
+                Priorities.Add($"priority.{i}");
+            }
+
+            var modesMenu = Menu.Add(new SDKMenu("st_orb_modes", "Modes"));
+            {
+                foreach (var config in ModeConfiguration)
+                {
+                    var header = $"st_orb_modes_{config.Key.ToString().ToLower()}";
+
+                    var modeMenu = modesMenu.Add(new Menu(header, config.Key.ToString()));
+                    {
+                        header += "_targeting";
+
+                        var targetingMenu = modeMenu.Add(new Menu(header, "Targeting"));
+                        {
+                            var champMenu = targetingMenu.Add(new Menu(header + "_champion", "Champions"));
+                            {
+                                champMenu.Add(new MenuBool(header + "_champion_ignoreshields", "Ignore shields"));
+                                champMenu.Add(new MenuBool(header + "_champion_ignorets", "Ignore TS on targets easy to kill", true));
+                                champMenu.Add(new MenuSlider(header + "_champion_attacks", "^ Max killable attacks for this to trigger", 2, 1, 5));
+
+                                var blacklistMenu = champMenu.Add(new Menu(header + "_champion_blacklist", "Blacklist"));
+                                {
+                                    blacklistMenu.Add(new MenuSeparator(header + "_champion_blacklist_info", "Disable attacking for the following champions:"));
+
+                                    foreach (var hero in enemies)
+                                    {
+                                        blacklistMenu.Add(new MenuBool(header + "_champion_blacklist" + hero.NetworkId, $"{hero.ChampionName()} ({hero.Name})"));
+                                    }
+                                }
+                            }
+
+                            var objectMenu = targetingMenu.Add(new Menu(header + "_targeting_objects", "Objects"));
+                            {
+                                objectMenu.Add(new MenuSeparator(header + "_targeting_objects_info", "Attack the following objects:"));
+                                objectMenu.AddSeparator();
+                                objectMenu.Add(new MenuSeparator(header + "_targeting_objects_wards", "Wards"));
+
+                                foreach (var info in AttackDictionary.Select(pair => pair.Value).Where(info => info.AddToMenu))
+                                {
+                                    objectMenu.Add(new MenuBool($"{header}_targeting_objects_{info.DisplayName.ToMenuUse()}", info.DisplayName, info.AttackByDefault));
+                                }
+                            }
+
+                            var structureMenu = targetingMenu.Add(new Menu(header + "_structure", "Structures"));
+                            {
+                                structureMenu.Add(new MenuBool($"{header}_structures_nexus", "Attack the nexus", true));
+                                structureMenu.Add(new MenuBool($"{header}_structures_inhibitor", "Attack inhibitors", true));
+                                structureMenu.Add(new MenuBool($"{header}_structures_turret", "Attack turrets", true));
+                            }
+
+                            var jungleMenu = targetingMenu.Add(new Menu(header + "_jungle", "Jungle"));
+                            {
+                                jungleMenu.Add(new MenuBool(header + "_jungle_smallfirst", "Prioritize small minions"));
+                            }
+
+                            if (config.Key == Mode.Freeze)
+                            {
+                                var freezeMenu = targetingMenu.Add(new Menu(header + "_freeze", "Freeze"));
+                                {
+                                    freezeMenu.Add(new MenuSlider(header + "_freeze_maxhealth", "Health to freeze minions at", 20, 5, 50));
+                                }
+                            }
+
+                            targetingMenu.AddSeparator();
+
+                            for (var i = 0; i < config.Value.Units.Length; ++i)
+                            {
+                                targetingMenu.Add(new MenuList<UnitType>($"{header}_priority_{i}", i != 0 ? i != EnumCache<UnitType>.Count - 1 ? $"Priority {i}" : $"Priority {i} (last)" : $"Priority {i} (first)", EnumCache<UnitType>.Values) { SelectedValue = config.Value.Units[i] });
+                            }
+                        }
+
+                        header = header.Remove("_targeting");
+
+                        modeMenu.Add(new MenuBool(header + "_magnet", "Magnet to champion targets (melee only)", config.Key == Mode.Combo));
+                        modeMenu.Add(new MenuBool(header + "_attacks", "Enable attacks", true));
+                        modeMenu.Add(new MenuBool(header + "_movement", "Enable movement", true));
+                        modeMenu.Add(new MenuKeyBind(header + "_key", $"{config.Key} active!", config.Value.Key, KeyBindType.Press));
+                    }
+                }
+
+                modesMenu.Add(new MenuKeyBind("st_orb_key_movblock", "Movement block", Key.P, KeyBindType.Press));
+            }
+
+            var drawMenu = Menu.Add(new SDKMenu("st_orb_draw", "Drawings"));
+            {
+                var rangeMenu = drawMenu.Add(new Menu("st_orb_draw_ranges", "Attack ranges"));
+                {
+                    var adc = rangeMenu.Add(new MenuBool("st_orb_draw_ranges_adc", "Turn on by default for enemy ADC", true));
+
+                    Action<Obj_AI_Hero> addToMenu = hero =>
+                    {
+                        var id = hero.NetworkId;
+
+                        var heroMenu = rangeMenu.Add(new Menu($"st_orb_draw_ranges_{id}", $"{hero.ChampionName()} ({hero.Name})"));
+                        {
+                            heroMenu.Add(new MenuSlider($"st_orb_draw_ranges_radius_{id}", "Radius to activate (0 stands for unlimited)", 1500, 0, 5000));
+                            heroMenu.Add(new MenuColor($"st_orb_draw_ranges_range_{id}", "Draw range", hero.IsEnemy ? SharpColor.Red : SharpColor.Blue) { Active = adc.Value && hero.IsADC() });
+                            heroMenu.Add(new MenuColor($"st_orb_draw_ranges_holdzone_{id}", "Draw HoldZone", SharpColor.White) { Active = false });
+                        }
+                    };
+
+                    rangeMenu.AddSeparator();
+                    rangeMenu.AddSeparator("== ALLIES ==");
+                    rangeMenu.AddSeparator();
+
+                    allies.ForEach(addToMenu);
+
+                    rangeMenu.AddSeparator();
+                    rangeMenu.AddSeparator("== ENEMIES ==");
+                    rangeMenu.AddSeparator();
+
+                    enemies.ForEach(addToMenu);
+                }
+
+                var minionMenu = drawMenu.Add(new Menu("minions", "Minions"));
+                {
+                    minionMenu.Add(new MenuBool("draw_killable_minions", "Draw killable minions", true));
+                    minionMenu.Add(new MenuColor("color", "Color", SharpColor.AliceBlue));
+                }
+            }
+
+            var problemMenu = Menu.Add(new SDKMenu("st_orb_problems", "Problems"));
+            {
+                problemMenu.Add(new MenuBool("problem_stutter", "I'm stuttering"));
+                problemMenu.Add(new MenuBool("problem_missingcs", "The lasthits are badly timed"));
+                problemMenu.Add(new MenuBool("problem_holdzone", "The HoldZone isn't big enough"));
+            }
+
+            Menu.Add(new MenuBool("attacks_disable", "Disable attacks"));
+            Menu.Add(new MenuBool("movement_disable", "Disable movement"));
+            Menu.Add(new MenuList<HumanizerMode>("humanizer_mode", "Humanizer mode", EnumCache<HumanizerMode>.Values) { SelectedValue = HumanizerMode.Normal });
+
+            Core.Menu.Add(SDKMenu);
+        }
+        */
         #endregion
 
         #region Attackable Objects
@@ -68,29 +233,29 @@
             /// <summary>
             /// The display name of the object
             /// </summary>
-            public readonly string DisplayName;
+            internal readonly string DisplayName;
 
             /// <summary>
             /// The indication whether the item should be added to menu
             /// </summary>
-            public readonly bool AddToMenu;
+            internal readonly bool AddToMenu;
 
             /// <summary>
             /// The indication whether to enable the menu item by default
             /// </summary>
-            public readonly bool AttackByDefault;
+            internal readonly bool AttackByDefault;
 
             /// <summary>
             /// The <see cref="Predicate"/> determining whether to attack
             /// </summary>
-            public readonly Predicate Attack;
+            internal readonly Predicate Attack;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="ObjectInfo"/> nested class
             /// </summary>
             /// <param name="attackByDef">Attack by default</param>
             /// <param name="displayName">Display name</param>
-            public ObjectInfo(string displayName, bool attackByDef = true)
+            internal ObjectInfo(string displayName, bool attackByDef = true)
             {
                 this.DisplayName = displayName;
 
@@ -310,7 +475,7 @@
 
         #endregion
 
-        #region Variables
+        #region Instance Variables
 
         /// <summary>
         /// Gets or sets the <see cref="E:UnkillableMinions"/> scan range for this instance
@@ -320,14 +485,12 @@
         /// <summary>
         /// The cached <see cref="Vector3"/> position of the <see cref="Unit"/>
         /// </summary>
-        // ReSharper disable once InconsistentNaming
-        private Vector3 ServerPosition3D;
+        private Vector3 serverPosition3D;
 
         /// <summary>
         /// The cached <see cref="Vector2"/> position of the <see cref="Unit"/>
         /// </summary>
-        // ReSharper disable once InconsistentNaming
-        private Vector2 ServerPosition2D;
+        private Vector2 serverPosition2D;
 
         /// <summary>
         /// The <see cref="ObjectText"/> entry
@@ -407,9 +570,9 @@
                 return;
             }
 
-            this.ServerPosition3D = unit.ServerPosition;
+            this.serverPosition3D = unit.ServerPosition;
 
-            this.ServerPosition2D = this.ServerPosition3D.To2D();
+            this.serverPosition2D = this.serverPosition3D.To2D();
         }
 
         private void OnBuffGain(Obj_AI_Base sender, Obj_AI_BaseBuffGainEventArgs args)
@@ -1124,10 +1287,10 @@
 
             if (@base == null)
             {
-                return this.ServerPosition2D.Distance(target, true) <= range;
+                return this.serverPosition2D.Distance(target, true) <= range;
             }
 
-            if (this.ServerPosition2D.Distance(@base, true) <= range)
+            if (this.serverPosition2D.Distance(@base, true) <= range)
             {
                 return true;
             }

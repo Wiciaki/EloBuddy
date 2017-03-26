@@ -4,14 +4,11 @@
 
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
-    using SparkTech.SDK.Utils;
-
-    using static EloBuddy.GameObjectOrder;
 
     /// <summary>
     /// The orbwalker where the <see cref="SparkWalker.Unit"/> is <see cref="ObjectManager.Player"/>'s pet
     /// </summary>
-    internal sealed class PetWalker : SparkWalker
+    public class PetWalker : SparkWalker
     {
         /// <summary>
         /// Gets the orbwalking unit
@@ -33,17 +30,17 @@
         /// <summary>
         /// Gets the attack order
         /// </summary>
-        protected override GameObjectOrder AttackOrder => MovePet;
+        protected override GameObjectOrder AttackOrder => GameObjectOrder.MovePet;
 
         /// <summary>
         /// Gets the move order
         /// </summary>
-        protected override GameObjectOrder MoveOrder => MovePet;
+        protected override GameObjectOrder MoveOrder => GameObjectOrder.MovePet;
 
         /// <summary>
         /// Gets the stop order
         /// </summary>
-        protected override GameObjectOrder StopOrder => MovePet;
+        protected override GameObjectOrder StopOrder => GameObjectOrder.MovePet;
 
         /// <summary>
         /// Determines whether this spell is an auto-attack reset
@@ -60,14 +57,8 @@
         {
             get
             {
-                if (Targeting["pet_always_combo"])
-                {
-                    return Mode.Combo;
-                }
-
-                return base.Mode;
+                return Targeting["pet.combo"] ? Mode.Combo : base.Mode;
             }
-
             set
             {
                 base.Mode = value;

@@ -47,6 +47,7 @@
             if (this.Instance != null)
             {
                 this.Instance.Add(name, item.Instance);
+                item.UpdateText();
             }
             else
             {

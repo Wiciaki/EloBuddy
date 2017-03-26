@@ -7,6 +7,7 @@
     using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.Enumerations;
+    using SparkTech.SDK.Utils;
 
     public class MainMenu : Menu
     {
@@ -15,20 +16,23 @@
         /// </summary>
         private static readonly List<MainMenu> Instances = new List<MainMenu>();
 
-        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null) : this(name, translationKey)
+        public MainMenu(string name, string translationKey, Func<Language, Dictionary<string, string>> translationGenerator, ReservedCollection replacements = null, string customHeader = null) : this(name, translationKey)
         {
             this.generator = translationGenerator;
 
             this.Replacements = replacements;
 
-            var text = this.GetText();
+            this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(customHeader ?? this.GetText(), name);
 
-            if (text == "SparkTech.SDK")
+            if (customHeader != null)
             {
-                text = "༼ つ ◕_◕ ༽つ";
+                this.UpdateText();
             }
+        }
 
-            this.Instance = EloBuddy.SDK.Menu.MainMenu.AddMenu(text, name);
+        public sealed override void UpdateText()
+        {
+            this.Instance.DisplayName = this.GetText().ToUpper();
         }
 
         private MainMenu(string name, string translationKey) : base(name, translationKey)
@@ -47,18 +51,16 @@
             return this.Add(new Menu(uniqueSubMenuId, translationName));
         }
 
+        public Menu AddSubMenu(string uniqueSubMenuId)
+        {
+            return this.Add(new QuickMenu(uniqueSubMenuId));
+        }
+
         public Menu Add(Menu menu)
         {
             menu.Root = this;
 
-            foreach (var m in menu.Items.Values)
-            {
-                m.Root = this;
-                m.UpdateText();
-            }
-
             menu.Instance = this.Instance.AddSubMenu("SparkTech.SDK", menu.Name);
-            menu.UpdateText();
 
             foreach (var pair in menu.PreAssign)
             {
@@ -68,6 +70,14 @@
             menu.PreAssign.Clear();
 
             this.Menus.Add(menu.Name, menu);
+
+            foreach (var m in menu.Items.Values)
+            {
+                m.Root = this;
+                m.UpdateText();
+            }
+
+            menu.UpdateText();
 
             return menu;
         }
@@ -89,7 +99,7 @@
 
         public List<MenuBase> GetComponents()
         {
-            var components = new List<MenuBase>();
+            var components = new List<MenuBase> { this };
 
             components.AddRange(this.Items.Values);
             components.AddRange(this.Menus.Values);
@@ -100,12 +110,7 @@
 
         public static List<MenuBase> GetAllComponents()
         {
-            var components = new List<MenuBase>();
-
-            components.AddRange(Instances);
-            components.AddRange(Instances.SelectMany(c => c.GetComponents()));
-
-            return components;
+            return Instances.SelectMany(c => c.GetComponents()).ToList();
         }
 
         #endregion
@@ -136,6 +141,11 @@
 
             Logger.Warn($"Suitable translation string for \"{translationKey}\" was not provided.");
             return translationKey;
+        }
+
+        public void Print(string translationKey)
+        {
+            Comms.Print(this.GetTranslation(translationKey));
         }
 
         /// <summary>

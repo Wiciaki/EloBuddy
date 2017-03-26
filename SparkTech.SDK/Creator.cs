@@ -9,7 +9,6 @@
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
-    using SparkTech.SDK.Utils;
     using SparkTech.SDK.Web;
 
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
@@ -115,7 +114,7 @@
                                        ["subExpiry"] = () => timeLeft
                                    };
 
-            MainMenu = new MainMenu("st.sdk", "settings", GetTranslations, replacements)
+            MainMenu = new MainMenu("st.sdk", "settings", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
                                new QuickMenu("update"),
 
@@ -130,6 +129,8 @@
 
                                { "language", new MenuItem("language", LangCache.Names) },
                                { "separator1", new MenuItem() },
+                               { "bugs.notice", new MenuItem("bugs_notice") },
+                               { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
                                { "comms.note", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
                            };
@@ -165,21 +166,17 @@
 
                     var path = LicenseServer.GetShopLink();
 
-                    CodeFlow.Secure(delegate
-                            {
-                                if (path == null)
-                                {
-                                    Comms.Print(MainMenu.GetTranslation("token_fail"));
-                                    return;
-                                }
+                    if (path == null)
+                    {
+                        MainMenu.Print("token_fail");
+                        return;
+                    }
 
-                                Clipboard.SetText(path);
-                                Comms.Print(MainMenu.GetTranslation("token_success"));
-                            });
+                    Clipboard.SetText(path);
+
+                    MainMenu.Print("token_success");
                 };
-
-            CodeFlow.Secure(MainMenu.Rebuild);
-
+            
             Console.WriteLine();
             Console.WriteLine("====== SparkTech.SDK variables ======");
             Console.WriteLine("          FirstRun: " + FirstRun + "            ");
@@ -231,11 +228,12 @@
 
                                    ["license"] = "Subscription",
                                    ["license_shop"] = "Press to generate an unique shop link",
-                                   ["license_status"] = "Subscription owned: {licenseStatus}.\nExpires in: {subExpiry}",
-                                   ["license_note"] = "A subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way to keep me motivated.\nPlease visit the shop website to find our more.",
+                                   ["license_status"] = "SDK Subscription owned: {licenseStatus}\nExpires in: {subExpiry}",
+                                   ["license_note"] = "Subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way of keeping me motivated.\nPlease visit the shop website to find our more.",
 
                                    ["language"] = "Language",
-                                   ["contact"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:\nDiscord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
+                                   ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
+                                   ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                                    ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.",
                                };
                 case Language.Polish:
@@ -270,7 +268,7 @@
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",
-                                   ["contact"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:\nDiscord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
+                                   ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:"
                     };
             }
         }

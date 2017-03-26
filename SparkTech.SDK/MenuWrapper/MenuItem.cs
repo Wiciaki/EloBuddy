@@ -260,7 +260,6 @@
                 }
 
                 this.intVal = value;
-
                 this.Instance.Cast<Slider>().CurrentValue = value;
             }
         }
@@ -280,10 +279,8 @@
 
         private readonly List<string> stringTextValues;
 
-        public MenuItem(string translationName, IEnumerable<string> textValues, int defaultIndex = 0) : base(translationName)
+        public MenuItem(string translationName, List<string> values, int defaultIndex = 0) : base(translationName)
         {
-            var values = textValues.ToList();
-
             var item = new ComboBox("PLACEHOLDER", values, defaultIndex);
 
             this.Instance = item;
@@ -331,7 +328,7 @@
             {
                 this.Assert(Type.StringList);
 
-                if (this.StringIndex == value)
+                if (this.stringIndex == value)
                 {
                     return;
                 }
@@ -358,6 +355,7 @@
         /// <summary>
         /// The string obtainer
         /// </summary>
+        /// <exception cref="InvalidOperationException">The <see cref="MenuItem"/> was not a stringlist, or the setter value not present</exception>
         public string String
         {
             get
@@ -368,16 +366,18 @@
             }
             set
             {
-                if (this == value)
+                this.Assert(Type.StringList);
+
+                if (this.stringVal == value)
                 {
                     return;
                 }
 
                 var i = this.stringTextValues.IndexOf(value);
 
-                if (i < 0)
+                if (i == -1)
                 {
-                    throw new InvalidOperationException($"Item {value} doesn't exist in this StringList.");
+                    throw new InvalidOperationException($"Item \"{value}\" doesn't exist in this StringList.");
                 }
 
                 this.StringIndex = i;

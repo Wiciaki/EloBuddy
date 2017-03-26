@@ -6,6 +6,11 @@ namespace SparkTech.SDK.Enumerations
     public enum Mode
     {
         /// <summary>
+        /// The orbwalker is slacking
+        /// </summary>
+        None = 0,
+
+        /// <summary>
         /// The orbwalker is performing a combo
         /// </summary>
         Combo = 1, 
@@ -33,11 +38,6 @@ namespace SparkTech.SDK.Enumerations
         /// <summary>
         /// The orbwalker flees
         /// </summary>
-        Flee = 6, 
-
-        /// <summary>
-        /// The orbwalker is slacking
-        /// </summary>
-        None = 0
+        Flee = 6
     }
 }

@@ -80,7 +80,7 @@
         /// <returns></returns>
         public static string ToMenuUse(this string input)
         {
-            return input.Space().ToLower().Replace('\'', ' ').Trim().Replace(' ', '_');
+            return input.Space().ToLower().Replace('\'', ' ').Trim().Replace(' ', '.');
         }
     }
 }
