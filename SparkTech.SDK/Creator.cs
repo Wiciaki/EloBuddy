@@ -7,7 +7,6 @@
 
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
-    using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
 
@@ -96,7 +95,7 @@
                 {
                     timeLeft = "never";
                 }
-                else if (span.Days > 0)
+                else if (days > 0)
                 {
                     timeLeft = $"{days} days";
                 }
@@ -110,7 +109,7 @@
 
             var replacements = new ReservedCollection
                                    {
-                                       ["licenseStatus"] = Licensed.ToString,
+                                       ["licenseStatus"] = () => Licensed ? "✔" : "✘",
                                        ["subExpiry"] = () => timeLeft
                                    };
 
@@ -128,7 +127,7 @@
                                    },
 
                                { "language", new MenuItem("language", LangCache.Names) },
-                               { "separator1", new MenuItem() },
+                               { "separator1", new MenuItem(10) },
                                { "bugs.notice", new MenuItem("bugs_notice") },
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
@@ -153,11 +152,6 @@
 
             Language = languageItem.Enum<Language>();
 
-            if (Language != Language.English)
-            {
-                MainMenu.Rebuild();
-            }
-
             languageItem.PropertyChanged += args =>
                 {
                     Language = args.Sender.Enum<Language>();
@@ -181,7 +175,12 @@
 
                     MainMenu.Print("token_success");
                 };
-            
+
+            if (Language != Language.English)
+            {
+                MainMenu.GetComponents().ForEach(component => component.UpdateText());
+            }
+
             Console.WriteLine();
             Console.WriteLine("====== SparkTech.SDK variables ======");
             Console.WriteLine("          FirstRun: " + FirstRun + "            ");
@@ -269,7 +268,7 @@
 
                                    ["license"] = "Subskrypcja",
                                    ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
-                                   ["license_status"] = "Status subskrypcji: {licenseStatus}.\nWygasa za: {subExpiry}",
+                                   ["license_status"] = "Status subskrypcji: {licenseStatus}\nWygasa za: {subExpiry}",
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",
