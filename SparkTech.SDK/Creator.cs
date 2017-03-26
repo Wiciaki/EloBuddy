@@ -127,7 +127,7 @@
                                    },
 
                                { "language", new MenuItem("language", LangCache.Names) },
-                               { "separator1", new MenuItem(10) },
+                               { "separator1", new MenuItem(8) },
                                { "bugs.notice", new MenuItem("bugs_notice") },
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
