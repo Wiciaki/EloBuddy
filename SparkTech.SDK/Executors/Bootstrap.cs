@@ -80,39 +80,45 @@
         /// </summary>
         /// <param name="link">The link to download the file</param>
         /// <param name="versionLink">The link to download the version string</param>
+        [CodeFlow.Unsafe]
         public static void WebLoad(string link, string versionLink = null)
         {
             var name = link.Split('/').Last().Remove("?raw=true");
-            Console.WriteLine(name);
             var path = Path.Combine(WorkingDirectory, "External", name);
-
-            if (!File.Exists(path))
-            {
-                Download(link, path).GetAwaiter().GetResult();
-                Process(Assembly.LoadFile(path));
-            }
 
             var download = true;
 
-            if (versionLink != null)
+            if (versionLink != null && File.Exists(path))
             {
-                var local = Assembly.LoadFile(path).GetName().Version;
-                var remote = new Version(WebClient.DownloadString(versionLink));
-
-                if (remote <= local)
+                try
                 {
-                    download = false;
+                    var local = Assembly.LoadFile(path).GetName().Version;
+                    var remote = new Version(WebClient.DownloadString(versionLink));
+
+                    if (remote <= local)
+                    {
+                        download = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.Exception("Cannot download version!", ex);
                 }
             }
 
             if (download)
             {
-                Download(link, path).GetAwaiter().GetResult();
+                Download(link, path).GetAwaiter().OnCompleted(() => Process(Assembly.LoadFile(path)));
             }
-
-            Process(Assembly.LoadFile(path));
         }
 
+        /// <summary>
+        /// Downloads the specified file asynchronously
+        /// </summary>
+        /// <param name="link">The link to download the file from</param>
+        /// <param name="path">The path to save the file to</param>
+        /// <returns>The <see cref="Task"/> that can be safely awaited</returns>
+        [CodeFlow.Unsafe]
         private static async Task Download(string link, string path)
         {
             await WebClient.DownloadFileTaskAsync(link, path).ConfigureAwait(false);
