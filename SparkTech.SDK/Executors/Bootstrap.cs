@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -25,6 +26,11 @@
         /// The object representation of the currently executing assembly
         /// </summary>
         public static readonly Assembly Assembly;
+
+        /// <summary>
+        /// The working directory for the executing assembly and its dependencies
+        /// </summary>
+        public static readonly string WorkingDirectory;
 
         /// <summary>
         /// The path to web version of the version data class
@@ -75,7 +81,35 @@
         /// <param name="versionLink">The link to download the version string</param>
         public static void WebLoad(string link, string versionLink = null)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "file.txt");
+            var name = link.Split('/').Last();
+            var path = Path.Combine(WorkingDirectory, "External", name);
+
+            if (!File.Exists(path))
+            {
+                WebClient.DownloadFile(link, path);
+                Process(Assembly.LoadFile(path));
+            }
+
+            var assembly = Assembly.LoadFile(path);
+            var download = true;
+
+            if (versionLink != null)
+            {
+                var local = assembly.GetName().Version;
+                var remote = new Version(WebClient.DownloadString(versionLink));
+
+                if (remote <= local)
+                {
+                    download = false;
+                }
+            }
+
+            if (download)
+            {
+                WebClient.DownloadFile(link, path);
+            }
+
+            Process(assembly);
         }
 
         /// <summary>
@@ -113,6 +147,11 @@
                 };
 
             timer.Start();
+
+            WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EloBuddy", "SparkTech");
+
+            Directory.CreateDirectory(WorkingDirectory);
+            Directory.CreateDirectory(Path.Combine(WorkingDirectory, "External"));
 
             Data = WebClient.DownloadString(VersioningWebPath);
 

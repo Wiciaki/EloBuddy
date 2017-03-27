@@ -137,7 +137,7 @@
 
             #region FirstInit
             {
-                var first = new MenuItem("error", false) { Instance = { IsVisible = false } };
+                var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
                 MainMenu.Add("first", first);
                 FirstRun = first;
                 first.Bool = false;
@@ -237,7 +237,7 @@
                                    ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                                    ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.\nTranslation credits: (...)",
 
-                                   ["welcome"] = "It appears you are a first time user. Welcome to SparkTech.SDK! Please, read the menu for more information"
+                                   ["welcome"] = "Welcome to SparkTech.SDK! Please, make yourself familiar with the menu first"
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>
