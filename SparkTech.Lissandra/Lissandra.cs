@@ -9,7 +9,7 @@
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.MenuWrapper;
 
-    [Trigger(Champion.Lissandra)]
+    [Trigger]
     internal static class Lissandra
     {
         private static Dictionary<string, string> TranslationGenerator(Language language)

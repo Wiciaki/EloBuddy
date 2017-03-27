@@ -2,20 +2,21 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel;
     using System.IO;
     using System.Linq;
     using System.Net;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Text.RegularExpressions;
-    using System.Timers;
+    using System.Threading.Tasks;
 
     using EloBuddy.SDK.Events;
     using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
+
+    using Timer = System.Timers.Timer;
 
     /// <summary>
     /// The component initializer
@@ -81,21 +82,21 @@
         /// <param name="versionLink">The link to download the version string</param>
         public static void WebLoad(string link, string versionLink = null)
         {
-            var name = link.Split('/').Last();
+            var name = link.Split('/').Last().Remove("?raw=true");
+            Console.WriteLine(name);
             var path = Path.Combine(WorkingDirectory, "External", name);
 
             if (!File.Exists(path))
             {
-                WebClient.DownloadFile(link, path);
+                Download(link, path).GetAwaiter().GetResult();
                 Process(Assembly.LoadFile(path));
             }
 
-            var assembly = Assembly.LoadFile(path);
             var download = true;
 
             if (versionLink != null)
             {
-                var local = assembly.GetName().Version;
+                var local = Assembly.LoadFile(path).GetName().Version;
                 var remote = new Version(WebClient.DownloadString(versionLink));
 
                 if (remote <= local)
@@ -106,10 +107,15 @@
 
             if (download)
             {
-                WebClient.DownloadFile(link, path);
+                Download(link, path).GetAwaiter().GetResult();
             }
 
-            Process(assembly);
+            Process(Assembly.LoadFile(path));
+        }
+
+        private static async Task Download(string link, string path)
+        {
+            await WebClient.DownloadFileTaskAsync(link, path).ConfigureAwait(false);
         }
 
         /// <summary>
