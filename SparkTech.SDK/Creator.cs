@@ -105,7 +105,7 @@
                 }
             }
 
-            SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == CultureInfo.InstalledUICulture.Name);
+            SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang).Substring(0, 2) == CultureInfo.InstalledUICulture.Name.Substring(0, 2));
 
             var replacements = new ReservedCollection
                                    {
@@ -131,6 +131,7 @@
                                { "bugs.notice", new MenuItem("bugs_notice") },
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
+                               { "separator3", new MenuItem(10) },
                                { "comms.note", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
                            };
 
@@ -181,14 +182,10 @@
                 MainMenu.GetComponents().ForEach(component => component.UpdateText());
             }
 
-            Console.WriteLine();
-            Console.WriteLine("====== SparkTech.SDK variables ======");
-            Console.WriteLine("          FirstRun: " + FirstRun + "            ");
-            Console.WriteLine("         Language: " + Language + "           ");
-            Console.WriteLine("     SystemLanguage: " + SystemLanguage + "         ");
-            Console.WriteLine("         Licensed: " + Licensed + "             ");
-            Console.WriteLine("=====================================");
-            Console.WriteLine();
+            if (FirstRun)
+            {
+                MainMenu.Print("welcome");
+            }
         }
 
         /// <summary>
@@ -238,7 +235,9 @@
                                    ["language"] = "Language",
                                    ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
                                    ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
-                                   ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.",
+                                   ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.\nTranslation credits: (...)",
+
+                                   ["welcome"] = "It appears you are a first time user. Welcome to SparkTech.SDK! Please, read the menu for more information"
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>

@@ -10,7 +10,7 @@
     using SparkTech.SDK.MenuWrapper;
 
     [Trigger(Champion.Lissandra)]
-    public static class Lissandra
+    internal static class Lissandra
     {
         private static Dictionary<string, string> TranslationGenerator(Language language)
         {
@@ -20,6 +20,7 @@
                     return new Dictionary<string, string>
                                {
                                    ["lissandra"] = "XLissandra",
+                                   ["combo"] = "Combo"
                                };
             }
         }
@@ -28,9 +29,10 @@
 
         static Lissandra()
         {
-            Console.WriteLine("Lissandra load...");
-
-            MainMenu = new MainMenu("st.lissandra", "st_lissandra", TranslationGenerator);
+            MainMenu = new MainMenu("st.lissandra", "lissandra", TranslationGenerator)
+                           {
+                               new QuickMenu("combo")
+                           };
         }
     }
 }

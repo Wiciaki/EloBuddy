@@ -14,9 +14,15 @@
         English = 0,
 
         /// <summary>
+        /// The <see cref="German"/> language
+        /// </summary>
+        [Description("de-DE")]
+        German = 1,
+
+        /// <summary>
         /// The <see cref="Polish"/> language
         /// </summary>
         [Description("pl-PL")]
-        Polish = 1
+        Polish = 2,
     }
 }

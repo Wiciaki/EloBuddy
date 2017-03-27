@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Net;
     using System.Reflection;
@@ -21,6 +22,11 @@
     public static class Bootstrap
     {
         /// <summary>
+        /// The object representation of the currently executing assembly
+        /// </summary>
+        public static readonly Assembly Assembly;
+
+        /// <summary>
         /// The path to web version of the version data class
         /// </summary>
         private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionInfo.cs";
@@ -31,9 +37,46 @@
         private static readonly string Data;
 
         /// <summary>
-        /// The object representation of the currently executing assembly
+        /// The web client used by this class
         /// </summary>
-        public static readonly Assembly Assembly;
+        private static readonly WebClient WebClient = new WebClient();
+
+        /// <summary>
+        /// Handles the application entry point arguments
+        /// </summary>
+        /// <param name="args">The empty, non-null string array</param>
+        /// <exception cref="ArgumentNullException">The array was equal to null</exception>
+        [CodeFlow.Unsafe]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void Init(this string[] args)
+        {
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            if (args.Length == 0 || args[0] != null)
+            {
+                Console.WriteLine("This executable must not be opened manually!");
+
+                while (true)
+                {
+                    Console.Read();
+                }
+            }
+
+            Process(Assembly.GetCallingAssembly());
+        }
+
+        /// <summary>
+        /// Invokes a remote assembly
+        /// </summary>
+        /// <param name="link">The link to download the file</param>
+        /// <param name="versionLink">The link to download the version string</param>
+        public static void WebLoad(string link, string versionLink = null)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "file.txt");
+        }
 
         /// <summary>
         /// Initializes static members of the <see cref="Bootstrap"/> class
@@ -42,11 +85,12 @@
         static Bootstrap()
         {
             Console.Title = "Connecting to GitHub...";
-            Console.WriteLine();
 
             AppDomain.CurrentDomain.DomainUnload += delegate
                 {
-                    Console.Title = "SparkTech reload...";
+                    WebClient.Dispose();
+
+                    Console.Title = "SparkTech unloaded";
                 };
 
             var flips = new List<string>(4)
@@ -70,10 +114,7 @@
 
             timer.Start();
 
-            using (var client = new WebClient())
-            {
-                Data = client.DownloadString(VersioningWebPath);
-            }
+            Data = WebClient.DownloadString(VersioningWebPath);
 
             Loading.OnLoadingComplete += delegate
                 {
@@ -88,32 +129,6 @@
                 };
 
             Process(Assembly = Assembly.GetExecutingAssembly());
-        }
-
-        /// <summary>
-        /// Handles the application entry point arguments
-        /// </summary>
-        /// <param name="args">The empty, non-null string array</param>
-        /// <exception cref="ArgumentNullException">The array was equal to null</exception>
-        [CodeFlow.Unsafe]
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void Init(this string[] args)
-        {
-            if (args == null)
-            {
-                throw new ArgumentNullException(nameof(args));
-            }
-
-            if (args.Length != 1)
-            {
-                Console.WriteLine("args.Length != 1");
-            }
-            else if (args[0] != null)
-            {
-                Console.WriteLine("args[0] != null");
-            }
-
-            Process(Assembly.GetCallingAssembly());
         }
 
         /// <summary>
@@ -134,8 +149,7 @@
                         Logger.Exception($"Couldn't invoke \"{type.FullName}\"!", ex.InnerException);
                     }
                 }
-                
-                
+
                 var assemblyName = assembly.GetName();
                 var split = assemblyName.Name.Split('.');
                 var name = split[split.Length - 1];
@@ -144,7 +158,6 @@
 
                 if (!match.Success)
                 {
-                    Console.WriteLine(name);
                     return;
                 }
 

@@ -172,7 +172,12 @@
                 }
             }
 
-            return base.GetText().ToUpper();
+            return base.GetText();
+        }
+
+        public sealed override void UpdateText()
+        {
+            this.Instance.DisplayName = this.GetText().ToUpper();
         }
 
         #endregion

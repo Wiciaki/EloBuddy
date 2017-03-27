@@ -65,13 +65,19 @@
                 default:
                     return new Dictionary<string, string>
                                {
-                                   ["orb"] = "XOrbwalker", ["targeting"] = "Targeting",
-                                   ["keybinds"] = "Keybinds", ["misc"] = "Miscallenous",
-                                   ["combo"] = "Combo", ["laneclear"] = "Laneclear",
-                                   ["harass"] = "Harass", ["lasthit"] = "LastHit",
-                                   ["freeze"] = "Freeze", ["flee"] = "Flee"
+                                   ["orb"] = "XOrbwalker",
+                                   ["targeting"] = "Targeting",
+                                   ["keybinds"] = "Keybinds",
+                                   ["misc"] = "Miscallenous",
+                                   ["combo"] = "Combo",
+                                   ["laneclear"] = "Laneclear",
+                                   ["harass"] = "Harass",
+                                   ["lasthit"] = "LastHit",
+                                   ["freeze"] = "Freeze",
+                                   ["flee"] = "Flee"
                                };
-                case Language.Polish: return new Dictionary<string, string>();
+                case Language.Polish:
+                    return new Dictionary<string, string>();
             }
         }
         /*
