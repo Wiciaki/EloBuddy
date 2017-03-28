@@ -24,14 +24,9 @@
     public static class Bootstrap
     {
         /// <summary>
-        /// The object representation of the currently executing assembly
-        /// </summary>
-        public static readonly Assembly Assembly;
-
-        /// <summary>
         /// The working directory for the executing assembly and its dependencies
         /// </summary>
-        public static readonly string WorkingDirectory;
+        private static readonly string WorkingDirectory;
 
         /// <summary>
         /// The path to web version of the version data class
@@ -165,7 +160,6 @@
             timer.Start();
 
             WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EloBuddy", "SparkTech");
-
             Directory.CreateDirectory(WorkingDirectory);
 
             Loading.OnLoadingComplete += delegate
@@ -182,7 +176,7 @@
 
             DataTask = WebClient.DownloadStringTaskAsync(VersioningWebPath);
 
-            Process(Assembly = Assembly.GetExecutingAssembly());
+            Process(Assembly.GetExecutingAssembly());
         }
 
         /// <summary>
