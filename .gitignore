@@ -237,7 +237,10 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# Custom .ignores by Spark
 *.dll
+!RemoteAssemblies/*
 /SparkTech.SDK/SparkTech.SDK.dll.config
 /SparkTech.SDK/SparkTech.SDK.dll.lastcodeanalysissucceeded
 /SparkTech.SDK/SparkTech.SDK.dll.CodeAnalysisLog.xml

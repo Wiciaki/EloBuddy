@@ -39,9 +39,9 @@
         private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionInfo.cs";
 
         /// <summary>
-        /// The downloaded version data to be matched
+        /// The task for the downloaded data
         /// </summary>
-        private static readonly string Data;
+        private static readonly Task<string> DataTask;
 
         /// <summary>
         /// The web client used by this class
@@ -62,13 +62,13 @@
                 throw new ArgumentNullException(nameof(args));
             }
 
-            if (args.Length == 0 || args[0] != null)
+            if (args.Length != 1 || args[0] != null)
             {
                 Console.WriteLine("This executable must not be opened manually!");
 
                 while (true)
                 {
-                    Console.Read();
+                    Console.ReadKey(true);
                 }
             }
 
@@ -80,48 +80,56 @@
         /// </summary>
         /// <param name="link">The link to download the file</param>
         /// <param name="versionLink">The link to download the version string</param>
+        /// <param name="pattern">The pattern to be searched in the version string for</param>
         [CodeFlow.Unsafe]
-        public static void WebLoad(string link, string versionLink = null)
+        public static void WebLoad(string link, string versionLink = null, string pattern = @"\d+.\d+.\d+.\d+")
         {
+            var libPath = Path.Combine(WorkingDirectory, "External");
+            Directory.CreateDirectory(libPath);
+
             var name = link.Split('/').Last().Remove("?raw=true");
-            var path = Path.Combine(WorkingDirectory, "External", name);
+            var path = Path.Combine(libPath, name);
 
-            var download = true;
-
-            if (versionLink != null && File.Exists(path))
+            if (versionLink == null || !File.Exists(path))
             {
-                try
-                {
-                    var local = Assembly.LoadFile(path).GetName().Version;
-                    var remote = new Version(WebClient.DownloadString(versionLink));
+                LoadRemoteAssembly(link, path);
+                return;
+            }
 
-                    if (remote <= local)
+            var assembly = Assembly.LoadFile(path);
+            var local = assembly.GetName().Version;
+
+            WebClient.DownloadStringTaskAsync(versionLink).ContinueWith(task =>
+                {
+                    var match = Regex.Match(task.Result, pattern);
+
+                    if (!match.Success)
                     {
-                        download = false;
+                        Logger.Error($"Something wrong with the version file or the pattern. {name} will not be loaded.");
+                        return;
                     }
-                }
-                catch (Exception ex)
-                {
-                    Logger.Exception("Cannot download version!", ex);
-                }
-            }
 
-            if (download)
-            {
-                Download(link, path).GetAwaiter().OnCompleted(() => Process(Assembly.LoadFile(path)));
-            }
+                    var remote = new Version(match.Value);
+
+                    if (remote > local)
+                    {
+                        LoadRemoteAssembly(link, path);
+                    }
+                    else
+                    {
+                        Process(assembly);
+                    }
+                });
         }
 
         /// <summary>
-        /// Downloads the specified file asynchronously
+        /// Loads an assembly that is located remotely
         /// </summary>
-        /// <param name="link">The link to download the file from</param>
-        /// <param name="path">The path to save the file to</param>
-        /// <returns>The <see cref="Task"/> that can be safely awaited</returns>
-        [CodeFlow.Unsafe]
-        private static async Task Download(string link, string path)
+        /// <param name="link">The link to have the assembly downloaded from</param>
+        /// <param name="path">The path to save the assembly to</param>
+        private static void LoadRemoteAssembly(string link, string path)
         {
-            await WebClient.DownloadFileTaskAsync(link, path).ConfigureAwait(false);
+            WebClient.DownloadFileTaskAsync(link, path).ContinueWith(task => Process(Assembly.LoadFile(path)));
         }
 
         /// <summary>
@@ -130,12 +138,8 @@
         [CodeFlow.Unsafe]
         static Bootstrap()
         {
-            Console.Title = "Connecting to GitHub...";
-
             AppDomain.CurrentDomain.DomainUnload += delegate
                 {
-                    WebClient.Dispose();
-
                     Console.Title = "SparkTech unloaded";
                 };
 
@@ -163,9 +167,6 @@
             WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EloBuddy", "SparkTech");
 
             Directory.CreateDirectory(WorkingDirectory);
-            Directory.CreateDirectory(Path.Combine(WorkingDirectory, "External"));
-
-            Data = WebClient.DownloadString(VersioningWebPath);
 
             Loading.OnLoadingComplete += delegate
                 {
@@ -178,6 +179,8 @@
 
                     ExecuteConstructor(typeof(Creator));
                 };
+
+            DataTask = WebClient.DownloadStringTaskAsync(VersioningWebPath);
 
             Process(Assembly = Assembly.GetExecutingAssembly());
         }
@@ -205,7 +208,7 @@
                 var split = assemblyName.Name.Split('.');
                 var name = split[split.Length - 1];
 
-                var match = new Regex($@"Version{name} = ""(\d+.\d+.\d+.\d+)""").Match(Data);
+                var match = Regex.Match(DataTask.Result, $@"Version{name} = ""(\d+.\d+.\d+.\d+)""");
 
                 if (!match.Success)
                 {
