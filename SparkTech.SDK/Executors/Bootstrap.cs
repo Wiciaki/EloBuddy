@@ -188,8 +188,12 @@
         [CodeFlow.Unsafe]
         private static void Process(Assembly assembly) => Loading.OnLoadingComplete += delegate
             {
+                var triggered = false;
+
                 foreach (var type in assembly.GetTypes().Where(HasActiveTrigger).OrderBy(type => type.Name))
                 {
+                    triggered = true;
+
                     try
                     {
                         ExecuteConstructor(type);
@@ -198,6 +202,11 @@
                     {
                         Logger.Exception($"Couldn't invoke \"{type.FullName}\"!", ex.InnerException);
                     }
+                }
+
+                if (!triggered)
+                {
+                    return;
                 }
 
                 var assemblyName = assembly.GetName();

@@ -32,9 +32,14 @@
                             text += " | Name: " + minion.Name + " | BaseName: " + minion.BaseSkinName;
                         }
 
+                        if (t == AIMinionType.Plant)
+                        {
+                            
+                        }
+
                         var pos = Drawing.WorldToScreen(minion.Position);
 
-                        Drawing.DrawText(pos.X - 200, pos.Y, Color.Gold, text);
+                        Drawing.DrawText(pos.X - 5, pos.Y + 10, Color.Gold, text);
                     }
                 };
         }

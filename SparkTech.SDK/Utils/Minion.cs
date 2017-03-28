@@ -84,6 +84,11 @@
 
                 var name = minion.Name;
 
+                if (name.StartsWith("Plant"))
+                {
+                    return AIMinionType.Plant;
+                }
+
                 if (JungleNameRegexList.Exists(regex => Regex.IsMatch(name, regex)))
                 {
                     return AIMinionType.Jungle;
