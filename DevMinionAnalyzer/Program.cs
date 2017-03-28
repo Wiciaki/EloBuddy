@@ -11,7 +11,12 @@
 
     public static class Program
     {
-        private static void Main(string[] args) => args.Init();
+        private static void Main(string[] args)
+        {
+            Bootstrap.WebLoad("https://github.com/Wiciaki/EloBuddy/blob/master/RemoteAssemblies/SparkTech.Lissandra.dll?raw=true", "https://github.com/Wiciaki/EloBuddy/raw/master/RemoteAssemblies/SampleVersion.txt");
+
+            args.Init();
+        }
     }
 
     [Trigger]
@@ -34,7 +39,7 @@
 
                         if (t == AIMinionType.Plant)
                         {
-                            
+                            text += " " + minion.IsTargetable + " " + minion.IsVisible + " " + !minion.IsDead + " " + !minion.IsInvulnerable + " " + !minion.IsZombie;
                         }
 
                         var pos = Drawing.WorldToScreen(minion.Position);

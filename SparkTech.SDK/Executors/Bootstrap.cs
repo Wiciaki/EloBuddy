@@ -65,6 +65,8 @@
             Process(Assembly.GetCallingAssembly());
         }
 
+        public static void WebLoad(string link, string versionLink = null, string pattern = null) => Resolve(link, versionLink, pattern);
+
         /// <summary>
         /// Invokes a remote assembly
         /// </summary>
@@ -72,62 +74,50 @@
         /// <param name="versionLink">The link to download the version string</param>
         /// <param name="pattern">The pattern to be searched in the version string for</param>
         [CodeFlow.Unsafe]
-        public static void WebLoad(string link, string versionLink = null, string pattern = null)
+        private static async void Resolve(string link, string versionLink, string pattern)
         {
-            var libPath = Path.Combine(WorkingDirectory, "External");
+            var libPath = Path.Combine(WorkingDirectory, "Addons");
             Directory.CreateDirectory(libPath);
-
-            if (string.IsNullOrEmpty(pattern))
-            {
-                pattern = @"\d+.\d+.\d+.\d+";
-            }
 
             var name = link.Split('/').Last().Remove("?raw=true");
             var path = Path.Combine(libPath, name);
 
-            var client = new WebClient();
-
-            if (versionLink == null || !File.Exists(path))
+            using (var client = new WebClient())
             {
-                LoadRemoteAssembly(client, link, path);
-                return;
-            }
+                Uri uri;
 
-            var assembly = Assembly.LoadFile(path);
-            var local = assembly.GetName().Version;
-
-            client.DownloadStringTaskAsync(versionLink).ContinueWith(task =>
+                if (File.Exists(path) && Uri.TryCreate(versionLink, UriKind.Absolute, out uri))
                 {
-                    var match = Regex.Match(task.Result, pattern);
+                    var download = await client.DownloadStringTaskAsync(uri).ConfigureAwait(false);
+
+                    if (string.IsNullOrEmpty(pattern))
+                    {
+                        pattern = @"\d+.\d+.\d+.\d+";
+                    }
+
+                    var match = Regex.Match(download, pattern);
 
                     if (!match.Success)
                     {
-                        Logger.Error($"SparkTech.SDK: Something is wrong with the version file or the pattern. {name} will not be loaded.");
+                        Logger.Error($"SparkTech.SDK: Version file couldn't be matched. {name} will not be loaded.");
                         return;
                     }
 
+                    var assembly = Assembly.LoadFile(path);
+                    var local = assembly.GetName().Version;
                     var remote = new Version(match.Value);
 
-                    if (remote > local)
-                    {
-                        LoadRemoteAssembly(client, link, path);
-                    }
-                    else
+                    if (local >= remote)
                     {
                         Process(assembly);
+                        return;
                     }
-                });
-        }
+                }
 
-        /// <summary>
-        /// Loads an assembly that is located remotely
-        /// </summary>
-        /// <param name="client">The webclient to be used</param>
-        /// <param name="link">The link to have the assembly downloaded from</param>
-        /// <param name="path">The path to save the assembly to</param>
-        private static void LoadRemoteAssembly(WebClient client, string link, string path)
-        {
-            client.DownloadFileTaskAsync(link, path).ContinueWith(task => Process(Assembly.LoadFile(path)));
+                await client.DownloadFileTaskAsync(link, path).ConfigureAwait(false);
+            }
+
+            Process(Assembly.LoadFile(path));
         }
 
         /// <summary>
