@@ -19,8 +19,6 @@
     {
         static Analyzer()
         {
-            Bootstrap.WebLoad("https://github.com/Wiciaki/EloBuddy/blob/master/RemoteAssemblies/SparkTech.Lissandra.dll?raw=true", "https://github.com/Wiciaki/EloBuddy/blob/master/RemoteAssemblies/SampleVersion.txt?raw=true");
-
             Drawing.OnDraw += delegate
                 {
                     foreach (var minion in ObjectCache.GetNative<Obj_AI_Minion>())

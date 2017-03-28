@@ -39,11 +39,6 @@
         private static readonly Task<string> DataTask;
 
         /// <summary>
-        /// The web client used by this class
-        /// </summary>
-        private static readonly WebClient WebClient = new WebClient();
-
-        /// <summary>
         /// Handles the application entry point arguments
         /// </summary>
         /// <param name="args">The empty, non-null string array</param>
@@ -77,30 +72,37 @@
         /// <param name="versionLink">The link to download the version string</param>
         /// <param name="pattern">The pattern to be searched in the version string for</param>
         [CodeFlow.Unsafe]
-        public static void WebLoad(string link, string versionLink = null, string pattern = @"\d+.\d+.\d+.\d+")
+        public static void WebLoad(string link, string versionLink = null, string pattern = null)
         {
             var libPath = Path.Combine(WorkingDirectory, "External");
             Directory.CreateDirectory(libPath);
 
+            if (string.IsNullOrEmpty(pattern))
+            {
+                pattern = @"\d+.\d+.\d+.\d+";
+            }
+
             var name = link.Split('/').Last().Remove("?raw=true");
             var path = Path.Combine(libPath, name);
 
+            var client = new WebClient();
+
             if (versionLink == null || !File.Exists(path))
             {
-                LoadRemoteAssembly(link, path);
+                LoadRemoteAssembly(client, link, path);
                 return;
             }
 
             var assembly = Assembly.LoadFile(path);
             var local = assembly.GetName().Version;
 
-            WebClient.DownloadStringTaskAsync(versionLink).ContinueWith(task =>
+            client.DownloadStringTaskAsync(versionLink).ContinueWith(task =>
                 {
                     var match = Regex.Match(task.Result, pattern);
 
                     if (!match.Success)
                     {
-                        Logger.Error($"Something wrong with the version file or the pattern. {name} will not be loaded.");
+                        Logger.Error($"SparkTech.SDK: Something is wrong with the version file or the pattern. {name} will not be loaded.");
                         return;
                     }
 
@@ -108,7 +110,7 @@
 
                     if (remote > local)
                     {
-                        LoadRemoteAssembly(link, path);
+                        LoadRemoteAssembly(client, link, path);
                     }
                     else
                     {
@@ -120,11 +122,12 @@
         /// <summary>
         /// Loads an assembly that is located remotely
         /// </summary>
+        /// <param name="client">The webclient to be used</param>
         /// <param name="link">The link to have the assembly downloaded from</param>
         /// <param name="path">The path to save the assembly to</param>
-        private static void LoadRemoteAssembly(string link, string path)
+        private static void LoadRemoteAssembly(WebClient client, string link, string path)
         {
-            WebClient.DownloadFileTaskAsync(link, path).ContinueWith(task => Process(Assembly.LoadFile(path)));
+            client.DownloadFileTaskAsync(link, path).ContinueWith(task => Process(Assembly.LoadFile(path)));
         }
 
         /// <summary>
@@ -133,19 +136,13 @@
         [CodeFlow.Unsafe]
         static Bootstrap()
         {
-            AppDomain.CurrentDomain.DomainUnload += delegate
-                {
-                    Console.Title = "SparkTech unloaded";
-                };
-
             var flips = new List<string>(4)
                             {
                                 @"\", "|", "/", "-"
                             };
 
-            var timer = new Timer(230d);
-
             var index = 0;
+            var timer = new Timer(230d);
 
             timer.Elapsed += delegate // TODO: Escape implicitly captured closure
                 {
@@ -158,6 +155,11 @@
                 };
 
             timer.Start();
+
+            AppDomain.CurrentDomain.DomainUnload += delegate
+                {
+                    Console.Title = "SparkTech unloaded";
+                };
 
             WorkingDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EloBuddy", "SparkTech");
             Directory.CreateDirectory(WorkingDirectory);
@@ -174,7 +176,7 @@
                     ExecuteConstructor(typeof(Creator));
                 };
 
-            DataTask = WebClient.DownloadStringTaskAsync(VersioningWebPath);
+            DataTask = new WebClient().DownloadStringTaskAsync(VersioningWebPath);
 
             Process(Assembly.GetExecutingAssembly());
         }
