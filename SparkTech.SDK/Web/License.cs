@@ -1,13 +1,13 @@
 ﻿namespace SparkTech.SDK.Web
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Security;
     using System.Text;
     using System.Xml.Serialization;
 
     using EloBuddy.Sandbox;
-    using EloBuddy.SDK.Utils;
 
     using SparkTech.SDK.Web.NetLicensing;
 
@@ -22,6 +22,11 @@
         public static readonly string Username;
 
         /// <summary>
+        /// Determines whether the current user is a staff member
+        /// </summary>
+        public static readonly bool IsStaff;
+
+        /// <summary>
         /// Determines whether the user has an active subscription for the specified product
         /// </summary>
         /// <param name="productName">The product to be searched for</param>
@@ -29,39 +34,50 @@
         /// <returns></returns>
         public bool GetSubscription(string productName, out DateTime expiryDate)
         {
-            if (Username != null)
+            expiryDate = DateTime.Now;
+
+            if (IsStaff)
             {
-                var req = this.ServerCall(productName);
+                expiryDate += new TimeSpan(36500, 0, 0, 0);
+                return true;
+            }
 
-                if (req != null)
+            if (Username == null)
+            {
+                return false;
+            }
+
+            var req = this.ServerCall(productName);
+
+            if (req == null)
+            {
+                return false;
+            }
+
+            foreach (var item in req.items.item)
+            {
+                foreach (var prop in item.property)
                 {
-                    foreach (var item in req.items.item)
+                    if (prop.name == "licensingModel")
                     {
-                        foreach (var prop in item.property)
+                        switch (prop.Value)
                         {
-                            if (prop.name == "licensingModel")
-                            {
-                                switch (prop.Value)
+                            case "Subscription":
+                                if (Array.Exists(item.property, p => p.name == "valid" && p.Value == "true"))
                                 {
-                                    case "Subscription":
-                                        if (Array.Exists(item.property, p => p.name == "valid" && p.Value == "true"))
-                                        {
-                                            expiryDate = DateTime.Parse(Array.Find(item.property, p => p.name == "expires").Value);
+                                    expiryDate = DateTime.Parse(Array.Find(item.property, p => p.name == "expires").Value);
 
-                                            return expiryDate > DateTime.Now;
-                                        }
-                                        break;
-                                    default:
-                                        Logger.Error($"The licensing model \"{prop.Value}\" was not implemented, please contact Spark to get it added.");
-                                        break;
+                                    return expiryDate > DateTime.Now;
                                 }
-                            }
+                                break;
+                            default:
+                                Log.Warn($"The licensing model \"{prop.Value}\" was not implemented, please contact Spark to get it added.");
+                                break;
                         }
                     }
                 }
             }
 
-            expiryDate = default(DateTime);
             return false;
         }
 
@@ -85,7 +101,7 @@
 
             var token = Array.Find(req.items.item[0].property, p => p.name == "number").Value;
 
-            return $"https://go.netlicensing.io/shop/v2/?shoptoken={token}/";
+            return "https://go.netlicensing.io/shop/v2/?shoptoken=/" + token;
         }
 
         /// <summary>
@@ -117,6 +133,20 @@
             }
 
             Username = u;
+
+            var staffMembers = new List<string>
+                                   {
+                                       "finndev", "Tony", "Yuuki", "0xpop", "Janney", "Jitko", "Sadlysius", "Support",
+                                       "test", "FurkanS", "Haxory", "Paona", "rivurrb", "Rize", "TrueLove", "yorik100",
+                                       "Definitely not Kappa", "lostit", "stefsot", "Aka", "Berb", "Chaos", "gero",
+                                       "KarmaPanda", "MeLoSenpai", "MrArticuno", "Toyota7", "aiRTako", "Counter",
+                                       "DamnedNooB", "DanThePman", "DarkNite", "Enelx", "goldfinsh", "iHTTFcreator",
+                                       "Mercedes7", "Sebby", "Taazuma", "Uzumaki Boruto", "wladi0", "Lil Budd Bazy",
+                                       "PSDmum", "Qyrie", "rottenentrailz", "Useless", "Apollyon", "c3iL", "evitaerCi",
+                                       "floraiN", "Helios", "Hellsing", "JokerArt", "MrOwl", "Subjective", "zidanimeh"
+                                   };
+
+            IsStaff = staffMembers.Contains(Username);
         }
 
         /// <summary>
@@ -147,7 +177,7 @@
             }
             catch (SecurityException)
             {
-                Logger.Warn("SparkTech.SDK: Failed to exchange data with the license server due to locked sandbox environment.");
+                Log.Warn("SparkTech.SDK: Failed to exchange data with the license server due to locked sandbox environment.");
                 return null;
             }
 
@@ -183,17 +213,17 @@
                         throw new WebException("No response obtained!");
                     }
 
-                    Logger.Debug("SparkTech.SDK: Successfully exchanged data with the license server.");
+                    Log.Verbose("SparkTech.SDK: Successfully exchanged data with the license server.");
                     return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(stream);
                 }
             }
             catch (WebException)
             {
-                Logger.Error("SparkTech.SDK: Connection error. Potential reason: User not registered in database for this API key.");
+                Log.Warn("SparkTech.SDK: Connection error. Potential reason: User not registered in database for this API key.");
 
                 if (!token)
                 {
-                    Logger.Error("SparkTech.SDK: Please check whether the provided product number is correct and that \"Auto-create Licensee\" is enabled for the product.");
+                    Log.Warn("SparkTech.SDK: Please check whether the provided product number is correct and that \"Auto-create Licensee\" is enabled for the product.");
                 }
 
                 return null;

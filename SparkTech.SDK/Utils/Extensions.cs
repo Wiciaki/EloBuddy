@@ -1,8 +1,11 @@
 ﻿namespace SparkTech.SDK.Utils
 {
+    using System;
     using System.Text.RegularExpressions;
 
     using EloBuddy;
+
+    using SharpDX;
 
     /// <summary>
     /// Provides static methods and extensions of various sort
@@ -50,20 +53,22 @@
         }
 
         /// <summary>
-        /// Spaces the input string
+        /// Puts spaces before the capital letters in a string
         /// </summary>
         /// <param name="input">The string to be spaced</param>
         /// <param name="ignoreAcronyms">If <c>true</c>, ignore acronyms</param>
         /// <returns></returns>
         public static string Space(this string input, bool ignoreAcronyms = true)
         {
+            // Thank you, Stack Overflow
+
             return ignoreAcronyms
                        ? Regex.Replace(input, @"((?<=\p{Ll})\p{Lu})|((?!\A)\p{Lu}(?>\p{Ll}))", " $0")
                        : Regex.Replace(input, "(?<!^)([A-Z])", " $1");
         }
 
         /// <summary>
-        /// Removes a part of the string
+        /// Removes parts of a string
         /// </summary>
         /// <param name="string">The original instance</param>
         /// <param name="text">The desired text to be removed</param>
@@ -81,6 +86,26 @@
         public static string ToMenuUse(this string input)
         {
             return input.Space().ToLower().Replace('\'', ' ').Trim().Replace(' ', '.');
+        }
+
+        public static int ToTicks(this float seconds)
+        {
+            return (int)(seconds * 1000f);
+        }
+
+        public static float ToSeconds(this int ticks)
+        {
+            return ticks / 1000f;
+        }
+
+        public static double Root(this double value, double level = 2d)
+        {
+            return Math.Pow(value, 1d / level);
+        }
+
+        public static Vector2 ToVector2(this Vector3 vector3)
+        {
+            return new Vector2(vector3.X, vector3.Y);
         }
     }
 }

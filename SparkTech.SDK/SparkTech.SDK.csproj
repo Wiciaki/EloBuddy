@@ -121,6 +121,7 @@
     <Compile Include="Executors\Bootstrap.cs" />
     <Compile Include="Executors\CodeFlow.cs" />
     <Compile Include="Executors\TriggerAttribute.cs" />
+    <Compile Include="Log.cs" />
     <Compile Include="MenuWrapper\MainMenu.cs" />
     <Compile Include="MenuWrapper\Menu.cs" />
     <Compile Include="MenuWrapper\MenuBase.cs" />
@@ -142,16 +143,15 @@
     <Compile Include="Targeting\TargetAcquire.cs" />
     <Compile Include="Targeting\Weight.cs" />
     <Compile Include="Utils\Comms.cs" />
-    <Compile Include="Utils\Converters.cs" />
     <Compile Include="Utils\Extensions.cs" />
+    <Compile Include="Utils\FileManager.cs" />
     <Compile Include="Utils\Minion.cs" />
     <Compile Include="Utils\ObjectText.cs" />
     <Compile Include="Utils\ObjectTextEntry.cs" />
-    <Compile Include="Utils\ObjectTracker.cs" />
+    <Compile Include="Cache\ObjectTracker.cs" />
     <Compile Include="Utils\Randomization.cs" />
     <Compile Include="Utils\TickOperation.cs" />
     <Compile Include="Creator.cs" />
-    <Compile Include="Web\Connection.cs" />
     <Compile Include="Web\License.cs" />
     <Compile Include="Web\NetLicensing\netlicensing-context.cs" />
     <Compile Include="Web\Updater.cs" />

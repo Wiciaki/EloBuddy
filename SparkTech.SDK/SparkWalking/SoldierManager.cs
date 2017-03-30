@@ -12,7 +12,7 @@
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Utils;
 
-    using Tracker = SparkTech.SDK.Utils.ObjectTracker<EloBuddy.Obj_AI_Minion>;
+    using Tracker = SparkTech.SDK.Cache.ObjectTracker<EloBuddy.Obj_AI_Minion>;
 
     /// <summary>
     /// The management class for Azirs' soldiers

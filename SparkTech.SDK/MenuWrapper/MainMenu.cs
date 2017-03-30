@@ -4,8 +4,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-    using EloBuddy.SDK.Utils;
-
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Utils;
 
@@ -134,7 +132,7 @@
                 return v;
             }
 
-            Logger.Warn($"Suitable translation string for \"{translationKey}\" was not provided.");
+            Log.Warn($"Suitable translation string for \"{translationKey}\" was not provided.");
             return translationKey;
         }
 

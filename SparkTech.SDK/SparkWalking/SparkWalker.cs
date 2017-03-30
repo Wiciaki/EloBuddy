@@ -1692,7 +1692,7 @@
             }
 
             return new TargetData(from minion in ObjectCache.GetMinions(ObjectTeam.Enemy, MinionType.Minion, this.InAttackRange)
-                                  let pred = HealthPrediction.GetPrediction(minion, (this.AttackTime() * 2f + this.ProjectileTime(minion)).Round())
+                                  let pred = HealthPrediction.GetPrediction(minion, (int)(this.AttackTime() * 2f + this.ProjectileTime(minion)))
                                   let damage = this.AttackDamage(minion)
                                   where pred >= 2f * damage || Math.Abs(pred - minion.Health) < 1f
                                   orderby minion.MaxHealth descending, this.Unit.Distance(minion)
@@ -1708,7 +1708,7 @@
             return new TargetData(
                 from minion in ObjectCache.GetMinions(ObjectTeam.Neutral, MinionType.Jungle, this.InAttackRange)
                 let type = minion.DetermineType()
-                orderby type == AIMinionType.Jungle == smallfirst descending/*, type descending*/, minion.Health, this.Unit.Distance(minion)
+                orderby type == AIMinionType.Jungle == smallfirst descending, minion.Health, this.Unit.Distance(minion)
                 select minion);
         }
 

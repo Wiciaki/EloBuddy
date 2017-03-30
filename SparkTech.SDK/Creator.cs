@@ -84,36 +84,36 @@
 
             Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out subscriptionExpiry);
 
-            var timeLeft = "-/-";
-
-            if (Licensed)
-            {
-                var span = subscriptionExpiry - DateTime.Now;
-                var days = span.Days;
-
-                if (days > 3650)
-                {
-                    timeLeft = "never";
-                }
-                else if (days > 0)
-                {
-                    timeLeft = $"{days} days";
-                }
-                else
-                {
-                    timeLeft = $"{span.Hours} hours";
-                }
-            }
-
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang).Substring(0, 2) == CultureInfo.InstalledUICulture.Name.Substring(0, 2));
 
             var replacements = new ReservedCollection
                                    {
                                        ["licenseStatus"] = () => Licensed ? "✔" : "✘",
-                                       ["subExpiry"] = () => timeLeft
+                                       ["subExpiry"] = delegate
+                                           {
+                                               if (!Licensed)
+                                               {
+                                                   return "-/-";
+                                               }
+
+                                               var span = subscriptionExpiry - DateTime.Now;
+                                               var days = span.Days;
+
+                                               if (days > 3650)
+                                               {
+                                                   return "∞";
+                                               }
+
+                                               if (days > 0)
+                                               {
+                                                   return days + " " + MainMenu.GetTranslation("days");
+                                               }
+
+                                               return span.Hours + " " + MainMenu.GetTranslation("hours");
+                                           }
                                    };
 
-            MainMenu = new MainMenu("st.sdk", "settings", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
+            MainMenu = new MainMenu("sparktech.sdk", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
                                new QuickMenu("update"),
 
@@ -177,8 +177,9 @@
                     MainMenu.Print("token_success");
                 };
 
-            if (Language != Language.English)
+            if (Language != default(Language))
             {
+                // This is necessary due to Language variable being assigned after the menu is built
                 MainMenu.GetComponents().ForEach(component => component.UpdateText());
             }
 
@@ -202,7 +203,10 @@
                                {
                                    ["error"] = "ERROR",
 
-                                   ["settings"] = "SparkTech.SDK",
+                                   ["sdk"] = "SparkTech.SDK",
+
+                                   ["days"] = "days",
+                                   ["hours"] = "hours",
 
                                    ["token_success"] = "Link copied to clipboard!",
                                    ["token_fail"] = "Failed to obtain a token!",
@@ -237,13 +241,16 @@
                                    ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                                    ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.\nTranslation credits: (...)",
 
-                                   ["welcome"] = "Welcome to SparkTech.SDK! Please, make yourself familiar with the menu first"
+                                   ["welcome"] = "Welcome! Please, make yourself familiar with the menu first"
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
                                    ["token_success"] = "Link skopiowany do schowka!",
                                    ["token_fail"] = "Wystapil blad przy generowaniu tokena!",
+
+                                   ["days"] = "dni",
+                                   ["hours"] = "godzin",
 
                                    #region Updater
 
@@ -271,8 +278,12 @@
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["language"] = "Język",
-                                   ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:"
+                                   ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:",
+
+                                   ["welcome"] = "Witaj! Prosze, zapoznaj sie najpierw z menu"
                     };
+                case Language.German:
+                    return new Dictionary<string, string>();
             }
         }
     }

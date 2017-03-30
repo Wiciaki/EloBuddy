@@ -7,7 +7,6 @@
     using System.Reflection;
 
     using EloBuddy;
-    using EloBuddy.SDK.Utils;
 
     using SharpDX;
 

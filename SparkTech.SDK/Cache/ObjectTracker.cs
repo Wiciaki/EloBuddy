@@ -1,13 +1,11 @@
-﻿namespace SparkTech.SDK.Utils
+﻿namespace SparkTech.SDK.Cache
 {
     using System;
     using System.Collections.Generic;
 
     using EloBuddy;
-    
-    using SparkTech.SDK.Cache;
 
-    public class ObjectTracker<T> : IDisposable where T : Obj_AI_Base
+    public class ObjectTracker<T> where T : Obj_AI_Base
     {
         public readonly List<T> Items;
 
@@ -70,19 +68,6 @@
             var item = (T)sender;
             this.Items.Add(item);
             this.Created?.Invoke(item);
-        }
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            GameObject.OnCreate -= this.OnCreate;
-            Obj_AI_Base.OnPlayAnimation -= this.OnPlayAnimation;
-            Obj_AI_Base.OnProcessSpellCast -= this.OnProcessSpellCast;
-
-            this.Created = null;
-            this.Deleted = null;
         }
     }
 }

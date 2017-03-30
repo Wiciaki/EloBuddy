@@ -38,7 +38,7 @@
                                {
                                    ["st_ping"] = "AllyPingSpammer",
 
-                                   ["notify_no_allies"] = "[AllyPingSpammer] No allies detected, the addon will now quit...",
+                                   ["notify_no_allies"] = "No allies detected, AllyPingSpammer will not load...",
                                    ["time_to_ping"] = "Pinging in: [TIME]",
 
                                    ["spam_who"] = "Ally to be spammed",
@@ -58,7 +58,7 @@
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["notify_no_allies"] = "[AllyPingSpammer] Nie wykryto sojusznikow, addon sie nie laduje...",
+                                   ["notify_no_allies"] = "Nie wykryto sojusznikow, AllyPingSpammer sie nie laduje...",
                                    ["time_to_ping"] = "Pinguje za: [TIME]",
 
                                    ["spam_who"] = "Sojusznik do spamowania",

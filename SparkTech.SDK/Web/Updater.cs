@@ -1,11 +1,12 @@
 ﻿namespace SparkTech.SDK.Web
 {
     using System;
+    using System.Net;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
 
     using SparkTech.SDK.EventData;
+    using SparkTech.SDK.Executors;
 
     public static class Updater
     {
@@ -20,11 +21,11 @@
         }
 
         /// <summary>
-        /// The regular expression
+        /// The regular expression used for matching the assembly info file
         /// </summary>
         private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]");
-
-        public static void Check(string link, Action<CheckPerformedEventArgs> action, Assembly callingAssembly)
+        
+        private static async void Check(string link, Action<CheckPerformedEventArgs> action, Assembly callingAssembly)
         {
             Uri uri;
 
@@ -33,44 +34,30 @@
                 throw new ArgumentException("Invalid link provided!");
             }
 
+            string data;
+
+            using (var client = new WebClient())
+            {
+                data = await client.DownloadStringTaskAsync(uri).ConfigureAwait(false);
+            }
+
+            var match = Regex.Match(data);
+            var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
+
             var assemblyName = callingAssembly.GetName();
+            var args = new CheckPerformedEventArgs(gitVersion, assemblyName.Version, assemblyName.Name);
 
-            Action req  = async delegate
-                {
-                    var match = Regex.Match(await Connection.WebClient.DownloadStringTaskAsync(uri).ConfigureAwait(false));
-                    var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
-                    var args = new CheckPerformedEventArgs(gitVersion, assemblyName.Version, assemblyName.Name);
-
-                    if (action != null)
+            CodeFlow.Secure(() =>
                     {
-                        action(args);
-                    }
-                    else
-                    {
-                        args.Notify();
-                    }
-                };
-
-            if (Connection.IsAllowed)
-            {
-                new Task(req).Start();
-            }
-            else
-            {
-                // This case is supposed to delay the check until the menu item has been marked
-
-#pragma warning disable RCS1127
-                Connection.PermissionChange change = null;
-#pragma warning restore RCS1127
-
-                change = enabled =>
-                    {
-                        new Task(req).Start();
-                        Connection.PermissionChanged -= change;
-                    };
-
-                Connection.PermissionChanged += change;
-            }
+                        if (action != null)
+                        {
+                            action(args);
+                        }
+                        else
+                        {
+                            args.Notify();
+                        }
+                    });
         }
     }
 }
