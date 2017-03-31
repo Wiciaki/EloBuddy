@@ -23,7 +23,7 @@ namespace SparkTech.SDK.EventData
         /// Initializes a new instance of the <see cref="BeforeOrbwalkerAttack"/> class
         /// </summary>
         /// <param name="target">The target</param>
-        internal BeforeOrbwalkerAttack(AttackableUnit target)
+        public BeforeOrbwalkerAttack(AttackableUnit target)
         {
             this.Target = target;
         }

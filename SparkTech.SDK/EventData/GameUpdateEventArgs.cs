@@ -19,7 +19,7 @@
         /// </summary>
         public readonly Orbwalker Orbwalker;
 
-        internal GameUpdateEventArgs(Orbwalker orbwalker, Mode mode)
+        public GameUpdateEventArgs(Orbwalker orbwalker, Mode mode)
         {
             this.Orbwalker = orbwalker;
 

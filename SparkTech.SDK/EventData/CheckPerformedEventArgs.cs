@@ -14,10 +14,22 @@
         /// </summary>
         public void Notify()
         {
-            Comms.Print(this.StatusMessage);
+            string key;
 
-            // ex. "You are using the latest version of [NAME]"
-            // Comms.Print(Translations.GetTranslation(("updater_" + (this.Success ? this.IsUpdated ? "updated" : "available" : "error")).Replace("[NAME]", this.assemblyName), this.MessageLanguage));
+            if (!this.Success)
+            {
+                key = "updater_failure";
+            }
+            else if (this.IsUpdated)
+            {
+                key = "updater_updated";
+            }
+            else
+            {
+                key = "updater_outdated";
+            }
+
+            Comms.Print(Creator.MainMenu.GetTranslation(key).Replace("[NAME]", this.assemblyName));
         }
 
         /// <summary>
@@ -39,11 +51,6 @@
         /// Determines whether this instance is updated
         /// </summary>
         public bool IsUpdated => this.LocalVersion >= this.GitVersion;
-
-        /// <summary>
-        /// Gets the current status message
-        /// </summary>
-        public string StatusMessage => this.IsUpdated ? $"{this.assemblyName} is up to date!" : $"A new update for {this.assemblyName} is available";
 
         /// <summary>
         /// The locally saved assembly name

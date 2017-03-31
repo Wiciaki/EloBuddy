@@ -18,7 +18,7 @@ namespace SparkTech.SDK.EventData
         /// Initializes a new instance of the <see cref="AfterAttackEventArgs"/>
         /// </summary>
         /// <param name="target"></param>
-        internal AfterAttackEventArgs(AttackableUnit target)
+        public AfterAttackEventArgs(AttackableUnit target)
         {
             this.Target = target;
         }

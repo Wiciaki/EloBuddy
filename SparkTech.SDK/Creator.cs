@@ -56,6 +56,11 @@
         public static readonly bool Licensed;
 
         /// <summary>
+        /// Determines 
+        /// </summary>
+        public static readonly DateTime SubscriptionExpiry;
+
+        /// <summary>
         /// The main menu of the SDK
         /// </summary>
         public static readonly MainMenu MainMenu;
@@ -80,9 +85,7 @@
         /// </summary>
         static Creator()
         {
-            DateTime subscriptionExpiry;
-
-            Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out subscriptionExpiry);
+            Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out SubscriptionExpiry);
 
             SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang).Substring(0, 2) == CultureInfo.InstalledUICulture.Name.Substring(0, 2));
 
@@ -96,7 +99,7 @@
                                                    return "-/-";
                                                }
 
-                                               var span = subscriptionExpiry - DateTime.Now;
+                                               var span = SubscriptionExpiry - DateTime.Now;
                                                var days = span.Days;
 
                                                if (days > 3650)
@@ -106,24 +109,24 @@
 
                                                if (days > 0)
                                                {
-                                                   return days + " " + MainMenu.GetTranslation("days");
+                                                   return days + " " + MainMenu?.GetTranslation("days");
                                                }
 
-                                               return span.Hours + " " + MainMenu.GetTranslation("hours");
+                                               return span.Hours + " " + MainMenu?.GetTranslation("hours");
                                            }
                                    };
 
-            MainMenu = new MainMenu("sparktech.sdk", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
+            MainMenu = new MainMenu("sparktech", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
                                new QuickMenu("update"),
 
                                new QuickMenu("license")
                                    {
-                                       ["license.shop"] = new MenuItem("license_shop", false),
+                                       ["shop"] = new MenuItem("license_shop", false),
                                        ["separator1"] = new MenuItem(10),
-                                       ["license.status"] = new MenuItem("license_status", null, true),
+                                       ["status"] = new MenuItem("license_status", null, true),
                                        ["separator2"] = new MenuItem(),
-                                       ["license.note"] = new MenuItem("license_note")
+                                       ["note"] = new MenuItem("license_note")
                                    },
 
                                { "language", new MenuItem("language", LangCache.Names) },
@@ -132,7 +135,7 @@
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
                                { "separator3", new MenuItem(10) },
-                               { "comms.note", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
+                               { "lang.notice", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
                            };
 
             #region FirstInit
@@ -153,6 +156,16 @@
 
             Language = languageItem.Enum<Language>();
 
+            if (Language != default(Language))
+            {
+                // This is necessary due to Language variable being assigned after the menu is built
+                MainMenu.GetComponents().ForEach(component => component.UpdateText());
+            }
+            else
+            {
+                MainMenu.GetMenu("license")["status"].UpdateText();
+            }
+
             languageItem.PropertyChanged += args =>
                 {
                     Language = args.Sender.Enum<Language>();
@@ -160,7 +173,7 @@
                     MainMenu.Rebuild();
                 };
 
-            MainMenu.GetMenu("license")["license.shop"].PropertyChanged += args =>
+            MainMenu.GetMenu("license")["shop"].PropertyChanged += args =>
                 {
                     args.Process = false;
 
@@ -176,12 +189,6 @@
 
                     MainMenu.Print("token_success");
                 };
-
-            if (Language != default(Language))
-            {
-                // This is necessary due to Language variable being assigned after the menu is built
-                MainMenu.GetComponents().ForEach(component => component.UpdateText());
-            }
 
             if (FirstRun)
             {
@@ -212,6 +219,10 @@
                                    ["token_fail"] = "Failed to obtain a token!",
 
                                    #region Updater
+
+                                   ["updater_failure"] = "Couldn't get update data for [NAME]",
+                                   ["updater_updated"] = "You're using the updated version of [NAME].",
+                                   ["updater_outdated"] = "New update for [NAME] is available!",
 
                                    ["update"] = "Updates",
 
@@ -250,9 +261,13 @@
                                    ["token_fail"] = "Wystapil blad przy generowaniu tokena!",
 
                                    ["days"] = "dni",
-                                   ["hours"] = "godzin",
+                                   ["hours"] = "godziny",
 
                                    #region Updater
+
+                                   ["updater_failure"] = "Nie mozna sprawdzic aktualizacji dla [NAME]",
+                                   ["updater_updated"] = "Uzywasz aktualnej wersji [NAME].",
+                                   ["updater_outdated"] = "Nowsza wersja [NAME] jest dostepna!",
 
                                    ["update"] = "Aktualizacje",
 
