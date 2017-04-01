@@ -108,8 +108,7 @@
         /// </summary>
         static PingSpammer()
         {
-            Allies = ObjectCache.GetNative<AIHeroClient>().FindAll(h => h.Team() == ObjectTeam.Ally);
-            Allies.RemoveAll(h => h.IsMe);
+            Allies = ObjectCache.GetNative<AIHeroClient>().FindAll(h => h.Team() == ObjectTeam.Ally && !h.IsMe);
 
             if (Allies.Count == 0)
             {

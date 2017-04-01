@@ -92,7 +92,7 @@
 
         public List<MenuBase> GetComponents()
         {
-            var components = new List<MenuBase> { this };
+            var components = new List<MenuBase>();
 
             components.AddRange(this.Items.Values);
             components.AddRange(this.Menus.Values);
@@ -103,7 +103,7 @@
 
         public static List<MenuBase> GetAllComponents()
         {
-            return Instances.SelectMany(c => c.GetComponents()).ToList();
+            return Instances.Concat(Instances.SelectMany(c => c.GetComponents())).ToList();
         }
 
         #endregion

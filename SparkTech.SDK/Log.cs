@@ -54,7 +54,7 @@
             Writer = File.CreateText(fileName);
 
             Writer.WriteLine("CLR: " + Environment.Version);
-            Writer.WriteLine("SDK: " + typeof(Creator).Assembly.GetName().Version);
+            Writer.WriteLine("SDK: " + typeof(Log).Assembly.GetName().Version);
             Verbose(CurrentTime);
             Verbose("Injection routine started...");
         }

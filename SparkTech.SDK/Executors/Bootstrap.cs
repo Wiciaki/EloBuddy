@@ -99,11 +99,6 @@
         }
 
         /// <summary>
-        /// The path to web version of the version data class
-        /// </summary>
-        private const string VersioningWebPath = "https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionInfo.cs";
-
-        /// <summary>
         /// The task for the downloaded data
         /// </summary>
         private static readonly Task<string> DataTask;
@@ -136,21 +131,23 @@
 
             Loading.OnLoadingComplete += delegate
                 {
+                    ExecuteConstructor(typeof(Creator));
+
                     timer.Stop();
                     timer.Dispose();
                     flips.Clear();
                     flips.TrimExcess();
 
-                    Console.Title = "SparkTech.SDK";
+                    GC.Collect();
 
-                    ExecuteConstructor(typeof(Creator));
+                    Console.Title = "SparkTech.SDK";
                 };
 
             DataTask = Task.Run(async () =>
                     {
                         using (var client = new WebClient())
                         {
-                            return await client.DownloadStringTaskAsync(VersioningWebPath).ConfigureAwait(false);
+                            return await client.DownloadStringTaskAsync("https://raw.githubusercontent.com/Wiciaki/EloBuddy/master/SparkTech.SDK/VersionInfo.cs").ConfigureAwait(false);
                         }
                     });
 
@@ -158,6 +155,11 @@
 
             Process(Assembly.GetExecutingAssembly());
         }
+
+        /// <summary>
+        /// Determined whether the notification message has been printed
+        /// </summary>
+        private static bool notified;
 
         /// <summary>
         /// Invokes .cctors of types with the <see cref="TriggerAttribute"/> in the specified assembly
@@ -191,18 +193,20 @@
 
                 name = name.ToLower();
 
-                var menu = Creator.MainMenu.GetMenu("update");
                 var webVersion = new Version(match.Groups[1].Value);
                 var local = assemblyName.Version;
                 var update = webVersion > local;
 
                 Creator.MainMenu.Replacements.Add(name + "Version", () => update ? $"{local} => {webVersion}" : $"{local}");
 
+                var menu = Creator.MainMenu.GetMenu("update");
                 menu["note." + name] = new MenuItem("update_note_" + name, null, true);
                 menu["info." + name] = new MenuItem($"updated_{(!update ? "yes" : "no")}_{name}");
 
-                if (update)
+                if (update && !notified)
                 {
+                    notified = true;
+
                     Creator.MainMenu.Print("update_available");
                 }
             };

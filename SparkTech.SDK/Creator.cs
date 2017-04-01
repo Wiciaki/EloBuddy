@@ -116,7 +116,7 @@
                                            }
                                    };
 
-            MainMenu = new MainMenu("sparktech", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
+            MainMenu = new MainMenu("st.sdk", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
                                new QuickMenu("update"),
 
@@ -158,8 +158,8 @@
 
             if (Language != default(Language))
             {
-                // This is necessary due to Language variable being assigned after the menu is built
-                MainMenu.GetComponents().ForEach(component => component.UpdateText());
+                // This is necessary due to Language variable being assigned after the menu is actually built
+                MainMenu.Rebuild();
             }
             else
             {
