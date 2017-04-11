@@ -143,6 +143,7 @@
     <Compile Include="Targeting\TargetAcquire.cs" />
     <Compile Include="Targeting\Weight.cs" />
     <Compile Include="Utils\Comms.cs" />
+    <Compile Include="Utils\DamageIndicator.cs" />
     <Compile Include="Utils\Extensions.cs" />
     <Compile Include="Utils\FileManager.cs" />
     <Compile Include="Utils\Minion.cs" />

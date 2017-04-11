@@ -14,8 +14,6 @@
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Utils;
 
-    using static SparkTech.SDK.Shortcuts;
-
     using Color = System.Drawing.Color;
 
     /// <summary>
@@ -104,11 +102,16 @@
         private static int delay = 8000;
 
         /// <summary>
+        /// The <see cref="System.Random"/> instance
+        /// </summary>
+        private static readonly Random Random = new Random();
+
+        /// <summary>
         /// The entry point for an addon
         /// </summary>
         static PingSpammer()
         {
-            Allies = ObjectCache.GetNative<AIHeroClient>().FindAll(h => h.Team() == ObjectTeam.Ally && !h.IsMe);
+            Allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(h => !h.IsMe);
 
             if (Allies.Count == 0)
             {
@@ -194,11 +197,11 @@
 
             Pinged(time);
 
-            TacticalMap.SendPing(MainMenu["pingtype"].Enum<PingCategory>(), Randomization.Randomize(targetHero.Position.ToVector2(), MainMenu.GetMenu("advanced")["difference"]));
+            TacticalMap.SendPing(MainMenu["pingtype"].Enum<PingCategory>(), Randomizer.Randomize(targetHero.Position.ToVector2(), MainMenu.GetMenu("advanced")["difference"]));
 
             if (MainMenu.GetMenu("advanced")["delay.rand"])
             {
-                MainMenu.GetMenu("advanced")["delay"].Int = RandomInst.Next(2000, 10000);
+                MainMenu.GetMenu("advanced")["delay"].Int = Random.Next(2000, 10000);
             }
         }
 
@@ -218,7 +221,7 @@
         {
             if (MainMenu["pingtype.rand"])
             {
-                MainMenu["pingtype"].StringIndex = RandomInst.Next(0, EnumCache<PingCategory>.Count - 1);
+                MainMenu["pingtype"].StringIndex = Random.Next(0, EnumCache<PingCategory>.Count - 1);
             }
 
             lastPingTime = time;
@@ -237,7 +240,7 @@
                 return;
             }
 
-            delay = RandomInst.Next(6000, 20000);
+            delay = Random.Next(6000, 20000);
 
             Pinged(time);
 
@@ -246,7 +249,12 @@
 
             for (var i = 0; i < 6; i++)
             {
-                TacticalMap.SendPing(type, Randomization.Randomize(new Vector2(pos.X + 500f * (float)Math.Cos(i), pos.Y + 500f * (float)Math.Sin(i)), diff));
+                var target = pos.ToVector2();
+
+                target.X += 500f * (float)Math.Cos(i);
+                target.Y += 500f * (float)Math.Sin(i);
+
+                TacticalMap.SendPing(type, Randomizer.Randomize(target, diff));
             }
         }
 

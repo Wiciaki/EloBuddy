@@ -4,8 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Windows;
-
-    using SparkTech.SDK.Cache;
+    
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
@@ -29,17 +28,6 @@
 
     #endregion
 
-    #region Shortcuts
-
-    public static class Shortcuts
-    {
-        public static Random RandomInst = new Random();
-
-        public static EloBuddy.AIHeroClient PlayerInst => ObjectCache.Player;
-    }
-
-    #endregion
-
     /// <summary>
     /// The variable storage and menu initializer
     /// </summary>
@@ -49,6 +37,21 @@
         /// Determines whether this run is a first one in the specified environment
         /// </summary>
         public static readonly bool FirstRun;
+
+        /// <summary>
+        /// The main menu of the SDK
+        /// </summary>
+        public static readonly MainMenu MainMenu;
+
+        /// <summary>
+        /// The currently used target language
+        /// </summary>
+        public static Language Language { get; private set; }
+
+        /// <summary>
+        /// The language used by the machine
+        /// </summary>
+        public static readonly Language SystemLanguage;
 
         /// <summary>
         /// Determines whether this assembly is eligible for the premium features
@@ -61,24 +64,9 @@
         public static readonly DateTime SubscriptionExpiry;
 
         /// <summary>
-        /// The main menu of the SDK
-        /// </summary>
-        public static readonly MainMenu MainMenu;
-
-        /// <summary>
         /// The license server for the assembly
         /// </summary>
         public static readonly LicenseServer LicenseServer = new LicenseServer("146f7c3c-e5aa-4529-84a7-cf2cf648f69d");
-
-        /// <summary>
-        /// The language used by the machine
-        /// </summary>
-        public static readonly Language SystemLanguage;
-
-        /// <summary>
-        /// The currently used target language
-        /// </summary>
-        public static Language Language { get; private set; }
 
         /// <summary>
         /// Initializes static members of the <see cref="Creator"/> class
@@ -94,6 +82,11 @@
                                        ["licenseStatus"] = () => Licensed ? "✔" : "✘",
                                        ["subExpiry"] = delegate
                                            {
+                                               if (MainMenu == null)
+                                               {
+                                                   return "null";
+                                               }
+
                                                if (!Licensed)
                                                {
                                                    return "-/-";
@@ -109,15 +102,22 @@
 
                                                if (days > 0)
                                                {
-                                                   return days + " " + MainMenu?.GetTranslation("days");
+                                                   return days + " " + MainMenu.GetTranslation("days");
                                                }
 
-                                               return span.Hours + " " + MainMenu?.GetTranslation("hours");
+                                               return span.Hours + " " + MainMenu.GetTranslation("hours");
                                            }
                                    };
 
-            MainMenu = new MainMenu("st.sdk", "sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
+            MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
+                               new QuickMenu("features")
+                                   {
+                                       ["premium_label"] = new MenuItem("premium"),
+                                       ["orbwalker"] = new MenuItem("use_xorbwalker", false),
+                                       ["targetselector"] = new MenuItem("use_xtargetselector", false),
+                                   },
+
                                new QuickMenu("update"),
 
                                new QuickMenu("license")
@@ -138,14 +138,10 @@
                                { "lang.notice", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
                            };
 
-            #region FirstInit
-            {
-                var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
-                MainMenu.Add("first", first);
-                FirstRun = first;
-                first.Bool = false;
-            }
-            #endregion
+            var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
+            MainMenu.Add("first", first);
+            FirstRun = first;
+            first.Bool = false;
 
             var languageItem = MainMenu["language"];
 
@@ -156,14 +152,14 @@
 
             Language = languageItem.Enum<Language>();
 
-            if (Language != default(Language))
+            // This is necessary due to Language variable being assigned after the menu is actually built
+            if (Language == default(Language))
             {
-                // This is necessary due to Language variable being assigned after the menu is actually built
-                MainMenu.Rebuild();
+                MainMenu.GetMenu("license")["status"].UpdateText();
             }
             else
             {
-                MainMenu.GetMenu("license")["status"].UpdateText();
+                MainMenu.Rebuild();
             }
 
             languageItem.PropertyChanged += args =>
@@ -190,6 +186,21 @@
                     MainMenu.Print("token_success");
                 };
 
+            var features = MainMenu.GetMenu("features");
+
+            if (!Licensed)
+            {
+                features["orbwalker"].Bool = false;
+                features["orbwalker"].PropertyChanged += args => args.Process = false;
+
+                features["targetselector"].Bool = false;
+                features["targetselector"].PropertyChanged += args => args.Process = false;
+            }
+            else
+            {
+                
+            }
+
             if (FirstRun)
             {
                 MainMenu.Print("welcome");
@@ -209,8 +220,7 @@
                     return new Dictionary<string, string>
                                {
                                    ["error"] = "ERROR",
-
-                                   ["sdk"] = "SparkTech.SDK",
+                                   ["st_sdk"] = "SparkTech.SDK",
 
                                    ["days"] = "days",
                                    ["hours"] = "hours",
@@ -247,6 +257,11 @@
                                    ["license_status"] = "SDK Subscription owned: {licenseStatus}\nExpires in: {subExpiry}",
                                    ["license_note"] = "Subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way of keeping me motivated.\nPlease visit the shop website to find our more.",
 
+                                   ["features"] = "Features",
+                                   ["premium"] = "Premium features (subscribers only)",
+                                   ["use_xorbwalker"] = "Enable SparkWalker",
+                                   ["use_xtargetselector"] = "Enable XTargetSelector",
+
                                    ["language"] = "Language",
                                    ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
                                    ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
@@ -273,7 +288,7 @@
 
                                    ["update_note_sdk"] = "Status wersji SparkTech.SDK:",
                                    ["updated_yes_sdk"] = "Używasz aktualnej wersji ({sdkVersion})",
-                                   ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze {sdkVersion}",
+                                   ["updated_no_sdk"] = "Nowa wersja dostępna, proszę zaktualizować w loaderze! {sdkVersion}",
 
                                    ["update_note_allypingspammer"] = "Moc pingowania AllyPingSpammera:",
                                    ["updated_yes_allypingspammer"] = "Pinguj bez ograniczeń. Wersja: {allypingspammerVersion}",
@@ -283,7 +298,7 @@
                                    ["updated_yes_lissandra"] = "Aktualna. ({lissandraVersion})",
                                    ["updated_no_lissandra"] = "Deficyt kostek lodu.... aktualizacja potrzebna! {lissandraVersion}",
 
-                                   ["update_available"] = "Aktualizacje są dostępne. Sprawdź menu, by poznać szczegóły.",
+                                   ["update_available"] = "Aktualizacje sa dostepne. Sprawdz menu, by poznac szczegoly.",
 
                                    #endregion
 
@@ -291,6 +306,11 @@
                                    ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
                                    ["license_status"] = "Status subskrypcji: {licenseStatus}\nWygasa za: {subExpiry}",
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
+
+                                   ["features"] = "Funkcje",
+                                   ["premium"] = "Funkcje premium (tylko dla subskrybentów)",
+                                   ["use_xorbwalker"] = "Aktywuj SparkWalker",
+                                   ["use_xtargetselector"] = "Aktywuj XTargetSelectora",
 
                                    ["language"] = "Język",
                                    ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:",

@@ -29,7 +29,7 @@
         /// </summary>
         static SoldierManager()
         {
-            var heroes = ObjectCache.GetNative<AIHeroClient>();
+            var heroes = ObjectCache.Get<AIHeroClient>();
 
             Trackers = new Dictionary<int, Tracker>(heroes.Count);
 

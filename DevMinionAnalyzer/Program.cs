@@ -13,7 +13,7 @@
     {
         private static void Main(string[] args)
         {
-            Bootstrap.WebLoad("https://github.com/Wiciaki/EloBuddy/blob/master/RemoteAssemblies/SparkTech.Lissandra.dll?raw=true", "https://github.com/Wiciaki/EloBuddy/raw/master/RemoteAssemblies/SampleVersion.txt");
+            //Bootstrap.WebLoad("https://github.com/Wiciaki/EloBuddy/blob/master/RemoteAssemblies/SparkTech.Lissandra.dll?raw=true", "https://github.com/Wiciaki/EloBuddy/raw/master/RemoteAssemblies/SampleVersion.txt");
 
             args.Init();
         }
@@ -26,7 +26,16 @@
         {
             Drawing.OnDraw += delegate
                 {
-                    foreach (var minion in ObjectCache.GetNative<Obj_AI_Minion>())
+                    ObjectCache.Get<Obj_AnimatedBuilding>();
+                    ObjectCache.Get<AIHeroClient>();
+                    ObjectCache.Get<Obj_AI_Turret>();
+                    ObjectCache.Get<GameObject>();
+                    ObjectCache.Get<MissileClient>();
+                    ObjectCache.GetMinions();
+                    ObjectCache.GetMinions(ObjectCache.Player.Position.ToVector2(), 500f);
+                    ObjectCache.Get<Obj_GeneralParticleEmitter>();
+
+                    foreach (var minion in ObjectCache.Get<Obj_AI_Minion>())
                     {
                         var t = minion.DetermineType();
 
@@ -35,11 +44,6 @@
                         if (t == AIMinionType.Unknown)
                         {
                             text += " | Name: " + minion.Name + " | BaseName: " + minion.BaseSkinName;
-                        }
-
-                        if (t == AIMinionType.Plant)
-                        {
-                            text += " " + minion.IsTargetable + " " + minion.IsVisible + " " + !minion.IsDead + " " + !minion.IsInvulnerable + " " + !minion.IsZombie;
                         }
 
                         var pos = Drawing.WorldToScreen(minion.Position);

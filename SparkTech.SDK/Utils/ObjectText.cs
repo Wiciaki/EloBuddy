@@ -56,7 +56,7 @@
                     return;
                 }
 
-                foreach (var o in ObjectCache.GetNative<GameObject>())
+                foreach (var o in ObjectCache.Get<GameObject>())
                 {
                     var currentObjectEntries = enabledEntries.FindAll(item => item.Draw(o));
 

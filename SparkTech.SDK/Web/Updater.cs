@@ -12,12 +12,12 @@
     {
         public static void Check(string username, string repository, string folderName, Action<CheckPerformedEventArgs> action = null)
         {
-            Check($"https://raw.githubusercontent.com/{username}/{repository}/master/{folderName}/Properties/AssemblyInfo.cs", action, Assembly.GetCallingAssembly());
+            Check($"https://raw.githubusercontent.com/{username}/{repository}/master/{folderName}/Properties/AssemblyInfo.cs", action, Assembly.GetCallingAssembly().GetName());
         }
 
         public static void Check(string link, Action<CheckPerformedEventArgs> action = null)
         {
-            Check(link, action, Assembly.GetCallingAssembly());
+            Check(link, action, Assembly.GetCallingAssembly().GetName());
         }
 
         /// <summary>
@@ -25,13 +25,28 @@
         /// </summary>
         private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]");
         
-        private static async void Check(string link, Action<CheckPerformedEventArgs> action, Assembly callingAssembly)
+        private static async void Check(string link, Action<CheckPerformedEventArgs> action, AssemblyName name)
         {
             Uri uri;
 
-            if (link == null || !link.ToLower().Contains("raw.githubusercontent.com") || !link.EndsWith("properties/assemblyinfo.cs", StringComparison.CurrentCultureIgnoreCase) || !Uri.TryCreate(link, UriKind.Absolute, out uri) || uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            if (link == null || !link.ToLower().Contains("raw.githubusercontent.com"))
             {
-                throw new ArgumentException("Invalid link provided!");
+                return;
+            }
+
+            if (!link.EndsWith("properties/assemblyinfo.cs", StringComparison.CurrentCultureIgnoreCase))
+            {
+                return;
+            }
+
+            if (!Uri.TryCreate(link, UriKind.Absolute, out uri))
+            {
+                return;
+            }
+
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            {
+                return;
             }
 
             string data;
@@ -44,8 +59,7 @@
             var match = Regex.Match(data);
             var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
 
-            var assemblyName = callingAssembly.GetName();
-            var args = new CheckPerformedEventArgs(gitVersion, assemblyName.Version, assemblyName.Name);
+            var args = new CheckPerformedEventArgs(gitVersion, name.Version, name.Name);
 
             CodeFlow.Secure(() =>
                     {

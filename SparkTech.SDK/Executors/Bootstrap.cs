@@ -9,6 +9,7 @@
     using System.Runtime.CompilerServices;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
+    using System.Timers;
 
     using EloBuddy.SDK.Events;
 
@@ -63,7 +64,7 @@
             }
 
             var name = link.Split('/').Last().Remove("?raw=true");
-            var path = FileManager.GetFolder("Addons").GetFile(name);
+            var path = FileManager.WorkingDirectory.GetSubFolder("Addons").GetFile(name);
 
             using (var client = new WebClient())
             {
@@ -77,7 +78,7 @@
 
                     if (!match.Success)
                     {
-                        Log.Warn($"SparkTech.SDK: Version file couldn't be matched. {name} will not be loaded.");
+                        Log.Warn($"Version file couldn't be matched. {name} will not be loaded.");
                         return;
                     }
 
@@ -109,24 +110,8 @@
         [CodeFlow.Unsafe]
         static Bootstrap()
         {
-            var flips = new List<string>(4)
-                            {
-                                @"\", "|", "/", "-"
-                            };
-
-            var index = 0;
             var timer = new Timer(230d);
-
-            timer.Elapsed += delegate // TODO: Escape implicitly captured closure
-                {
-                    if (++index == flips.Count)
-                    {
-                        index = 0;
-                    }
-
-                    Console.Title = "SparkTech load... " + flips[index];
-                };
-
+            timer.Elapsed += Elapsed;
             timer.Start();
 
             Loading.OnLoadingComplete += delegate
@@ -134,9 +119,11 @@
                     ExecuteConstructor(typeof(Creator));
 
                     timer.Stop();
+                    timer.Elapsed -= Elapsed;
                     timer.Dispose();
-                    flips.Clear();
-                    flips.TrimExcess();
+                    Flips.Clear();
+                    Flips.TrimExcess();
+                    flipIndex = 0;
 
                     GC.Collect();
 
@@ -154,6 +141,29 @@
             ExecuteConstructor(typeof(Log));
 
             Process(Assembly.GetExecutingAssembly());
+        }
+
+        /// <summary>
+        /// The current index of the flips
+        /// </summary>
+        private static int flipIndex;
+
+        /// <summary>
+        /// The list of the flips used
+        /// </summary>
+        private static readonly List<string> Flips = new List<string>(4)
+                                                         {
+                                                             @"\", "|", "/", "-"
+                                                         };
+
+        /// <summary>
+        /// Invokes every time a timer has been called
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="args">The arguments</param>
+        private static void Elapsed(object sender, ElapsedEventArgs args)
+        {
+            Console.Title = "SparkTech load... " + Flips[flipIndex++ % (Flips.Count + 1)];
         }
 
         /// <summary>
@@ -196,12 +206,13 @@
                 var webVersion = new Version(match.Groups[1].Value);
                 var local = assemblyName.Version;
                 var update = webVersion > local;
+                var updateText = update ? "no" : "yes";
 
                 Creator.MainMenu.Replacements.Add(name + "Version", () => update ? $"{local} => {webVersion}" : $"{local}");
 
                 var menu = Creator.MainMenu.GetMenu("update");
                 menu["note." + name] = new MenuItem("update_note_" + name, null, true);
-                menu["info." + name] = new MenuItem($"updated_{(!update ? "yes" : "no")}_{name}");
+                menu["info." + name] = new MenuItem("updated_" + updateText + "_" + name);
 
                 if (update && !notified)
                 {

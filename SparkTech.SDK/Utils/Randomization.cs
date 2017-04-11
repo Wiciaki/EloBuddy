@@ -1,16 +1,16 @@
 ﻿namespace SparkTech.SDK.Utils
 {
+    using System;
+
     using SharpDX;
-
-    using SparkTech.SDK.Executors;
-
-    using static Shortcuts;
 
     /// <summary>
     /// The randomization class
     /// </summary>
-    public static class Randomization
+    public static class Randomizer
     {
+        private static readonly Random Random = new Random();
+
         /// <summary>
         /// Randomizes a <see cref="Vector2"/>
         /// </summary>
@@ -30,7 +30,7 @@
         /// <returns></returns>
         public static float Randomize(float input, int maxDiff)
         {
-            var random = RandomInst.Next(0, maxDiff);
+            var random = Random.Next(0, maxDiff);
 
             return NextBool() ? input + random : input - random;
         }
@@ -41,7 +41,7 @@
         /// <returns></returns>
         public static bool NextBool()
         {
-            return RandomInst.Next(0, 1) == 0;
+            return Random.Next(0, 1) == 0;
         }
     }
 }

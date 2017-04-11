@@ -177,7 +177,7 @@
             }
             catch (SecurityException)
             {
-                Log.Warn("SparkTech.SDK: Failed to exchange data with the license server due to locked sandbox environment.");
+                Log.Warn("Failed to exchange data with the license server due to locked sandbox environment.");
                 return null;
             }
 
@@ -213,17 +213,17 @@
                         throw new WebException("No response obtained!");
                     }
 
-                    Log.Verbose("SparkTech.SDK: Successfully exchanged data with the license server.");
+                    Log.Verbose("Successfully exchanged data with the license server.");
                     return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(stream);
                 }
             }
             catch (WebException)
             {
-                Log.Warn("SparkTech.SDK: Connection error. Potential reason: User not registered in database for this API key.");
+                Log.Warn("Connection error. Potential reason: User not registered in database for this API key.");
 
                 if (!token)
                 {
-                    Log.Warn("SparkTech.SDK: Please check whether the provided product number is correct and that \"Auto-create Licensee\" is enabled for the product.");
+                    Log.Warn("Please check whether the provided product number is correct and that \"Auto-create Licensee\" is enabled for the product.");
                 }
 
                 return null;

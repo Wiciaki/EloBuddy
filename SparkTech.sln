@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.9
+VisualStudioVersion = 15.0.26403.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AllyPingSpammer", "AllyPingSpammer\AllyPingSpammer.csproj", "{F6D4EA66-0E8F-4D9C-920A-E1D099551F20}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevMinionAnalyzer", "DevMinionAnalyzer\DevMinionAnalyzer.csproj", "{FEDA24DA-0416-4862-81A5-FB5DF2E15B64}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTech.Lissandra", "SparkTech.Lissandra\SparkTech.Lissandra.csproj", "{7A552E2F-C83E-4D73-B9DF-07A1EEF38017}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkTech.Orianna", "SparkTech.Orianna\SparkTech.Orianna.csproj", "{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,14 @@ Global
 		{7A552E2F-C83E-4D73-B9DF-07A1EEF38017}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7A552E2F-C83E-4D73-B9DF-07A1EEF38017}.Release|x86.ActiveCfg = Release|Any CPU
 		{7A552E2F-C83E-4D73-B9DF-07A1EEF38017}.Release|x86.Build.0 = Release|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Debug|x86.Build.0 = Debug|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Release|x86.ActiveCfg = Release|Any CPU
+		{918EAE37-7C4E-4281-94BC-69CC0B43CFF5}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

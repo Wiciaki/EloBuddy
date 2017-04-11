@@ -11,7 +11,7 @@
 
         public event Action<T> Created, Deleted;
 
-        private bool process;
+        private bool processNext;
 
         private readonly string itemName, spellName;
 
@@ -19,7 +19,7 @@
 
         private readonly int trackedId;
         
-        public ObjectTracker(string itemName, string spellName, int? sourceNetworkId = null, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        public ObjectTracker(string itemName, string spellName, int? sourceNetworkId = null, StringComparison comparison = StringComparison.CurrentCultureIgnoreCase)
         {
             this.Items = new List<T>();
             this.itemName = itemName;
@@ -36,16 +36,14 @@
         {
             if (sender.NetworkId == this.trackedId && this.spellName.Equals(args.SData.Name, this.comparison))
             {
-                this.process = true;
+                this.processNext = true;
             }
         }
 
         private void OnPlayAnimation(Obj_AI_Base sender, GameObjectPlayAnimationEventArgs args)
         {
             if (!this.itemName.Equals(sender.Name, this.comparison) || args.Animation != "Death")
-            {
                 return;
-            }
 
             var index = this.Items.FindIndex(item => item.NetworkId == sender.NetworkId);
 
@@ -59,12 +57,10 @@
 
         private void OnCreate(GameObject sender, EventArgs args)
         {
-            if (!this.process || !sender.Name.Equals(this.itemName, this.comparison))
-            {
+            if (!this.processNext || !sender.Name.Equals(this.itemName, this.comparison))
                 return;
-            }
 
-            this.process = false;
+            this.processNext = false;
             var item = (T)sender;
             this.Items.Add(item);
             this.Created?.Invoke(item);

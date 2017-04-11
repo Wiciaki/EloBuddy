@@ -4,7 +4,7 @@
     using System.Collections.Generic;
 
     using EloBuddy.SDK.Menu.Values;
-    
+
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.EventData;
@@ -30,7 +30,26 @@
 
         public readonly Type MenuItemType;
 
-        private readonly Predicate predicate;
+        private Predicate predicate;
+
+        public Predicate Predicate
+        {
+            get
+            {
+                return this.predicate;
+            }
+            set
+            {
+                if (this.predicate == value)
+                {
+                    return;
+                }
+
+                this.predicate = value;
+
+                this.Instance.IsVisible = value?.Invoke() ?? true;
+            }
+        }
 
         public override void UpdateText()
         {
@@ -63,7 +82,7 @@
         public event EventDataHandler<ValueChangedEventArgs> PropertyChanged;
 
         private int skipping;
-      
+
         private bool InvokeAndDetermine(string name)
         {
             if (this.skipping-- > 0)
@@ -130,7 +149,7 @@
             item.OnValueChange += (sender, args) =>
                 {
                     this.boolVal = args.NewValue;
-                    
+
                     if (this.InvokeAndDetermine(nameof(this.Bool)))
                     {
                         item.CurrentValue = args.OldValue;
@@ -382,7 +401,7 @@
                 this.StringIndex = i;
             }
         }
-        
+
         /// <summary>
         /// Implicitly obtains a string from the current instance
         /// </summary>

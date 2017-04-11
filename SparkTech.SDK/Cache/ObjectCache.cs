@@ -21,21 +21,12 @@
     [Trigger]
     public static class ObjectCache
     {
-        #region Constants
-
-        /// <summary>
-        ///     Represents all the teams
-        /// </summary>
-        private const ObjectTeam AllTeams = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral | ObjectTeam.Unknown;
-
-        #endregion
-
         #region Static Fields
 
         /// <summary>
-        ///     Saves the <see cref="E:Player" /> instance
+        ///     Gets the <see cref="E:Player" />'s  instance
         /// </summary>
-        public static readonly AIHeroClient Player;
+        public static AIHeroClient Player => ObjectManager.Player;
 
         /// <summary>
         ///     Contains the <see cref="FieldInfo" /> instances
@@ -88,7 +79,6 @@
         private static readonly List<Obj_AI_Minion> Wards;
 
 #pragma warning disable 649
-#pragma warning disable 169 // The compiler just can't know we're going to use reflection!
 #pragma warning disable RCS1169
 
         /// <summary>
@@ -137,7 +127,6 @@
         private static List<AIHeroClient> AIHeroClientList;
 
 #pragma warning restore 649
-#pragma warning restore 169
 #pragma warning restore RCS1169
 
         #endregion
@@ -196,8 +185,6 @@
                 }
             }
 
-            Player = Game.Mode == GameMode.Running ? (AIHeroClient)GameObjectList.Single(o => o.IsMe) : ObjectManager.Player;
-
             var alliedTeam = Player.Team;
 
             TeamDictionary = new Dictionary<GameObjectTeam, ObjectTeam>
@@ -214,17 +201,6 @@
 
         #endregion
 
-        #region Delegates
-
-        /// <summary>
-        ///     The <see cref="ListAction{TItem}" /> delegate
-        /// </summary>
-        /// <typeparam name="TItem">The item type to take action on</typeparam>
-        /// <param name="list">The <see cref="List{T}" /> to take action on</param>
-        private delegate void ListAction<TItem>(List<TItem> list);
-
-        #endregion
-
         #region Public Methods and Operators
 
         /// <summary>
@@ -232,20 +208,21 @@
         /// </summary>
         /// <typeparam name="TGameObject">The requested <see cref="GameObject" /> type</typeparam>
         /// <param name="team">The specified object team</param>
-        /// <param name="inrange">The function determining whether this instance is in range</param>
+        /// <param name="predicate">The function determining whether this instance is eligible</param>
         /// <returns></returns>
-        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Predicate<TGameObject> inrange = null) where TGameObject : GameObject
+        public static List<TGameObject> Get<TGameObject>(ObjectTeam team = ObjectTeam.Ally | ObjectTeam.Enemy | ObjectTeam.Neutral, Predicate<TGameObject> predicate = null) where TGameObject : GameObject
         {
-            FieldInfo field;
             var name = typeof(TGameObject).Name + "List";
+
+            FieldInfo field;
 
             // Found it cached
             if (FieldData.TryGetValue(name, out field))
             {
-                return Selector((List<TGameObject>)field.GetValue(null), team, true, true, inrange);
+                return Selector((List<TGameObject>)field.GetValue(null), team, predicate);
             }
 
-            var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
+            var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o != null);
             field = GetField(name);
 
             // This type of GameObject is supported however cache is being just initialized
@@ -255,34 +232,7 @@
                 FieldData.Add(name, field);
             }
 
-            return Selector(container, team, true, false, inrange);
-        }
-
-        /// <summary>
-        ///     Gets the GameObjects of the specified type
-        /// </summary>
-        /// <typeparam name="TGameObject">The requested <see cref="GameObject" /> type</typeparam>
-        /// <returns></returns>
-        public static List<TGameObject> GetNative<TGameObject>() where TGameObject : GameObject
-        {
-            FieldInfo field;
-            var name = typeof(TGameObject).Name + "List";
-
-            if (FieldData.TryGetValue(name, out field))
-            {
-                return Selector((List<TGameObject>)field.GetValue(null), AllTeams, false, true, null);
-            }
-
-            var container = GameObjectList.ConvertAll(o => o as TGameObject).FindAll(o => o.IsValid());
-            field = GetField(name);
-
-            if (field != null)
-            {
-                field.SetValue(null, container);
-                FieldData.Add(name, field);
-            }
-
-            return Selector(container, AllTeams, false, false, null);
+            return Selector(container, team, predicate);
         }
 
         /// <summary>
@@ -294,7 +244,7 @@
         /// <returns></returns>
         public static List<Obj_AI_Minion> GetMinions(ObjectTeam team = ObjectTeam.Enemy | ObjectTeam.Ally, MinionType type = MinionType.Minion, Predicate<Obj_AI_Minion> inrange = null)
         {
-            var container = new List<Obj_AI_Minion>(Obj_AI_MinionList.Count);
+            var container = new List<Obj_AI_Minion>();
 
             if ((type & MinionType.Minion) != 0)
                 container.AddRange(Minions);
@@ -309,7 +259,7 @@
             if ((type & MinionType.Other) != 0)
                 container.AddRange(OtherMinions);
 
-            return Selector(container, team, true, false, inrange);
+            return Selector(container, team, inrange);
         }
 
         /// <summary>
@@ -322,7 +272,7 @@
         /// <returns></returns>
         public static List<Obj_AI_Base> GetMinions(Vector2 from, float range, ObjectTeam team = ObjectTeam.Enemy, MinionType type = MinionType.Minion)
         {
-            var container = new List<Obj_AI_Base>(Obj_AI_MinionList.Count);
+            var container = new List<Obj_AI_Base>();
 
             if ((type & MinionType.Minion) != 0)
                 container.AddRange(Minions);
@@ -337,14 +287,17 @@
             if ((type & MinionType.Other) != 0)
                 container.AddRange(OtherMinions);
 
-            range *= range;
-
             if (from.IsZero)
                 from = Player.ServerPosition.ToVector2();
 
-            var infinity = float.IsPositiveInfinity(range);
+            range *= range;
 
-            return Selector(container, team, true, false, @base => infinity || Vector2.DistanceSquared(@base.ServerPosition.ToVector2(), from) <= range);
+            if (float.IsPositiveInfinity(range))
+            {
+                return Selector(container, team, null);
+            }
+
+            return Selector(container, team, @base => Vector2.DistanceSquared(from , @base.ServerPosition.ToVector2()) <= range);
         }
 
         /// <summary>
@@ -382,36 +335,24 @@
         #region Private Methods
 
         /// <summary>
-        ///     Gets the executor function
+        ///     Returns a matched list
         /// </summary>
-        /// <typeparam name="TItem">The <see cref="GameObject" /> type to take action on</typeparam>
-        /// <param name="object">The sender</param>
-        /// <param name="new">Determines whether to add or remove item</param>
+        /// <typeparam name="TGameObject">The requested <see cref="GameObject" /> type</typeparam>
+        /// <param name="container">The original list</param>
+        /// <param name="flags">The provided team flags</param>
+        /// <param name="predicate">The function to check if the unit meets the condition</param>
         /// <returns></returns>
-        private static ListAction<TItem> GetExecutor<TItem>(TItem @object, bool @new) where TItem : GameObject
+        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, Predicate<TGameObject> predicate) where TGameObject : GameObject
         {
-            if (@new)
-            {
-                return list => list?.Add(@object);
-            }
-
-            return list =>
-            {
-                if (list == null)
-                    return;
-
-                var searched = @object?.NetworkId;
-
-                while (true)
+            return container.FindAll(o =>
                 {
-                    var index = list.FindIndex(item => searched.HasValue ? item?.NetworkId == searched : item == null);
+                    var team = o.Team();
 
-                    if (index < 0)
-                        break;
+                    if ((flags & team) == 0)
+                        return false;
 
-                    list.RemoveAt(index);
-                }
-            };
+                    return predicate == null || predicate(o);
+                });
         }
 
         /// <summary>
@@ -431,94 +372,108 @@
         /// <param name="new">Determines whether to add or remove an item</param>
         private static void Process(GameObject @object, bool @new)
         {
-            GetExecutor(@object, @new)(GameObjectList);
+            var engine = new ProcessingEngine(@object, @new);
 
-            var attackable = @object as AttackableUnit;
-            if (attackable == null)
+            engine.Proc(GameObjectList);
+
+            if (!engine.Proc(AttackableUnitList))
             {
-                GetExecutor(@object as Obj_GeneralParticleEmitter, @new)(Obj_GeneralParticleEmitterList);
+                if (engine.Proc(Obj_GeneralParticleEmitterList))
+                { }
+                else if (engine.Proc(MissileClientList))
+                { }
+
                 return;
             }
 
-            GetExecutor(attackable, @new)(AttackableUnitList);
-
-            var @base = attackable as Obj_AI_Base;
-            if (@base == null)
+            if (!engine.Proc(Obj_AI_BaseList))
             {
-                GetExecutor(attackable as Obj_HQ, @new)(Obj_HQList);
-                GetExecutor(attackable as Obj_BarracksDampener, @new)(Obj_BarracksDampenerList);
+                if (engine.Proc(Obj_AnimatedBuildingList))
+                {
+                    if (engine.Proc(Obj_BarracksDampenerList))
+                    {
+
+                    }
+                    else if (engine.Proc(Obj_HQList))
+                    {
+
+                    }
+                }
+
                 return;
             }
 
-            GetExecutor(@base, @new)(Obj_AI_BaseList);
-            GetExecutor(@base as AIHeroClient, @new)(AIHeroClientList);
-            GetExecutor(@base as Obj_AI_Turret, @new)(Obj_AI_TurretList);
-
-            var minion = attackable as Obj_AI_Minion;
-            if (minion == null)
-                return;
-
-            GetExecutor(minion, @new)(Obj_AI_MinionList);
-
-            if (minion.IsValid)
+            if (engine.Proc(AIHeroClientList))
             {
-                var type = minion.DetermineType();
+                return;
+            }
 
-                GetExecutor(minion, @new)(
-                    type.IsMinion()
-                        ? Minions
-                        : type == AIMinionType.Ward
+            if (engine.Proc(Obj_AI_TurretList))
+            {
+                return;
+            }
+
+            engine.Proc(Obj_AI_MinionList);
+
+            var type = ((Obj_AI_Minion)@object).DetermineType();
+
+            engine.Proc(
+                type.IsMinion()
+                    ? Minions
+                    : type == AIMinionType.Ward
                         ? Wards
                         : type.IsJungle()
-                        ? JungleMinions
-                        : type == AIMinionType.Pet
-                        ? Pets
-                        : OtherMinions);
-            }
-            else
+                            ? JungleMinions
+                            : type == AIMinionType.Pet
+                                ? Pets
+                                : OtherMinions);
+            /*
+             
+            bool Proc<T>(ICollection<T> a) where T: GameObject 
             {
-                GetExecutor(minion, @new)(Minions);
-                GetExecutor(minion, @new)(Wards);
-                GetExecutor(minion, @new)(JungleMinions);
-                GetExecutor(minion, @new)(Pets);
-                GetExecutor(minion, @new)(OtherMinions);
+                return false;
             }
-        }
 
-        /// <summary>
-        ///     Returns a matched list
-        /// </summary>
-        /// <typeparam name="TGameObject">The requested <see cref="GameObject" /> type</typeparam>
-        /// <param name="container">The original list</param>
-        /// <param name="flags">The provided team flags</param>
-        /// <param name="moreChecks">Determines whether to perform additional checks</param>
-        /// <param name="validityCheck">The additional predicate</param>
-        /// <param name="predicate">The function to check if the unit meets the condition</param>
-        /// <returns></returns>
-        private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, bool moreChecks, bool validityCheck, Predicate<TGameObject> predicate) where TGameObject : GameObject
-        {
-            return container.FindAll(o =>
-                {
-                    if (validityCheck && !o.IsValid())
-                        return false;
-
-                    var team = o.Team();
-
-                    if ((flags & team) == 0)
-                        return false;
-
-                    if (!moreChecks)
-                        return true;
-
-                    if (predicate != null && !predicate(o) || !o.IsVisible || o.IsDead)
-                        return false;
-
-                    var attackable = o as AttackableUnit;
-
-                    return attackable == null || !attackable.IsInvulnerable && !attackable.IsZombie && (team == ObjectTeam.Ally || attackable.IsTargetable || team == ObjectTeam.Unknown);
-                });
+            */
         }
 
         #endregion
+
+        private class ProcessingEngine
+        {
+            internal ProcessingEngine(GameObject @object, bool @new)
+            {
+                this.@object = @object;
+                this.@new = @new;
+            }
+
+            private readonly GameObject @object;
+
+            private readonly bool @new;
+
+            internal bool Proc<TGameObject>(ICollection<TGameObject> list) where TGameObject : GameObject
+            {
+                var o = this.@object as TGameObject;
+
+                if (o == null)
+                {
+                    return false;
+                }
+
+                if (list != null)
+                {
+                    if (this.@new)
+                    {
+                        list.Add(o);
+                    }
+                    else
+                    {
+                        list.Remove(o);
+                    }
+                }
+
+                return true;
+            }
+        }
     }
 }

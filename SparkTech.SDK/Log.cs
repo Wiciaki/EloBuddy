@@ -34,12 +34,12 @@
                     Writer.Dispose();
                 };
 
-            var folder = FileManager.GetFolder("Logs");
-            var date = DateTime.Today;
+            var folder = FileManager.WorkingDirectory.GetSubFolder("Logs");
+            var date = DateTime.Now;
 
-            foreach (var file in Directory.GetFiles(folder).Where(file => (date - File.GetCreationTime(file)).Days > 7 && Path.GetFileName(file).StartsWith("Game")))
+            foreach (var fileInfo in Directory.GetFiles(folder).Select(file => new FileInfo(file)).Where(fileInfo => (date - fileInfo.CreationTime).Days > 3 && fileInfo.Name.StartsWith("Game")))
             {
-                File.Delete(file);
+                fileInfo.Delete();
             }
 
             var i = 0;
@@ -55,14 +55,18 @@
 
             Writer.WriteLine("CLR: " + Environment.Version);
             Writer.WriteLine("SDK: " + typeof(Log).Assembly.GetName().Version);
-            Verbose(CurrentTime);
-            Verbose("Injection routine started...");
+            Verbose(CurrentTime + "\nInjection routine started...");
         }
 
-        public static void Verbose(string message) => Writer.WriteLine(Environment.NewLine + message);
+        public static void Verbose(string message)
+        {
+            Writer.WriteLine("\nSparkTech.SDK: " + message);
+        }
 
         public static void Warn(string message)
         {
+            message = "SparkTech.SDK: " + message;
+
             Logger.Warn(message);
 
             Writer.WriteLine();
@@ -73,6 +77,8 @@
 
         public static void Exception(Exception ex, string message)
         {
+            message = "SparkTech.SDK: " + message;
+
             try
             {
                 Logger.Exception(message, ex);
