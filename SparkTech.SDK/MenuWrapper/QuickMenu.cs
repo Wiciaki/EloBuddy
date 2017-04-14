@@ -2,7 +2,7 @@
 {
     public class QuickMenu : Menu
     {
-        public QuickMenu(string name) : base(name, name.Replace('.', '_'))
+        public QuickMenu(string translationKey) : base(translationKey.Replace('_', '.'), translationKey)
         {
 
         }

@@ -107,15 +107,38 @@
         /// <summary>
         /// The API key to be used in the connection
         /// </summary>
-        private readonly string apiKey;
+        private readonly SecureString apiKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LicenseServer"/> class
         /// </summary>
         /// <param name="apiKey">The API key to be used</param>
-        public LicenseServer(string apiKey)
+        public LicenseServer(SecureString apiKey)
         {
+            apiKey.MakeReadOnly();
+
             this.apiKey = apiKey;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LicenseServer"/> class
+        /// </summary>
+        /// <param name="apiKey">The API key to be secured and used</param>
+        public LicenseServer(string apiKey) : this(Create(apiKey))
+        {
+
+        }
+
+        private static SecureString Create(string apiKey)
+        {
+            var secureString = new SecureString();
+
+            foreach (var @char in apiKey)
+            {
+                secureString.AppendChar(@char);
+            }
+
+            return secureString;
         }
 
         /// <summary>
@@ -217,9 +240,9 @@
                     return (netlicensing)new XmlSerializer(typeof(netlicensing)).Deserialize(stream);
                 }
             }
-            catch (WebException)
+            catch (WebException ex)
             {
-                Log.Warn("Connection error. Potential reason: User not registered in database for this API key.");
+                Log.Exception(ex, "Connection error. Potential reason: User not registered in database for this API key.");
 
                 if (!token)
                 {

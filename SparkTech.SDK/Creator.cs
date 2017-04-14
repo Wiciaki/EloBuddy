@@ -4,29 +4,13 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.Windows;
-    
+
     using SparkTech.SDK.Enumerations;
+    using SparkTech.SDK.EventData;
     using SparkTech.SDK.MenuWrapper;
     using SparkTech.SDK.Web;
 
     using LangCache = SparkTech.SDK.Cache.EnumCache<Enumerations.Language>;
-
-    #region Delegates
-
-    /// <summary>
-    /// The delegate used for passing argument-less Boolean pointers
-    /// </summary>
-    /// <returns></returns>
-    public delegate bool Predicate();
-
-    /// <summary>
-    /// The main event delegate used for handling most of the event data instances
-    /// </summary>
-    /// <typeparam name="TEventArgs">The destination event arguments</typeparam>
-    /// <param name="args">The actual event data</param>
-    public delegate void EventDataHandler<in TEventArgs>(TEventArgs args) where TEventArgs : EventArgs;
-
-    #endregion
 
     /// <summary>
     /// The variable storage and menu initializer
@@ -75,8 +59,6 @@
         {
             Licensed = LicenseServer.GetSubscription("SparkTech.SDK", out SubscriptionExpiry);
 
-            SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang).Substring(0, 2) == CultureInfo.InstalledUICulture.Name.Substring(0, 2));
-
             var replacements = new ReservedCollection
                                    {
                                        ["licenseStatus"] = () => Licensed ? "✔" : "✘",
@@ -109,13 +91,15 @@
                                            }
                                    };
 
-            MainMenu = new MainMenu("st.sdk", "st_sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
+            MainMenu = new QuickMainMenu("st_sdk", GetTranslations, replacements, "༼ つ ◕_◕ ༽つ")
                            {
                                new QuickMenu("features")
                                    {
-                                       ["premium_label"] = new MenuItem("premium"),
-                                       ["orbwalker"] = new MenuItem("use_xorbwalker", false),
-                                       ["targetselector"] = new MenuItem("use_xtargetselector", false),
+                                       ["premium_label"] = new MenuItem("features_premium"),
+                                       ["orbwalker"] = new MenuItem("use_xorbwalker", true),
+                                       ["targetselector"] = new MenuItem("use_xtargetselector", true),
+                                       ["common_label"] = new MenuItem("features_common"),
+                                       ["indicator"] = new MenuItem("use_indicator", true)
                                    },
 
                                new QuickMenu("update"),
@@ -135,7 +119,7 @@
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
                                { "separator3", new MenuItem(10) },
-                               { "lang.notice", new MenuItem("i_dont_speak_spaghetti", () => Language != Language.English && Language != Language.Polish) }
+                               { "lang.notice", new MenuItem("i_dont_speak_spaghetti", IsLanguageUnknown) }
                            };
 
             var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
@@ -144,6 +128,10 @@
             first.Bool = false;
 
             var languageItem = MainMenu["language"];
+
+            var substring = CultureInfo.InstalledUICulture.Name.Substring(0, 2);
+
+            SystemLanguage = LangCache.Values.Find(lang => LangCache.Description(lang) == substring);
 
             if (FirstRun)
             {
@@ -164,7 +152,7 @@
 
             languageItem.PropertyChanged += args =>
                 {
-                    Language = args.Sender.Enum<Language>();
+                    Language = languageItem.Enum<Language>();
 
                     MainMenu.Rebuild();
                 };
@@ -191,10 +179,10 @@
             if (!Licensed)
             {
                 features["orbwalker"].Bool = false;
-                features["orbwalker"].PropertyChanged += args => args.Process = false;
+                features["orbwalker"].PropertyChanged += OnBlocked;
 
                 features["targetselector"].Bool = false;
-                features["targetselector"].PropertyChanged += args => args.Process = false;
+                features["targetselector"].PropertyChanged += OnBlocked;
             }
             else
             {
@@ -204,6 +192,33 @@
             if (FirstRun)
             {
                 MainMenu.Print("welcome");
+            }
+        }
+
+        /// <summary>
+        /// Executes when a MenuItem is being blocked
+        /// </summary>
+        /// <param name="args">The event data</param>
+        private static void OnBlocked(ValueChangedEventArgs args)
+        {
+            args.Process = false;
+
+            MainMenu.Print("premium_required");
+        }
+
+        /// <summary>
+        /// Determines whether the current language is unknown
+        /// </summary>
+        /// <returns>Value determining whether the current language I don't speak :)</returns>
+        private static bool IsLanguageUnknown()
+        {
+            switch (Language)
+            {
+                case Language.English:
+                case Language.Polish:
+                    return false;
+                default:
+                    return true;
             }
         }
 
@@ -228,8 +243,6 @@
                                    ["token_success"] = "Link copied to clipboard!",
                                    ["token_fail"] = "Failed to obtain a token!",
 
-                                   #region Updater
-
                                    ["updater_failure"] = "Couldn't get update data for [NAME]",
                                    ["updater_updated"] = "You're using the updated version of [NAME].",
                                    ["updater_outdated"] = "New update for [NAME] is available!",
@@ -250,35 +263,34 @@
 
                                    ["update_available"] = "Updates are available. Check the menu for more details.",
 
-                                   #endregion
-
                                    ["license"] = "Subscription",
                                    ["license_shop"] = "Press to generate an unique shop link",
                                    ["license_status"] = "SDK Subscription owned: {licenseStatus}\nExpires in: {subExpiry}",
                                    ["license_note"] = "Subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way of keeping me motivated.\nPlease visit the shop website to find our more.",
 
                                    ["features"] = "Features",
-                                   ["premium"] = "Premium features (subscribers only)",
+                                   ["features_premium"] = "Premium features (subscribers only)",
+                                   ["features_common"] = "Common features",
                                    ["use_xorbwalker"] = "Enable SparkWalker",
                                    ["use_xtargetselector"] = "Enable XTargetSelector",
+                                   ["use_indicator"] = "Draw damage on enemies' health bars",
 
                                    ["language"] = "Language",
                                    ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
                                    ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
                                    ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.\nTranslation credits: (...)",
 
-                                   ["welcome"] = "Welcome! Please, make yourself familiar with the menu first"
+                                   ["welcome"] = "Welcome! Please, make yourself familiar with the menu first",
+                                   ["premium_required"] = "This is a premium feature and requires you to subscribe"
                                };
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["token_success"] = "Link skopiowany do schowka!",
-                                   ["token_fail"] = "Wystapil blad przy generowaniu tokena!",
-
                                    ["days"] = "dni",
                                    ["hours"] = "godziny",
 
-                                   #region Updater
+                                   ["token_success"] = "Link skopiowany do schowka!",
+                                   ["token_fail"] = "Wystapil blad przy generowaniu tokena!",
 
                                    ["updater_failure"] = "Nie mozna sprawdzic aktualizacji dla [NAME]",
                                    ["updater_updated"] = "Uzywasz aktualnej wersji [NAME].",
@@ -300,25 +312,73 @@
 
                                    ["update_available"] = "Aktualizacje sa dostepne. Sprawdz menu, by poznac szczegoly.",
 
-                                   #endregion
-
                                    ["license"] = "Subskrypcja",
                                    ["license_shop"] = "Kliknij, by utworzyć unikalny link do sklepu",
-                                   ["license_status"] = "Status subskrypcji: {licenseStatus}\nWygasa za: {subExpiry}",
+                                   ["license_status"] = "Status subskrypcji SDK: {licenseStatus}\nWygasa za: {subExpiry}",
                                    ["license_note"] = "Subskrypcja pozwala na używanie funkcji premium, takich jak dedykowany orbwalker,\ntarget selector, czy też dostęp do addonów w fazie testowej. Pomaga mi też utrzymać motywację,\njak i wysoką jakość addonów.\nOdwiedź stronę sklepu, by dowiedzieć się więcej",
 
                                    ["features"] = "Funkcje",
-                                   ["premium"] = "Funkcje premium (tylko dla subskrybentów)",
+                                   ["features_premium"] = "Funkcje premium (tylko dla subskrybentów)",
+                                   ["features_common"] = "Zwykłe funkcje",
                                    ["use_xorbwalker"] = "Aktywuj SparkWalker",
-                                   ["use_xtargetselector"] = "Aktywuj XTargetSelectora",
+                                   ["use_xtargetselector"] = "Aktywuj XTargetSelector",
+                                   ["use_indicator"] = "Pasek obrażeń na zdrowiu przeciwnika",
 
                                    ["language"] = "Język",
                                    ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:",
 
-                                   ["welcome"] = "Witaj! Prosze, zapoznaj sie najpierw z menu"
+                                   ["welcome"] = "Witaj! Prosze, zapoznaj sie najpierw z menu",
+                                   ["premium_required"] = "To jest funkcja premium i wymaga posiadania subskrypcji"
                     };
                 case Language.German:
-                    return new Dictionary<string, string>();
+                    return new Dictionary<string, string>
+                               {
+                                   ["days"] = "days",
+                                   ["hours"] = "hours",
+
+                                   ["token_success"] = "Link copied to clipboard!",
+                                   ["token_fail"] = "Failed to obtain a token!",
+
+                                   ["updater_failure"] = "Couldn't get update data for [NAME]",
+                                   ["updater_updated"] = "You're using the updated version of [NAME].",
+                                   ["updater_outdated"] = "New update for [NAME] is available!",
+
+                                   ["update"] = "Updates",
+
+                                   ["update_note_sdk"] = "SparkTech.SDK version status:",
+                                   ["updated_yes_sdk"] = "You are using the updated version, which is {sdkVersion}",
+                                   ["updated_no_sdk"] = "A new update is available! Please update it in the loader! {sdkVersion}",
+
+                                   ["update_note_allypingspammer"] = "Pinging capabilities of AllyPingSpammer:",
+                                   ["updated_yes_allypingspammer"] = "Feel free to ping to your limits. Version is {allypingspammerVersion}",
+                                   ["updated_no_allypingspammer"] = "Not enough pings, please update! {allypingspammerVersion}",
+
+                                   ["update_note_lissandra"] = "Lissandra version:",
+                                   ["updated_yes_lissandra"] = "FREEEEZE! ({lissandraVersion})",
+                                   ["updated_no_lissandra"] = "Need more ice cubes... Update is available! {lissandraVersion}",
+
+                                   ["update_available"] = "Updates are available. Check the menu for more details.",
+
+                                   ["license"] = "Subscription",
+                                   ["license_shop"] = "Press to generate an unique shop link",
+                                   ["license_status"] = "SDK Subscription owned: {licenseStatus}\nExpires in: {subExpiry}",
+                                   ["license_note"] = "Subscription allows you to use premium features like an exclusive orbwalker, target selector,\nas well as allows early access to beta addons. It's also a nice way of keeping me motivated.\nPlease visit the shop website to find our more.",
+
+                                   ["features"] = "Features",
+                                   ["features_premium"] = "Premium features (subscribers only)",
+                                   ["features_common"] = "Common features",
+                                   ["use_xorbwalker"] = "Enable SparkWalker",
+                                   ["use_xtargetselector"] = "Enable XTargetSelector",
+                                   ["use_indicator"] = "Draw damage on enemies' health bars",
+
+                                   ["language"] = "Language",
+                                   ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
+                                   ["contact"] = "Discord: \"Spark#7596\"\nSkype: \"wiktorsharp\"",
+                                   ["i_dont_speak_spaghetti"] = "Please note I don't speak this language.\nTranslation credits: (...)",
+
+                                   ["welcome"] = "Welcome! Please, make yourself familiar with the menu first",
+                                   ["premium_required"] = "This is a premium feature and requires you to subscribe"
+                    };
             }
         }
     }

@@ -85,7 +85,7 @@
             return this[name] ?? this.Menus.Values.Select(menu => menu[name]).FirstOrDefault(item => item != null);
         }
 
-        public static MainMenu GetMainMenu(string name)
+        public static MainMenu Get(string name)
         {
             return Instances.Find(main => main.Name == name);
         }
@@ -101,11 +101,6 @@
             return components;
         }
 
-        public static List<MenuBase> GetAllComponents()
-        {
-            return Instances.Concat(Instances.SelectMany(c => c.GetComponents())).ToList();
-        }
-
         #endregion
 
         #region Translation Stuff
@@ -113,9 +108,14 @@
         /// <summary>
         /// Processes with the text update of all items
         /// </summary>
-        public static void Rebuild()
+        internal static void Rebuild()
         {
-            GetAllComponents().ForEach(component => component.UpdateText());
+            Instances.ForEach(mm => mm.UpdateText());
+
+            foreach (var component in Instances.SelectMany(mm => mm.GetComponents()))
+            {
+                component.UpdateText();
+            }
         }
 
         /// <summary>
@@ -159,9 +159,9 @@
                 this.translations.Add(pair.Key, pair.Value);
             }
 
-            if (Creator.Language != Language.English)
+            if (Creator.Language != default(Language))
             {
-                foreach (var pair in this.generator(Language.English))
+                foreach (var pair in this.generator(default(Language)))
                 {
                     if (!this.translations.ContainsKey(pair.Key))
                     {

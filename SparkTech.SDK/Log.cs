@@ -79,23 +79,14 @@
         {
             message = "SparkTech.SDK: " + message;
 
-            try
-            {
-                Logger.Exception(message, ex);
-            }
-            catch
-            {
-                // Nice logger you got there ( ͡° ͜ʖ ͡°)
-            }
-            finally
-            {
-                Writer.WriteLine();
-                Writer.WriteLine("========== EXCEPTION ==========");
-                Writer.WriteLine(message);
-                Writer.WriteLine();
-                Writer.WriteLine(ex);
-                Writer.WriteLine("===============================");
-            }
+            Logger.Error(message);
+
+            Writer.WriteLine();
+            Writer.WriteLine("========== EXCEPTION ==========");
+            Writer.WriteLine(message);
+            Writer.WriteLine();
+            Writer.WriteLine(ex);
+            Writer.WriteLine("===============================");
         }
     }
 }

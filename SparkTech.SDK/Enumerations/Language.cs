@@ -10,19 +10,19 @@
         /// <summary>
         /// The <see cref="English"/> language
         /// </summary>
-        [Description("en-US")]
+        [Description("en")]
         English = 0,
 
         /// <summary>
         /// The <see cref="German"/> language
         /// </summary>
-        [Description("de-DE")]
+        [Description("de")]
         German = 1,
 
         /// <summary>
         /// The <see cref="Polish"/> language
         /// </summary>
-        [Description("pl-PL")]
+        [Description("pl")]
         Polish = 2,
     }
 }

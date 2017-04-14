@@ -122,6 +122,11 @@
         private static List<Obj_AnimatedBuilding> Obj_AnimatedBuildingList;
 
         /// <summary>
+        ///     Contains all the <see cref="Obj_AI_Marker" /> instances
+        /// </summary>
+        private static List<Obj_AnimatedBuilding> Obj_AI_MarkerList;
+
+        /// <summary>
         ///     Contains all the <see cref="AIHeroClient" /> instances
         /// </summary>
         private static List<AIHeroClient> AIHeroClientList;
@@ -391,42 +396,42 @@
                 if (engine.Proc(Obj_AnimatedBuildingList))
                 {
                     if (engine.Proc(Obj_BarracksDampenerList))
-                    {
-
-                    }
+                    { }
                     else if (engine.Proc(Obj_HQList))
-                    {
-
-                    }
+                    { }
                 }
 
                 return;
             }
 
-            if (engine.Proc(AIHeroClientList))
+            if (engine.Proc(Obj_AI_MinionList))
             {
-                return;
+                var type = ((Obj_AI_Minion)@object).DetermineType();
+
+                engine.Proc(
+                    type.IsMinion()
+                        ? Minions
+                        : type == AIMinionType.Ward
+                            ? Wards
+                            : type.IsJungle()
+                                ? JungleMinions
+                                : type == AIMinionType.Pet
+                                    ? Pets
+                                    : OtherMinions);
+            }
+            else if (engine.Proc(Obj_AI_MarkerList))
+            { }
+            else if (engine.Proc(AIHeroClientList))
+            { }
+            else if (engine.Proc(Obj_AI_TurretList))
+            { }
+            else if (engine.Proc(Obj_AI_MarkerList))
+            { }
+            else
+            {
+                Log.Verbose("Unhandled type in cache: " + @object.GetType().Name);
             }
 
-            if (engine.Proc(Obj_AI_TurretList))
-            {
-                return;
-            }
-
-            engine.Proc(Obj_AI_MinionList);
-
-            var type = ((Obj_AI_Minion)@object).DetermineType();
-
-            engine.Proc(
-                type.IsMinion()
-                    ? Minions
-                    : type == AIMinionType.Ward
-                        ? Wards
-                        : type.IsJungle()
-                            ? JungleMinions
-                            : type == AIMinionType.Pet
-                                ? Pets
-                                : OtherMinions);
             /*
              
             bool Proc<T>(ICollection<T> a) where T: GameObject 
@@ -444,6 +449,7 @@
             internal ProcessingEngine(GameObject @object, bool @new)
             {
                 this.@object = @object;
+
                 this.@new = @new;
             }
 
