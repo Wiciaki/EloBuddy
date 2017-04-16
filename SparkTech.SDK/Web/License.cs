@@ -125,9 +125,7 @@
         /// </summary>
         /// <param name="apiKey">The API key to be secured and used</param>
         public LicenseServer(string apiKey) : this(Create(apiKey))
-        {
-
-        }
+        { }
 
         private static SecureString Create(string apiKey)
         {

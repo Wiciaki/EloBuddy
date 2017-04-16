@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
     using System.Reflection;
 
     using EloBuddy;
@@ -32,6 +31,11 @@
         ///     Contains the <see cref="FieldInfo" /> instances
         /// </summary>
         private static readonly Dictionary<string, FieldInfo> FieldData;
+
+        /// <summary>
+        ///     The team relation dictionary
+        /// </summary>
+        private static readonly Dictionary<GameObjectTeam, ObjectTeam> TeamDictionary;
 
         /// <summary>
         ///     Contains all the <see cref="GameObject" /> instances
@@ -69,12 +73,7 @@
         private static readonly List<Obj_AI_Minion> Pets;
 
         /// <summary>
-        ///     The team relation dictionary
-        /// </summary>
-        private static readonly Dictionary<GameObjectTeam, ObjectTeam> TeamDictionary;
-
-        /// <summary>
-        ///     Gets the list containing just the wards
+        ///     Gets the list containing the wards
         /// </summary>
         private static readonly List<Obj_AI_Minion> Wards;
 
@@ -144,14 +143,26 @@
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         static ObjectCache()
         {
-            GameObjectList = ObjectManager.Get<GameObject>().ToList();
-            Obj_AI_MinionList = GameObjectList.OfType<Obj_AI_Minion>().ToList();
+            GameObjectList = new List<GameObject>();
+            Obj_AI_MinionList = new List<Obj_AI_Minion>();
 
-            FieldData = new Dictionary<string, FieldInfo>(10)
-                        {
-                            ["GameObjectList"] = GetField("GameObjectList"),
-                            ["Obj_AI_MinionList"] = GetField("Obj_AI_MinionList")
-            };
+            foreach (var o in ObjectManager.Get<GameObject>())
+            {
+                GameObjectList.Add(o);
+
+                var minion = o as Obj_AI_Minion;
+
+                if (minion != null)
+                {
+                    Obj_AI_MinionList.Add(minion);
+                }
+            }
+
+            FieldData = new Dictionary<string, FieldInfo>
+                            {
+                                ["GameObjectList"] = GetField("GameObjectList"),
+                                ["Obj_AI_MinionList"] = GetField("Obj_AI_MinionList")
+                            };
 
             Minions = new List<Obj_AI_Minion>();
             Pets = new List<Obj_AI_Minion>();
