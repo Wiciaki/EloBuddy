@@ -2,7 +2,7 @@
 {
     public static class VersionInfo
     {
-        public const string VersionSDK = "0.3.1.0";
+        public const string VersionSDK = "0.3.1.1";
 
         public const string VersionAllyPingSpammer = "2.2.1.1";
 

@@ -13,10 +13,13 @@
 	/// </summary>
     public static class Updater
     {
+		/// <summary>
+		/// Performs an update check and executes the requested action
+		/// </summary>
+		/// <param name="link">The specified link</param>
+		/// <param name="action">The optional, specified action</param>
         public static async void Check(string link, Action<CheckPerformedEventArgs> action = null)
         {
-            Uri uri;
-
             if (link == null || !link.ToLower().Contains("raw.githubusercontent.com"))
             {
                 return;
@@ -27,7 +30,9 @@
                 return;
             }
 
-            if (!Uri.TryCreate(link, UriKind.Absolute, out uri))
+	        Uri uri;
+
+			if (!Uri.TryCreate(link, UriKind.Absolute, out uri))
             {
                 return;
             }
@@ -37,35 +42,28 @@
                 return;
             }
 
-            string data;
+	        var name = Assembly.GetCallingAssembly().GetName();
+
+			string data;
 
             using (var client = new WebClient())
             {
                 data = await client.DownloadStringTaskAsync(uri).ConfigureAwait(false);
             }
 
-            var match = Regex.Match(data);
+            var match = Regex.Match(data, @"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]");
             var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
 
-	        var name = Assembly.GetCallingAssembly().GetName();
             var args = new CheckPerformedEventArgs(gitVersion, name.Version, name.Name);
 
-            CodeFlow.Secure(delegate
-                    {
-                        if (action != null)
-                        {
-                            action(args);
-                        }
-                        else
-                        {
-                            args.Notify();
-                        }
-                    });
+	        if (action != null)
+	        {
+		        CodeFlow.Secure(() => action(args));
+	        }
+	        else
+	        {
+		        CodeFlow.Secure(args.Notify);
+	        }
         }
-
-	    /// <summary>
-	    /// The regular expression used for matching the assembly info file
-	    /// </summary>
-	    private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]", RegexOptions.Compiled);
 	}
 }
