@@ -119,7 +119,7 @@
                 return;
             }
 
-            MainMenu = new MainMenu("st.ping", "st_ping", GenerateTranslations)
+            MainMenu = new QuickMainMenu("st_ping", GenerateTranslations)
                            {
                                ["hero"] = new MenuItem("spam_who", Allies.ConvertAll(ally => ally.UniqueName())),
                                ["separator1"] = new MenuItem(),

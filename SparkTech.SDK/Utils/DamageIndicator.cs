@@ -5,6 +5,7 @@
 
     using EloBuddy;
     using EloBuddy.SDK;
+    using EloBuddy.SDK.Menu;
 
     using SharpDX;
 
@@ -19,19 +20,28 @@
     {
         public bool Draw = true;
 
-        public Func<AIHeroClient, float> Damage;
+        public readonly Func<AIHeroClient, float> GetDamage;
 
-        public Func<AIHeroClient, SystemColor> Color;
+        private SystemColor color;
 
-        public DamageIndicator(SystemColor color) : this()
+        public SystemColor Color
         {
-            color = SystemColor.FromArgb(150, color);
-
-            this.Color = h => color;
+            get
+            {
+                return this.color;
+            }
+            set
+            {
+                this.color = SystemColor.FromArgb(150, value);
+            }
         }
 
-        public DamageIndicator()
+        public DamageIndicator(Func<AIHeroClient, float> getDamage)
         {
+            this.GetDamage = getDamage;
+
+            this.Color = SystemColor.Gold;
+
             Drawable.Add(this);
         }
 
@@ -45,26 +55,21 @@
         {
             Drawing.OnEndScene += delegate
                 {
-                    if (!Creator.MainMenu.GetMenu("features")["indicator"])
+                    if (!Creator.MainMenu.GetMenu("features")["indicator"] || MainMenu.IsVisible)
                     {
                         return;
                     }
 
-                    if (EloBuddy.SDK.Menu.MainMenu.IsOpen)
-                    {
-                        return;
-                    }
-
-                    var enemies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Enemy, h => h.IsHPBarRendered && h.VisibleOnScreen);
+                    var enemies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Enemy, h => h.VisibleOnScreen && h.IsHPBarRendered);
 
                     if (enemies.Count == 0)
                     {
                         return;
                     }
 
-                    var sources = Drawable.FindAll(s => s.Draw && s.Damage != null && s.Color != null);
+                    var drawable = Drawable.FindAll(s => s.Draw);
 
-                    if (sources.Count == 0)
+                    if (drawable.Count == 0)
                     {
                         return;
                     }
@@ -86,26 +91,26 @@
                                 break;
                         }
 
-                        var health = enemy.TotalShieldHealth();
-                        var maxHealth = enemy.TotalShieldMaxHealth();
+                        var current = enemy.TotalShieldHealth();
+                        var max = enemy.TotalShieldMaxHealth();
 
-                        foreach (var source in sources)
+                        foreach (var source in drawable)
                         {
-                            if (health <= 0)
+                            if (current <= 0f)
                             {
                                 break;
                             }
 
                             var end = position;
-                            end.X += Width * (health / maxHealth);
+                            end.X += Width * (current / max);
 
-                            health -= source.Damage(enemy);
-                            var damagePercent = Math.Max(health, 0f) / maxHealth;
+                            current -= source.GetDamage(enemy);
+                            var damagePercent = Math.Max(current, 0f) / max;
 
                             var start = position;
                             start.X += Width * damagePercent;
 
-                            Drawing.DrawLine(start, end, Height, source.Color(enemy));
+                            Drawing.DrawLine(start, end, Height, source.Color);
                         }
                     }
                 };

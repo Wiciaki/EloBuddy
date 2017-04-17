@@ -44,9 +44,9 @@
             return this.Add(new Menu(uniqueSubMenuId, translationName));
         }
 
-        public Menu AddSubMenu(string uniqueSubMenuId)
+        public Menu AddSubMenu(string translationName)
         {
-            return this.Add(new QuickMenu(uniqueSubMenuId));
+            return this.Add(new QuickMenu(translationName));
         }
 
         public Menu Add(Menu menu)
@@ -106,16 +106,18 @@
         #region Translation Stuff
 
         /// <summary>
-        /// Processes with the text update of all items
+        /// Processes with the text update of all items for this instance
         /// </summary>
-        internal static void Rebuild()
+        public void Rebuild()
         {
-            Instances.ForEach(mm => mm.UpdateText());
+            this.UpdateText();
 
-            foreach (var component in Instances.SelectMany(mm => mm.GetComponents()))
-            {
-                component.UpdateText();
-            }
+            this.GetComponents().ForEach(component => component.UpdateText());
+        }
+
+        internal static void LanguageChanged()
+        {
+            Instances.ForEach(inst => inst.Rebuild());
         }
 
         /// <summary>
@@ -133,6 +135,7 @@
             }
 
             Log.Warn($"Suitable translation string for \"{translationKey}\" was not provided.");
+
             return translationKey;
         }
 

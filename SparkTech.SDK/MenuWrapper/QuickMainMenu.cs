@@ -5,7 +5,7 @@
 
     using SparkTech.SDK.Enumerations;
 
-    class QuickMainMenu : MainMenu
+    public class QuickMainMenu : MainMenu
     {
         public QuickMainMenu(
             string translationKey,

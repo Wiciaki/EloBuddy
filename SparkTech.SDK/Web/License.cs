@@ -198,7 +198,7 @@
             }
             catch (SecurityException)
             {
-                Log.Warn("Failed to exchange data with the license server due to locked sandbox environment.");
+                Log.Verbose("Failed to exchange data with the license server due to locked sandbox environment.");
                 return null;
             }
 

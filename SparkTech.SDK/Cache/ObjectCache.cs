@@ -360,15 +360,7 @@
         /// <returns></returns>
         private static List<TGameObject> Selector<TGameObject>(List<TGameObject> container, ObjectTeam flags, Predicate<TGameObject> predicate) where TGameObject : GameObject
         {
-            return container.FindAll(o =>
-                {
-                    var team = o.Team();
-
-                    if ((flags & team) == 0)
-                        return false;
-
-                    return predicate == null || predicate(o);
-                });
+            return predicate == null ? container.FindAll(o => (flags & o.Team()) != 0) : container.FindAll(o => (flags & o.Team()) != 0 && predicate(o));
         }
 
         /// <summary>
@@ -445,15 +437,36 @@
 
             /*
              
-            bool Proc<T>(ICollection<T> a) where T: GameObject 
+            bool Proc<TGameObject>(ICollection<TGameObject> list) where TGameObject : GameObject 
             {
-                return false;
+                var o = @object as TGameObject;
+
+                if (o == null)
+                {
+                    return false;
+                }
+
+                if (list != null)
+                {
+                    if (@new)
+                    {
+                        list.Add(o);
+                    }
+                    else
+                    {
+                        list.Remove(o);
+                    }
+                }
+
+                return true;
             }
 
             */
         }
 
         #endregion
+
+        // todo remove this code after switching to c# 7
 
         private class ProcessingEngine
         {

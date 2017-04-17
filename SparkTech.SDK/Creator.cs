@@ -43,7 +43,7 @@
         public static readonly bool Licensed;
 
         /// <summary>
-        /// Determines 
+        /// Determines when the subscription expires
         /// </summary>
         public static readonly DateTime SubscriptionExpiry;
 
@@ -95,11 +95,12 @@
                            {
                                new QuickMenu("features")
                                    {
-                                       ["premium_label"] = new MenuItem("features_premium"),
+                                       ["premium.label"] = new MenuItem("features_premium"),
                                        ["orbwalker"] = new MenuItem("use_xorbwalker", true),
                                        ["targetselector"] = new MenuItem("use_xtargetselector", true),
-                                       ["common_label"] = new MenuItem("features_common"),
-                                       ["indicator"] = new MenuItem("use_indicator", true)
+                                       ["common.label"] = new MenuItem("features_common"),
+                                       ["indicator"] = new MenuItem("use_indicator", true),
+                                       ["indicator.label"] = new MenuItem("indicator_note")
                                    },
 
                                new QuickMenu("update"),
@@ -154,7 +155,7 @@
                 {
                     Language = languageItem.Enum<Language>();
 
-                    MainMenu.Rebuild();
+                    MainMenu.LanguageChanged();
                 };
 
             MainMenu.GetMenu("license")["shop"].PropertyChanged += args =>
@@ -271,9 +272,10 @@
                                    ["features"] = "Features",
                                    ["features_premium"] = "Premium features (subscribers only)",
                                    ["features_common"] = "Common features",
-                                   ["use_xorbwalker"] = "Enable SparkWalker",
+                                   ["use_xorbwalker"] = "Enable XOrbwalker",
                                    ["use_xtargetselector"] = "Enable XTargetSelector",
-                                   ["use_indicator"] = "Draw damage on enemies' health bars",
+                                   ["use_indicator"] = "Enable Damage Indicator",
+                                   ["indicator_note"] = "Draws damage on enemies' health bars",
 
                                    ["language"] = "Language",
                                    ["bugs_notice"] = "Thank you for using my software.\nIf you encounter any bugs or have any suggestions, please contact me at:",
@@ -320,9 +322,10 @@
                                    ["features"] = "Funkcje",
                                    ["features_premium"] = "Funkcje premium (tylko dla subskrybentów)",
                                    ["features_common"] = "Zwykłe funkcje",
-                                   ["use_xorbwalker"] = "Aktywuj SparkWalker",
+                                   ["use_xorbwalker"] = "Aktywuj XOrbwalker",
                                    ["use_xtargetselector"] = "Aktywuj XTargetSelector",
-                                   ["use_indicator"] = "Pasek obrażeń na zdrowiu przeciwnika",
+                                   ["use_indicator"] = "Aktywuj Damage Indicator",
+                                   ["indicator_note"] = "Wyświetla pasek obrażeń na zdrowiu przeciwnika",
 
                                    ["language"] = "Język",
                                    ["bugs_notice"] = "Dziękuję za używanie mojego oprogramowania.\nJeśli zauważysz bugi lub masz sugestie, napisz:",

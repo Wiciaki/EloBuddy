@@ -8,24 +8,12 @@
     using SparkTech.SDK.EventData;
     using SparkTech.SDK.Executors;
 
+	/// <summary>
+	/// The class useful for performing update checks
+	/// </summary>
     public static class Updater
     {
-        public static void Check(string username, string repository, string folderName, Action<CheckPerformedEventArgs> action = null)
-        {
-            Check($"https://raw.githubusercontent.com/{username}/{repository}/master/{folderName}/Properties/AssemblyInfo.cs", action, Assembly.GetCallingAssembly().GetName());
-        }
-
-        public static void Check(string link, Action<CheckPerformedEventArgs> action = null)
-        {
-            Check(link, action, Assembly.GetCallingAssembly().GetName());
-        }
-
-        /// <summary>
-        /// The regular expression used for matching the assembly info file
-        /// </summary>
-        private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]");
-        
-        private static async void Check(string link, Action<CheckPerformedEventArgs> action, AssemblyName name)
+        public static async void Check(string link, Action<CheckPerformedEventArgs> action = null)
         {
             Uri uri;
 
@@ -59,9 +47,10 @@
             var match = Regex.Match(data);
             var gitVersion = match.Success ? new Version(match.Groups[1].Value) : null;
 
+	        var name = Assembly.GetCallingAssembly().GetName();
             var args = new CheckPerformedEventArgs(gitVersion, name.Version, name.Name);
 
-            CodeFlow.Secure(() =>
+            CodeFlow.Secure(delegate
                     {
                         if (action != null)
                         {
@@ -73,5 +62,10 @@
                         }
                     });
         }
-    }
+
+	    /// <summary>
+	    /// The regular expression used for matching the assembly info file
+	    /// </summary>
+	    private static readonly Regex Regex = new Regex(@"\[assembly\: AssemblyVersion\(""(\d+\.\d+\.\d+\.\d+)""\)\]", RegexOptions.Compiled);
+	}
 }
