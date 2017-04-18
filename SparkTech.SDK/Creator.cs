@@ -95,10 +95,10 @@
                            {
                                new QuickMenu("features")
                                    {
-                                       ["premium.label"] = new MenuItem("features_premium"),
+                                       ["premium.label"] = new MenuItem("features_premium", MenuItem.LabelType.GroupLabel),
                                        ["orbwalker"] = new MenuItem("use_xorbwalker", true),
                                        ["targetselector"] = new MenuItem("use_xtargetselector", true),
-                                       ["common.label"] = new MenuItem("features_common"),
+                                       ["common.label"] = new MenuItem("features_common", MenuItem.LabelType.GroupLabel),
                                        ["indicator"] = new MenuItem("use_indicator", true),
                                        ["indicator.label"] = new MenuItem("indicator_note")
                                    },
@@ -109,7 +109,7 @@
                                    {
                                        ["shop"] = new MenuItem("license_shop", false),
                                        ["separator1"] = new MenuItem(10),
-                                       ["status"] = new MenuItem("license_status", null, true),
+                                       ["status"] = new MenuItem("license_status", MenuItem.LabelType.GroupLabel),
                                        ["separator2"] = new MenuItem(),
                                        ["note"] = new MenuItem("license_note")
                                    },
@@ -120,7 +120,7 @@
                                { "separator2", new MenuItem(10) },
                                { "contact", new MenuItem("contact") },
                                { "separator3", new MenuItem(10) },
-                               { "lang.notice", new MenuItem("i_dont_speak_spaghetti", IsLanguageUnknown) }
+                               { "lang.notice", new MenuItem("i_dont_speak_spaghetti") { Predicate = IsLanguageUnknown } }
                            };
 
             var first = new MenuItem("error", true) { Instance = { IsVisible = false } };
@@ -148,15 +148,17 @@
             }
             else
             {
-                MainMenu.Rebuild();
+                MainMenu.UpdateText();
+
+				MainMenu.GetComponents().ForEach(component => component.UpdateText());
             }
 
             languageItem.PropertyChanged += args =>
                 {
-                    Language = languageItem.Enum<Language>();
+                    Language = args.Sender.Enum<Language>();
 
-                    MainMenu.LanguageChanged();
-                };
+					MainMenu.Rebuild();
+	            };
 
             MainMenu.GetMenu("license")["shop"].PropertyChanged += args =>
                 {
@@ -207,11 +209,11 @@
             MainMenu.Print("premium_required");
         }
 
-        /// <summary>
-        /// Determines whether the current language is unknown
-        /// </summary>
-        /// <returns>Value determining whether the current language I don't speak :)</returns>
-        private static bool IsLanguageUnknown()
+		/// <summary>
+		/// Determines whether the current language is unknown
+		/// </summary>
+		/// <returns>Value determining whether I don't speak the currently used language :)</returns>
+		private static bool IsLanguageUnknown()
         {
             switch (Language)
             {

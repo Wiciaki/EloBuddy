@@ -60,13 +60,6 @@
                         return;
                     }
 
-                    var enemies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Enemy, h => h.VisibleOnScreen && h.IsHPBarRendered);
-
-                    if (enemies.Count == 0)
-                    {
-                        return;
-                    }
-
                     var drawable = Drawable.FindAll(s => s.Draw);
 
                     if (drawable.Count == 0)
@@ -74,7 +67,14 @@
                         return;
                     }
 
-                    foreach (var enemy in enemies)
+					var enemies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Enemy, h => h.VisibleOnScreen && h.IsHPBarRendered);
+
+		            if (enemies.Count == 0)
+		            {
+			            return;
+		            }
+
+					foreach (var enemy in enemies)
                     {
                         var position = enemy.HPBarPosition;
                         position.X += enemy.HPBarXOffset;

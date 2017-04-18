@@ -20,7 +20,7 @@
         {
             BaseDirectory = new Folder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EloBuddy"));
 
-            WorkingDirectory = BaseDirectory.GetSubFolder("SparkTech");
+            WorkingDirectory = BaseDirectory.GetFolder("SparkTech");
         }
 
         public class Folder
@@ -41,7 +41,7 @@
                 return Path.Combine(this, fileName);
             }
 
-            public Folder GetSubFolder(string name)
+            public Folder GetFolder(string name)
             {
                 if (!this.subFolders.ContainsKey(name))
                 {

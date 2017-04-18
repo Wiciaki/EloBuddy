@@ -34,7 +34,7 @@
                     Writer.Dispose();
                 };
 
-            var folder = FileManager.WorkingDirectory.GetSubFolder("Logs");
+            var folder = FileManager.WorkingDirectory.GetFolder("Logs");
             var date = DateTime.Now;
 
             foreach (var fileInfo in Directory.GetFiles(folder).Select(file => new FileInfo(file)).Where(fileInfo => (date - fileInfo.CreationTime).Days > 3 && fileInfo.Name.StartsWith("Game")))

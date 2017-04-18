@@ -105,19 +105,14 @@
 
         #region Translation Stuff
 
-        /// <summary>
-        /// Processes with the text update of all items for this instance
-        /// </summary>
-        public void Rebuild()
+        internal static void Rebuild()
         {
-            this.UpdateText();
+            Instances.ForEach(inst =>
+		            {
+						inst.UpdateText();
 
-            this.GetComponents().ForEach(component => component.UpdateText());
-        }
-
-        internal static void LanguageChanged()
-        {
-            Instances.ForEach(inst => inst.Rebuild());
+			            inst.GetComponents().ForEach(component => component.UpdateText());
+		            });
         }
 
         /// <summary>

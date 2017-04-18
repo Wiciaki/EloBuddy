@@ -26,6 +26,13 @@
             StringList
         }
 
+	    public enum LabelType
+	    {
+		    Label,
+
+			GroupLabel
+	    }
+
         public readonly ValueBase Instance;
 
         public readonly Type MenuItemType;
@@ -47,9 +54,24 @@
 
                 this.predicate = value;
 
-                this.Instance.IsVisible = value?.Invoke() ?? true;
+	            if (value != null)
+	            {
+		            this.IsVisible = value();
+	            }
             }
         }
+
+		public bool IsVisible
+		{
+			get
+			{
+				return this.Instance.IsVisible;
+			}
+			set
+			{
+				this.Instance.IsVisible = value;
+			}
+		}
 
         public override void UpdateText()
         {
@@ -62,7 +84,7 @@
 
             if (this.predicate != null)
             {
-                this.Instance.IsVisible = this.predicate();
+                this.IsVisible = this.predicate();
             }
         }
 
@@ -116,16 +138,9 @@
 
         #region Label
 
-        public MenuItem(string translationName, Predicate predicate = null, bool groupLabel = false) : base(translationName)
+        public MenuItem(string translationName, LabelType labelType = LabelType.Label) : base(translationName)
         {
-            this.Instance = groupLabel ? new GroupLabel("PLACEHOLDER") : new Label("PLACEHOLDER");
-
-            if (predicate != null)
-            {
-                this.Instance.IsVisible = predicate();
-            }
-
-            this.predicate = predicate;
+            this.Instance = labelType == LabelType.Label ? new Label("PLACEHOLDER") : new GroupLabel("PLACEHOLDER");
 
             this.MenuItemType = Type.Label;
         }

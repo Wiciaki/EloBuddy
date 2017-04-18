@@ -24,8 +24,10 @@
     {
         static Analyzer()
         {
+	        new DamageIndicator(h => 300f);
+
             Drawing.OnDraw += delegate
-                {
+                {/*
                     ObjectCache.Get<Obj_AnimatedBuilding>();
                     ObjectCache.Get<AIHeroClient>();
                     ObjectCache.Get<Obj_AI_Turret>();
@@ -34,6 +36,7 @@
                     ObjectCache.GetMinions();
                     ObjectCache.GetMinions(ObjectCache.Player.Position.ToVector2(), 500f);
                     ObjectCache.Get<Obj_GeneralParticleEmitter>();
+					*/
 
                     foreach (var minion in ObjectCache.Get<Obj_AI_Minion>())
                     {

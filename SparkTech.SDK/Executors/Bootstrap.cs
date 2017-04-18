@@ -64,7 +64,7 @@
             }
 
             var name = link.Split('/').Last().Remove("?raw=true");
-            var path = FileManager.WorkingDirectory.GetSubFolder("Addons").GetFile(name);
+            var path = FileManager.WorkingDirectory.GetFolder("Addons").GetFile(name);
 
             using (var client = new WebClient())
             {
@@ -100,7 +100,7 @@
         }
 
         /// <summary>
-        /// The task for the downloaded data
+        /// The task for the downloaded github data
         /// </summary>
         private static readonly Task<string> DataTask;
 
@@ -211,7 +211,7 @@
                 Creator.MainMenu.Replacements.Add(name + "Version", () => update ? $"{local} => {webVersion}" : $"{local}");
 
                 var menu = Creator.MainMenu.GetMenu("update");
-                menu["note." + name] = new MenuItem("update_note_" + name, null, true);
+                menu["note." + name] = new MenuItem("update_note_" + name, MenuItem.LabelType.GroupLabel);
                 menu["info." + name] = new MenuItem("updated_" + updateText + "_" + name);
 
                 if (update && !notified)
