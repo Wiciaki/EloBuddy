@@ -1,10 +1,10 @@
 ﻿namespace DevMinionAnalyzer
 {
-    using System.Drawing;
+	using System.Drawing;
 
-    using EloBuddy;
+	using EloBuddy;
 
-    using SparkTech.SDK.Cache;
+	using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
     using SparkTech.SDK.Utils;
@@ -27,17 +27,7 @@
 	        new DamageIndicator(h => 300f);
 
             Drawing.OnDraw += delegate
-                {/*
-                    ObjectCache.Get<Obj_AnimatedBuilding>();
-                    ObjectCache.Get<AIHeroClient>();
-                    ObjectCache.Get<Obj_AI_Turret>();
-                    ObjectCache.Get<GameObject>();
-                    ObjectCache.Get<MissileClient>();
-                    ObjectCache.GetMinions();
-                    ObjectCache.GetMinions(ObjectCache.Player.Position.ToVector2(), 500f);
-                    ObjectCache.Get<Obj_GeneralParticleEmitter>();
-					*/
-
+                {
                     foreach (var minion in ObjectCache.Get<Obj_AI_Minion>())
                     {
                         var t = minion.DetermineType();

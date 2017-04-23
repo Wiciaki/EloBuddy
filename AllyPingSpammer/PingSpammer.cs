@@ -7,7 +7,6 @@
 
     using SharpDX;
 
-    using SparkTech.SDK;
     using SparkTech.SDK.Cache;
     using SparkTech.SDK.Enumerations;
     using SparkTech.SDK.Executors;
@@ -36,7 +35,6 @@
                                {
                                    ["st_ping"] = "AllyPingSpammer",
 
-                                   ["notify_no_allies"] = "No allies detected, AllyPingSpammer will not load...",
                                    ["time_to_ping"] = "Pinging in: [TIME]",
 
                                    ["spam_who"] = "Ally to be spammed",
@@ -56,7 +54,6 @@
                 case Language.Polish:
                     return new Dictionary<string, string>
                                {
-                                   ["notify_no_allies"] = "Nie wykryto sojusznikow, AllyPingSpammer sie nie laduje...",
                                    ["time_to_ping"] = "Pinguje za: [TIME]",
 
                                    ["spam_who"] = "Sojusznik do spamowania",
@@ -87,7 +84,7 @@
         private static AIHeroClient targetHero;
 
         /// <summary>
-        /// The list of allies heroes (subjects to spammming)
+        /// The list of allied heroes (subjects to spammming)
         /// </summary>
         private static readonly List<AIHeroClient> Allies;
 
@@ -111,13 +108,7 @@
         /// </summary>
         static PingSpammer()
         {
-            Allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally).FindAll(h => !h.IsMe);
-
-            if (Allies.Count == 0)
-            {
-                Comms.Print(GenerateTranslations(Creator.Language)["notify_no_allies"]);
-                return;
-            }
+            Allies = ObjectCache.Get<AIHeroClient>(ObjectTeam.Ally);
 
             MainMenu = new QuickMainMenu("st_ping", GenerateTranslations)
                            {
